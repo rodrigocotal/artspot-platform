@@ -1,6 +1,6 @@
 # GitHub Actions CI/CD Pipeline
 
-This directory contains the CI/CD workflows for the ArtSpot platform.
+This directory contains the CI/CD workflows for the ArtSpot platform deployed on AWS.
 
 ## Workflows
 
@@ -11,6 +11,7 @@ This directory contains the CI/CD workflows for the ArtSpot platform.
 - **Lint & Type Check:** Runs ESLint and TypeScript type checking on all packages
 - **Build:** Builds all packages to ensure no build errors
 - **Security Scan:** Runs `pnpm audit` to check for security vulnerabilities
+- **Prisma Generate:** Generates Prisma Client for type-checking
 
 **Purpose:** Ensures code quality and prevents broken code from being merged.
 
@@ -20,12 +21,12 @@ This directory contains the CI/CD workflows for the ArtSpot platform.
 **Trigger:** Push to `develop` branch
 
 **Jobs:**
-- **Deploy Web to Vercel:** Deploys Next.js frontend to Vercel staging
-- **Deploy API to Render:** Deploys Express.js API to Render staging
-- **Deploy CMS to Render:** Deploys Strapi CMS to Render staging
+- **Deploy Web to AWS Amplify:** Deploys Next.js frontend to Amplify staging
+- **Deploy API to AWS App Runner:** Deploys Express.js API to App Runner staging
+- **Deploy CMS to AWS App Runner:** Deploys Strapi CMS to App Runner staging
 - **Notify Deployment:** Checks all deployments succeeded
 
-**Purpose:** Automatically deploys to staging environment for testing.
+**Purpose:** Automatically deploys to AWS staging environment for testing.
 
 ---
 
@@ -33,13 +34,13 @@ This directory contains the CI/CD workflows for the ArtSpot platform.
 **Trigger:** Push to `main` branch
 
 **Jobs:**
-- **Deploy Web to Vercel:** Deploys Next.js frontend to Vercel production
-- **Deploy API to Render:** Deploys Express.js API to Render production
-- **Deploy CMS to Render:** Deploys Strapi CMS to Render production
+- **Deploy Web to AWS Amplify:** Deploys Next.js frontend to Amplify production
+- **Deploy API to AWS App Runner:** Deploys Express.js API to App Runner production
+- **Deploy CMS to AWS App Runner:** Deploys Strapi CMS to App Runner production
 - **Run Migrations:** Runs Prisma database migrations
 - **Notify Deployment:** Checks all deployments succeeded
 
-**Purpose:** Automatically deploys to production after merge to main.
+**Purpose:** Automatically deploys to AWS production after merge to main.
 
 ---
 
@@ -47,30 +48,38 @@ This directory contains the CI/CD workflows for the ArtSpot platform.
 
 Configure these secrets in your GitHub repository settings (`Settings > Secrets and variables > Actions`).
 
-### Vercel (Web Frontend)
-- `VERCEL_TOKEN` - Vercel authentication token (get from Vercel dashboard)
-- `VERCEL_ORG_ID` - Your Vercel organization ID
-- `VERCEL_PROJECT_ID` - Your Vercel project ID for the web app
+### AWS Credentials
+- `AWS_ACCESS_KEY_ID` - AWS IAM user access key ID
+- `AWS_SECRET_ACCESS_KEY` - AWS IAM user secret access key
+- `AWS_REGION` - AWS region (e.g., `us-east-1`)
 
-### Render (API & CMS Backend)
-- `RENDER_DEPLOY_HOOK_STAGING_API` - Render deploy hook URL for staging API
-- `RENDER_DEPLOY_HOOK_STAGING_CMS` - Render deploy hook URL for staging CMS
-- `RENDER_DEPLOY_HOOK_PRODUCTION_API` - Render deploy hook URL for production API
-- `RENDER_DEPLOY_HOOK_PRODUCTION_CMS` - Render deploy hook URL for production CMS
+### AWS Amplify (Web Frontend)
+- `AWS_AMPLIFY_APP_ID` - Amplify application ID
 
-### Environment URLs
+### AWS App Runner (API & CMS Backend)
+
 **Staging:**
-- `STAGING_API_URL` - Staging API URL (e.g., `https://artspot-api-staging.onrender.com`)
-- `STAGING_CMS_URL` - Staging CMS URL (e.g., `https://artspot-cms-staging.onrender.com`)
-- `STAGING_NEXTAUTH_URL` - Staging frontend URL (e.g., `https://artspot-staging.vercel.app`)
+- `AWS_APPRUNNER_API_STAGING_ARN` - App Runner service ARN for staging API
+- `AWS_APPRUNNER_CMS_STAGING_ARN` - App Runner service ARN for staging CMS
 
 **Production:**
-- `PRODUCTION_API_URL` - Production API URL (e.g., `https://api.artspot.com`)
-- `PRODUCTION_CMS_URL` - Production CMS URL (e.g., `https://cms.artspot.com`)
-- `PRODUCTION_NEXTAUTH_URL` - Production frontend URL (e.g., `https://artspot.com`)
+- `AWS_APPRUNNER_API_PRODUCTION_ARN` - App Runner service ARN for production API
+- `AWS_APPRUNNER_CMS_PRODUCTION_ARN` - App Runner service ARN for production CMS
+
+### Environment URLs
+
+**Staging:**
+- `STAGING_API_URL` - Staging API URL (e.g., `https://xxxxx.us-east-1.awsapprunner.com`)
+- `STAGING_CMS_URL` - Staging CMS URL (e.g., `https://yyyyy.us-east-1.awsapprunner.com`)
+- `STAGING_NEXTAUTH_URL` - Staging frontend URL (e.g., `https://develop.xxxxx.amplifyapp.com`)
+
+**Production:**
+- `PRODUCTION_API_URL` - Production API URL (e.g., `https://xxxxx.us-east-1.awsapprunner.com`)
+- `PRODUCTION_CMS_URL` - Production CMS URL (e.g., `https://yyyyy.us-east-1.awsapprunner.com`)
+- `PRODUCTION_NEXTAUTH_URL` - Production frontend URL (e.g., `https://main.xxxxx.amplifyapp.com` or custom domain)
 
 ### Database
-- `PRODUCTION_DATABASE_URL` - PostgreSQL connection string for production
+- `PRODUCTION_DATABASE_URL` - PostgreSQL connection string for production (AWS RDS)
 
 ### Application Secrets
 - `NEXTAUTH_SECRET` - NextAuth.js secret key (generate with `openssl rand -base64 32`)
@@ -80,38 +89,31 @@ Configure these secrets in your GitHub repository settings (`Settings > Secrets 
 
 ## How to Set Up
 
-### 1. Create Vercel Project
+### 1. Set Up AWS Services
+
+**See the comprehensive [AWS Deployment Guide](../../docs/aws-deployment.md) for detailed instructions.**
+
+Quick summary:
+1. Create AWS account and IAM user with appropriate permissions
+2. Set up AWS Amplify for frontend hosting
+3. Create App Runner services for API and CMS
+4. Configure ElastiCache Redis
+5. Set up S3 + CloudFront for image storage
+6. Configure secrets in AWS Secrets Manager
+
+### 2. Get AWS Resource ARNs and URLs
+
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Get Amplify App ID
+aws amplify list-apps --query 'apps[?name==`artspot-web`].appId' --output text
 
-# Link your project
-cd apps/web
-vercel link
+# Get App Runner Service ARNs
+aws apprunner list-services --query 'ServiceSummaryList[?ServiceName==`artspot-api-production`].ServiceArn' --output text
+aws apprunner list-services --query 'ServiceSummaryList[?ServiceName==`artspot-cms-production`].ServiceArn' --output text
 
-# Get project details
-vercel project ls
+# Get App Runner Service URLs
+aws apprunner describe-service --service-arn <SERVICE_ARN> --query 'Service.ServiceUrl' --output text
 ```
-
-The output will give you your `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`.
-
-To get your `VERCEL_TOKEN`:
-1. Go to https://vercel.com/account/tokens
-2. Create a new token
-3. Copy and save it as a GitHub secret
-
-### 2. Create Render Services
-1. Go to https://render.com
-2. Create a new **Web Service** for the API:
-   - Build Command: `cd apps/api && pnpm install && pnpm build`
-   - Start Command: `cd apps/api && pnpm start`
-   - Environment: Node
-3. Create a new **Web Service** for the CMS:
-   - Build Command: `cd apps/cms && pnpm install && pnpm build`
-   - Start Command: `cd apps/cms && pnpm start`
-   - Environment: Node
-4. For each service, go to **Settings > Deploy Hook** and create a deploy hook
-5. Copy the deploy hook URLs and save them as GitHub secrets
 
 ### 3. Configure GitHub Secrets
 1. Go to your GitHub repository

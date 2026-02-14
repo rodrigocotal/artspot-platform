@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Deploy to Production (AWS)
 
 on:
   push:
@@ -7,48 +7,43 @@ on:
 
 jobs:
   deploy-web-production:
-    name: Deploy Web to Vercel (Production)
+    name: Deploy Web to AWS Amplify (Production)
     runs-on: ubuntu-latest
     environment:
       name: production-web
-      url: ${{ steps.deploy.outputs.url }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Trigger Amplify deployment
+        run: |
+          BRANCH_NAME="main"
+          aws amplify start-job \
+            --app-id ${{ secrets.AWS_AMPLIFY_APP_ID }} \
+            --branch-name ${BRANCH_NAME} \
+            --job-type RELEASE
 
-      - name: Build web application
-        run: pnpm --filter @artspot/web build
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.PRODUCTION_API_URL }}
-          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          NEXTAUTH_URL: ${{ secrets.PRODUCTION_NEXTAUTH_URL }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for Amplify deployment to complete..."
+          sleep 180
 
-      - name: Deploy to Vercel
-        id: deploy
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: apps/web
+      - name: Get deployment status
+        run: |
+          aws amplify get-branch \
+            --app-id ${{ secrets.AWS_AMPLIFY_APP_ID }} \
+            --branch-name main
 
   deploy-api-production:
-    name: Deploy API to Render (Production)
+    name: Deploy API to AWS App Runner (Production)
     runs-on: ubuntu-latest
     environment:
       name: production-api
@@ -57,25 +52,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Trigger Render deployment
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Trigger App Runner deployment
         run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_PRODUCTION_API }}"
+          aws apprunner start-deployment \
+            --service-arn ${{ secrets.AWS_APPRUNNER_API_PRODUCTION_ARN }}
 
       - name: Wait for deployment
-        run: sleep 90
+        run: |
+          echo "Waiting for App Runner deployment to complete..."
+          sleep 180
+
+      - name: Get deployment status
+        run: |
+          aws apprunner describe-service \
+            --service-arn ${{ secrets.AWS_APPRUNNER_API_PRODUCTION_ARN }} \
+            --query 'Service.Status'
 
       - name: Health check
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_API_URL }}/health)
           if [ $response -eq 200 ]; then
-            echo "API health check passed"
+            echo "✅ API health check passed"
           else
-            echo "API health check failed with status $response"
+            echo "❌ API health check failed with status $response"
             exit 1
           fi
 
   deploy-cms-production:
-    name: Deploy CMS to Render (Production)
+    name: Deploy CMS to AWS App Runner (Production)
     runs-on: ubuntu-latest
     environment:
       name: production-cms
@@ -84,20 +95,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Trigger Render deployment
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Trigger App Runner deployment
         run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_PRODUCTION_CMS }}"
+          aws apprunner start-deployment \
+            --service-arn ${{ secrets.AWS_APPRUNNER_CMS_PRODUCTION_ARN }}
 
       - name: Wait for deployment
-        run: sleep 90
+        run: |
+          echo "Waiting for App Runner deployment to complete..."
+          sleep 180
+
+      - name: Get deployment status
+        run: |
+          aws apprunner describe-service \
+            --service-arn ${{ secrets.AWS_APPRUNNER_CMS_PRODUCTION_ARN }} \
+            --query 'Service.Status'
 
       - name: Health check
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_CMS_URL }}/_health)
           if [ $response -eq 200 ]; then
-            echo "CMS health check passed"
+            echo "✅ CMS health check passed"
           else
-            echo "CMS health check failed with status $response"
+            echo "❌ CMS health check failed with status $response"
             exit 1
           fi
 
@@ -143,8 +170,18 @@ jobs:
              [ "${{ needs.deploy-cms-production.result }}" == "success" ] && \
              [ "${{ needs.run-migrations.result }}" == "success" ]; then
             echo "✅ All production deployments successful!"
-            echo "🚀 Production is live!"
+            echo "🚀 Production is live on AWS!"
+            echo ""
+            echo "Frontend: AWS Amplify"
+            echo "API: AWS App Runner"
+            echo "CMS: AWS App Runner"
+            echo "Database: AWS RDS PostgreSQL"
           else
             echo "❌ One or more production deployments failed"
+            echo ""
+            echo "Web: ${{ needs.deploy-web-production.result }}"
+            echo "API: ${{ needs.deploy-api-production.result }}"
+            echo "CMS: ${{ needs.deploy-cms-production.result }}"
+            echo "Migrations: ${{ needs.run-migrations.result }}"
             exit 1
           fi

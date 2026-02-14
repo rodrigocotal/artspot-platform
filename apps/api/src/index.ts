@@ -7,6 +7,7 @@ import { config } from './config/environment';
 import { disconnectDatabase } from './config/database';
 import { errorHandler } from './middleware/error-handler';
 import healthRouter from './routes/health';
+import uploadRouter from './routes/upload';
 
 // Load environment variables
 dotenv.config();
@@ -37,6 +38,7 @@ if (config.nodeEnv === 'development') {
 
 // Routes
 app.use('/health', healthRouter);
+app.use('/upload', uploadRouter);
 
 // 404 handler
 app.use('*', (req, res) => {

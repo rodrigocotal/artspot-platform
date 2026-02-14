@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { config } from './config/environment';
+import { disconnectDatabase } from './config/database';
 import { errorHandler } from './middleware/error-handler';
 import healthRouter from './routes/health';
 
@@ -67,10 +68,22 @@ const server = app.listen(config.port, () => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
+  server.close(async () => {
     console.log('HTTP server closed');
+    await disconnectDatabase();
+    console.log('Database disconnected');
+  });
+});
+
+process.on('SIGINT', async () => {
+  console.log('\nSIGINT signal received: closing HTTP server');
+  server.close(async () => {
+    console.log('HTTP server closed');
+    await disconnectDatabase();
+    console.log('Database disconnected');
+    process.exit(0);
   });
 });
 

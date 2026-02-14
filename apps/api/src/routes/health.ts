@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { prisma } from '../config/database';
 
 const router: Router = Router();
 
@@ -24,13 +25,21 @@ router.get('/', (_req: Request, res: Response) => {
  */
 router.get('/db', async (_req: Request, res: Response) => {
   try {
-    // TODO: Add Prisma database check when configured
-    // await prisma.$queryRaw`SELECT 1`;
+    // Query database to verify connection
+    await prisma.$queryRaw`SELECT 1`;
+
+    // Get database stats
+    const userCount = await prisma.user.count();
 
     res.status(200).json({
       success: true,
       message: 'Database connection healthy',
       timestamp: new Date().toISOString(),
+      database: {
+        status: 'connected',
+        provider: 'postgresql',
+        userCount,
+      },
     });
   } catch (error) {
     res.status(503).json({

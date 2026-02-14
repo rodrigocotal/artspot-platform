@@ -84,7 +84,7 @@ export function getImageUrl(
  * Helper to upload artwork image
  */
 export async function uploadArtworkImage(
-  file: string | Buffer,
+  file: string,
   options: {
     publicId?: string;
     folder?: string;
@@ -92,7 +92,7 @@ export async function uploadArtworkImage(
   } = {}
 ) {
   try {
-    const result = await cloudinary.uploader.upload(file, {
+    const result = await cloudinary.uploader.upload(file as string, {
       folder: options.folder || 'artworks',
       public_id: options.publicId,
       upload_preset: UPLOAD_PRESETS.ARTWORK,

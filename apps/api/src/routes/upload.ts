@@ -9,13 +9,14 @@ const router: Router = Router();
  * @desc    Upload single artwork image
  * @access  Private (Admin/Gallery Staff)
  */
-router.post('/artwork', uploadArtworkImage, async (req: Request, res: Response) => {
+router.post('/artwork', uploadArtworkImage, async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.file) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'No file uploaded',
       });
+      return;
     }
 
     const file = req.file as any;
@@ -57,13 +58,14 @@ router.post('/artwork', uploadArtworkImage, async (req: Request, res: Response) 
  * @desc    Upload multiple artwork images
  * @access  Private (Admin/Gallery Staff)
  */
-router.post('/artworks', uploadArtworkImages, async (req: Request, res: Response) => {
+router.post('/artworks', uploadArtworkImages, async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'No files uploaded',
       });
+      return;
     }
 
     const images = req.files.map((file: any) => {
@@ -106,9 +108,9 @@ router.post('/artworks', uploadArtworkImages, async (req: Request, res: Response
  * @desc    Get image information
  * @access  Public
  */
-router.get('/info/:publicId', async (req: Request, res: Response) => {
+router.get('/info/:publicId', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { publicId } = req.params;
+    const publicId = req.params.publicId as string;
     const info = await getImageInfo(publicId);
 
     res.status(200).json({

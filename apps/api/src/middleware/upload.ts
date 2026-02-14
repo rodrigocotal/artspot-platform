@@ -1,6 +1,7 @@
 import multer from 'multer';
+import type { RequestHandler } from 'express';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import cloudinary, { UPLOAD_PRESETS } from '../config/cloudinary';
+import cloudinary from '../config/cloudinary';
 
 // Allowed file types for artwork images
 const ALLOWED_FORMATS = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'tiff'];
@@ -13,7 +14,7 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024;
  */
 const cloudinaryStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: async (req, file) => {
+  params: async (_req, file) => {
     return {
       folder: 'artworks',
       allowed_formats: ALLOWED_FORMATS,
@@ -27,7 +28,7 @@ const cloudinaryStorage = new CloudinaryStorage({
 /**
  * File filter to validate uploads
  */
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   // Check file type
   const ext = file.originalname.split('.').pop()?.toLowerCase();
   if (ext && ALLOWED_FORMATS.includes(ext)) {
@@ -51,9 +52,9 @@ export const upload = multer({
 /**
  * Upload single artwork image
  */
-export const uploadArtworkImage = upload.single('image');
+export const uploadArtworkImage: RequestHandler = upload.single('image');
 
 /**
  * Upload multiple artwork images (up to 10)
  */
-export const uploadArtworkImages = upload.array('images', 10);
+export const uploadArtworkImages: RequestHandler = upload.array('images', 10);

@@ -1,16 +1,23 @@
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables FIRST before any other imports
+// Use process.cwd() which is the directory where the command was run
+dotenv.config({ path: path.join(process.cwd(), '.env') });
+
 import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import { config } from './config/environment';
 import { disconnectDatabase } from './config/database';
 import { errorHandler } from './middleware/error-handler';
 import healthRouter from './routes/health';
 import uploadRouter from './routes/upload';
+import { initializeCloudinary } from './config/cloudinary';
 
-// Load environment variables
-dotenv.config();
+// Initialize Cloudinary AFTER env vars are loaded
+initializeCloudinary();
 
 const app: Express = express();
 

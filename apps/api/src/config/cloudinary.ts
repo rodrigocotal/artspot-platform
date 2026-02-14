@@ -1,13 +1,28 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { config } from './environment';
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: config.cloudinary.cloudName,
-  api_key: config.cloudinary.apiKey,
-  api_secret: config.cloudinary.apiSecret,
-  secure: true,
-});
+let isConfigured = false;
+
+/**
+ * Initialize Cloudinary configuration
+ * This must be called AFTER environment variables are loaded
+ */
+export function initializeCloudinary() {
+  if (isConfigured) return;
+
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+
+  isConfigured = true;
+
+  console.log('Cloudinary configured:', {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY?.substring(0, 5) + '...',
+  });
+}
 
 /**
  * Upload presets for different image types

@@ -170,8 +170,8 @@ Complete step-by-step guide to set up ArtSpot infrastructure on AWS using the Co
 ```
 NODE_ENV=production
 PORT=4000
-DATABASE_URL=postgresql://artspot_admin:EXuABqxbXCetA0NbGurd@artspot-db-dev.cpgo2ia2wuo1.ap-southeast-2.rds.amazonaws.com:5432/postgres?schema=public&sslmode=require
-REDIS_URL=redis://artspot-redis.xxxxx.0001.use1.cache.amazonaws.com:6379
+DATABASE_URL=postgresql://artspot_admin:EXuABqxbXCetA0NbGurd@artspot-db-dev.cpgo2ia2wuo1.ap-southeast-2.rds.amazonaws.com:5432/artspot-db-dev?schema=public&sslmode=require
+REDIS_URL=redis://clustercfg.artspot-redis.uiabmv.apse2.cache.amazonaws.com:6379
 JWT_SECRET=<from-secrets-manager>
 JWT_EXPIRES_IN=7d
 CLOUDINARY_CLOUD_NAME=doqecw19f
@@ -217,9 +217,10 @@ Repeat Step 5 with:
   ```
 - Start command:
   ```bash
-  node apps/cms/dist/index.js
+  npx pnpm@8.15.0 --filter @artspot/cms start
   ```
 - Port: `1337`
+- Source Directory: `/` (root)
 
 **Service settings:**
 - Name: `artspot-cms-production`
@@ -231,15 +232,15 @@ Repeat Step 5 with:
 HOST=0.0.0.0
 PORT=1337
 NODE_ENV=production
-APP_KEYS=artspot-dev-key-1,artspot-dev-key-2
-API_TOKEN_SALT=artspot-api-token-salt
-ADMIN_JWT_SECRET=artspot-admin-jwt-secret
-TRANSFER_TOKEN_SALT=artspot-transfer-token-salt
-JWT_SECRET=artspot-jwt-secret
+APP_KEYS=Q9XuuPVMOV22zm893hy6v+VxgTqV/IOCc/V1xmRuBbk=,sb7zLBqC42jNzPE1UkuZ35Bw7dTCuixEG/tj1E8LczM=
+API_TOKEN_SALT=+46uBNvimb/fPFU3QHDr45/KKRiSJqyujYPs7di384Q=
+ADMIN_JWT_SECRET=LCuuVQDgVmfQI4jdTBEQBASQsLXgfiLHioYFp9RRq+g=
+TRANSFER_TOKEN_SALT=i7rdLH9Ece751XXGUKskTV41mfOVCfmkMVHkQJ8myjk=
+JWT_SECRET=uvPGt2kO4bWCZunmWYZTBZ/fgTaSGHW0BWW2hlY8z/E=
 DATABASE_CLIENT=postgres
 DATABASE_HOST=artspot-db-dev.cpgo2ia2wuo1.ap-southeast-2.rds.amazonaws.com
 DATABASE_PORT=5432
-DATABASE_NAME=postgres
+DATABASE_NAME=artspot-db-dev
 DATABASE_USERNAME=artspot_admin
 DATABASE_PASSWORD=EXuABqxbXCetA0NbGurd
 DATABASE_SSL=true

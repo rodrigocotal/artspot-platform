@@ -26,26 +26,28 @@ REDIS_URL=redis://clustercfg.artspot-redis.uiabmv.apse2.cache.amazonaws.com:6379
 
 ---
 
-## ⏳ Step 1: IAM User
+## ✅ Step 1: IAM User
 
-**Status:** PENDING
+**Status:** COMPLETED ✅
 
-**Username:** artspot-deploy
+**Username:** artspot-github-actions
 
-**Permissions needed:**
+**Permissions attached:**
 - AdministratorAccess-Amplify
 - AWSAppRunnerFullAccess
 - AmazonS3FullAccess
-- CloudFrontFullAccess
-- AmazonElastiCacheFullAccess
-- SecretsManagerReadWrite
 
-**Save when complete:**
+**Environment Variables:**
 ```bash
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
+AWS_ACCESS_KEY_ID=<configured-in-github-secrets>
+AWS_SECRET_ACCESS_KEY=<configured-in-github-secrets>
 AWS_REGION=ap-southeast-2
 ```
+
+**Notes:**
+- Used for GitHub Actions automated deployments
+- Access keys stored securely in GitHub Secrets
+- Programmatic access only (no console access)
 
 ---
 
@@ -134,116 +136,190 @@ AWS_APPRUNNER_API_PRODUCTION_ARN=arn:aws:apprunner:ap-southeast-2:357559222118:s
 
 ---
 
-## ⏳ Step 6: App Runner - API (Staging)
+## ✅ Step 6: App Runner - API (Staging)
 
-**Status:** PENDING
+**Status:** COMPLETED ✅
 
-**Service Name:** artspot-api-staging
+**Service Name:** artspot-api-development
 **Branch:** develop
+**Region:** ap-southeast-2
 
-**Save when complete:**
-```bash
-STAGING_API_URL=
-AWS_APPRUNNER_API_STAGING_ARN=
-```
-
----
-
-## ⏳ Step 7: App Runner - CMS (Production)
-
-**Status:** PENDING
-
-**Service Name:** artspot-cms-production
-**Branch:** main
+**Service URL:** https://vzpregb2dy.ap-southeast-2.awsapprunner.com
 
 **Environment Variables:**
 ```bash
-HOST=0.0.0.0
-PORT=1337
-NODE_ENV=production
-APP_KEYS=artspot-dev-key-1,artspot-dev-key-2
-API_TOKEN_SALT=artspot-api-token-salt
-ADMIN_JWT_SECRET=artspot-admin-jwt-secret
-TRANSFER_TOKEN_SALT=artspot-transfer-token-salt
-JWT_SECRET=artspot-jwt-secret
-DATABASE_CLIENT=postgres
-DATABASE_HOST=artspot-db-dev.cpgo2ia2wuo1.ap-southeast-2.rds.amazonaws.com
-DATABASE_PORT=5432
-DATABASE_NAME=postgres
-DATABASE_USERNAME=artspot_admin
-DATABASE_PASSWORD=EXuABqxbXCetA0NbGurd
-DATABASE_SSL=true
-DATABASE_SCHEMA=strapi
-CLOUDINARY_NAME=doqecw19f
-CLOUDINARY_KEY=288382122493568
-CLOUDINARY_SECRET=yWa5TGiauYx4HeBxTYbHGuN84CQ
+STAGING_API_URL=https://vzpregb2dy.ap-southeast-2.awsapprunner.com
+AWS_APPRUNNER_API_STAGING_ARN=arn:aws:apprunner:ap-southeast-2:357559222118:service/artspot-api-development/1d861a278cea4e3baf1e6857fe1ea77e
 ```
 
-**Save when complete:**
-```bash
-PRODUCTION_CMS_URL=
-AWS_APPRUNNER_CMS_PRODUCTION_ARN=
-```
+**Build Configuration:**
+- Build: `cd apps/api && npx pnpm@8.15.0 install --frozen-lockfile && npx pnpm@8.15.0 prisma:generate && npx pnpm@8.15.0 build`
+- Start: `node apps/api/dist/index.js`
+- Port: 4000
+
+**Notes:**
+- Auto-deploy enabled from develop branch
+- Connected to RDS PostgreSQL and ElastiCache Redis
+- Health endpoint: /health
 
 ---
 
-## ⏳ Step 8: App Runner - CMS (Staging)
+## ✅ Step 7: App Runner - CMS (Production)
 
-**Status:** PENDING
+**Status:** COMPLETED ✅
+
+**Service Name:** artspot-cms-production
+**Branch:** main
+**Region:** ap-southeast-2
+
+**Service URL:** https://rwaxtjdazy.ap-southeast-2.awsapprunner.com
+
+**Environment Variables:**
+```bash
+PRODUCTION_CMS_URL=https://rwaxtjdazy.ap-southeast-2.awsapprunner.com
+AWS_APPRUNNER_CMS_PRODUCTION_ARN=arn:aws:apprunner:ap-southeast-2:357559222118:service/artspot-cms-production/17d247ef33dd43f9bb25a1af86cbc826
+```
+
+**Build Configuration:**
+- Build: `cd apps/cms && npx pnpm@8.15.0 install --frozen-lockfile && npx pnpm@8.15.0 build`
+- Start: `cd apps/cms && npx pnpm@8.15.0 start`
+- Port: 1337
+
+**Notes:**
+- Auto-deploy enabled from main branch
+- Connected to RDS PostgreSQL (schema: strapi)
+- Strapi Admin: /admin
+- Health endpoint: /_health
+- Uses production-grade security keys
+
+---
+
+## ✅ Step 8: App Runner - CMS (Staging)
+
+**Status:** COMPLETED ✅
 
 **Service Name:** artspot-cms-staging
 **Branch:** develop
+**Region:** ap-southeast-2
 
-**Save when complete:**
+**Service URL:** https://p6ynpume2f.ap-southeast-2.awsapprunner.com
+
+**Environment Variables:**
 ```bash
-STAGING_CMS_URL=
-AWS_APPRUNNER_CMS_STAGING_ARN=
+STAGING_CMS_URL=https://p6ynpume2f.ap-southeast-2.awsapprunner.com
+AWS_APPRUNNER_CMS_STAGING_ARN=arn:aws:apprunner:ap-southeast-2:357559222118:service/artspot-cms-staging/ee7244783ceb41fc8bedd8a46ceac8af
 ```
+
+**Build Configuration:**
+- Build: `cd apps/cms && npx pnpm@8.15.0 install --frozen-lockfile && npx pnpm@8.15.0 build`
+- Start: `cd apps/cms && npx pnpm@8.15.0 start`
+- Port: 1337
+
+**Notes:**
+- Auto-deploy enabled from develop branch
+- Connected to RDS PostgreSQL (schema: strapi)
+- Same configuration as production, different branch
 
 ---
 
-## ⏳ Step 9: AWS Amplify
+## ✅ Step 9: AWS Amplify
 
-**Status:** PENDING
+**Status:** COMPLETED ✅
 
 **App Name:** artspot-web
+**App ID:** d33bfmlx9m4rwh
+**Repository:** rodrigocotal/artspot-platform
+**Region:** ap-southeast-2
+
+**Production URL:** https://main.d33bfmlx9m4rwh.amplifyapp.com
+**Staging URL:** https://develop.d33bfmlx9m4rwh.amplifyapp.com
+
+**Environment Variables:**
+```bash
+AWS_AMPLIFY_APP_ID=d33bfmlx9m4rwh
+PRODUCTION_NEXTAUTH_URL=https://main.d33bfmlx9m4rwh.amplifyapp.com
+STAGING_NEXTAUTH_URL=https://develop.d33bfmlx9m4rwh.amplifyapp.com
+NEXTAUTH_SECRET=xh5rGDWQ6dfb/yjRCnSDyu/cmUEEX96s0YeYQXAEYgw=
+```
+
+**Configuration:**
+- **All branches:**
+  - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=doqecw19f`
+  - `NEXTAUTH_SECRET=xh5rGDWQ6dfb/yjRCnSDyu/cmUEEX96s0YeYQXAEYgw=`
+
+- **main branch:**
+  - `NEXT_PUBLIC_API_URL=https://sprbj7w893.ap-southeast-2.awsapprunner.com`
+  - `NEXTAUTH_URL=https://main.d33bfmlx9m4rwh.amplifyapp.com`
+
+- **develop branch:**
+  - `NEXT_PUBLIC_API_URL=https://vzpregb2dy.ap-southeast-2.awsapprunner.com`
+  - `NEXTAUTH_URL=https://develop.d33bfmlx9m4rwh.amplifyapp.com`
+
+**Notes:**
+- Auto-deploy enabled from both main and develop branches
+- Build configuration from `amplify.yml` in repository
+- CloudFront CDN automatically configured
+- SSL/TLS certificates automatically provisioned
+
+---
+
+## ✅ Step 10: GitHub Secrets
+
+**Status:** COMPLETED ✅
+
 **Repository:** rodrigocotal/artspot-platform
 
-**Branches:**
-- main (production)
-- develop (staging)
+**Configured Secrets (18 total):**
 
-**Production Environment Variables:**
-```bash
-NEXT_PUBLIC_API_URL=<from-app-runner-api-production>
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=doqecw19f
-NEXTAUTH_URL=<will-be-amplify-url>
-NEXTAUTH_SECRET=<from-secrets-manager>
-```
+### AWS Credentials
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION` (ap-southeast-2)
 
-**Save when complete:**
-```bash
-AWS_AMPLIFY_APP_ID=
-PRODUCTION_NEXTAUTH_URL=
-STAGING_NEXTAUTH_URL=
-```
+### AWS Services
+- `AWS_AMPLIFY_APP_ID`
+- `AWS_APPRUNNER_API_PRODUCTION_ARN`
+- `AWS_APPRUNNER_API_STAGING_ARN`
+- `AWS_APPRUNNER_CMS_PRODUCTION_ARN`
+- `AWS_APPRUNNER_CMS_STAGING_ARN`
+
+### Service URLs
+- `PRODUCTION_API_URL`
+- `PRODUCTION_CMS_URL`
+- `STAGING_API_URL`
+- `STAGING_CMS_URL`
+
+### Database & Application
+- `PRODUCTION_DATABASE_URL`
+- `NEXTAUTH_SECRET`
+- `CLOUDINARY_CLOUD_NAME`
+
+**GitHub Actions Workflows:**
+- ✅ `pr-checks.yml` - Runs on pull requests
+- ✅ `deploy-staging.yml` - Deploys to staging on push to `develop`
+- ✅ `deploy-production.yml` - Deploys to production on push to `main`
+
+**Notes:**
+- All secrets configured in GitHub repository settings
+- Workflows use IAM user credentials for AWS authentication
+- Automated deployments enabled for both staging and production
 
 ---
 
 ## Progress Tracker
 
 - [x] ElastiCache Redis
-- [ ] IAM User
-- [ ] Secrets Manager
+- [x] IAM User
+- [ ] Secrets Manager (Optional)
 - [x] S3 + CloudFront
 - [x] App Runner (API - Production)
-- [ ] App Runner (API - Staging)
-- [ ] App Runner (CMS - Production)
-- [ ] App Runner (CMS - Staging)
-- [ ] AWS Amplify
-- [ ] GitHub Secrets
+- [x] App Runner (API - Staging)
+- [x] App Runner (CMS - Production)
+- [x] App Runner (CMS - Staging)
+- [x] AWS Amplify
+- [x] GitHub Secrets
 
-**Completion:** 3/10 steps 🚀
+**Completion:** 9/10 steps 🎉 (Secrets Manager is optional)
 
 ---
 

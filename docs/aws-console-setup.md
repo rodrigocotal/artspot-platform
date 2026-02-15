@@ -152,11 +152,11 @@ Complete step-by-step guide to set up ArtSpot infrastructure on AWS using the Co
 - Runtime: `Node.js 18`
 - Build command:
   ```bash
-  cd apps/api && npm install -g pnpm@8.15.0 && pnpm install && pnpm build
+  cd apps/api && npx pnpm@8.15.0 install --frozen-lockfile && npx pnpm@8.15.0 prisma:generate && npx pnpm@8.15.0 build
   ```
 - Start command:
   ```bash
-  cd apps/api && pnpm start
+  node apps/api/dist/index.js
   ```
 - Port: `4000`
 
@@ -213,11 +213,11 @@ Repeat Step 5 with:
 - Runtime: `Node.js 18`
 - Build command:
   ```bash
-  cd apps/cms && npm install -g pnpm@8.15.0 && pnpm install && pnpm build
+  cd apps/cms && npx pnpm@8.15.0 install --frozen-lockfile && npx pnpm@8.15.0 build
   ```
 - Start command:
   ```bash
-  cd apps/cms && pnpm start
+  node apps/cms/dist/index.js
   ```
 - Port: `1337`
 

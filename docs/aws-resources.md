@@ -106,32 +106,31 @@ S3_BUCKET=artspot-images-production
 
 ---
 
-## ⏳ Step 5: App Runner - API (Production)
+## ✅ Step 5: App Runner - API (Production)
 
-**Status:** PENDING
+**Status:** COMPLETED ✅
 
 **Service Name:** artspot-api-production
 **Branch:** main
+**Region:** ap-southeast-2
+
+**Service URL:** https://sprbj7w893.ap-southeast-2.awsapprunner.com
 
 **Environment Variables:**
 ```bash
-NODE_ENV=production
-PORT=4000
-DATABASE_URL=postgresql://artspot_admin:EXuABqxbXCetA0NbGurd@artspot-db-dev.cpgo2ia2wuo1.ap-southeast-2.rds.amazonaws.com:5432/postgres?schema=public&sslmode=require
-REDIS_URL=redis://clustercfg.artspot-redis.uiabmv.apse2.cache.amazonaws.com:6379
-JWT_SECRET=<from-secrets-manager>
-JWT_EXPIRES_IN=7d
-CLOUDINARY_CLOUD_NAME=doqecw19f
-CLOUDINARY_API_KEY=288382122493568
-CLOUDINARY_API_SECRET=yWa5TGiauYx4HeBxTYbHGuN84CQ
-ALLOWED_ORIGINS=*
+PRODUCTION_API_URL=https://sprbj7w893.ap-southeast-2.awsapprunner.com
+AWS_APPRUNNER_API_PRODUCTION_ARN=arn:aws:apprunner:ap-southeast-2:357559222118:service/artspot-api-production/f76b49f1090f4921beebe0064c5c5130
 ```
 
-**Save when complete:**
-```bash
-PRODUCTION_API_URL=
-AWS_APPRUNNER_API_PRODUCTION_ARN=
-```
+**Build Configuration:**
+- Build: `cd apps/api && npx pnpm@8.15.0 install --frozen-lockfile && npx pnpm@8.15.0 prisma:generate && npx pnpm@8.15.0 build`
+- Start: `node apps/api/dist/index.js`
+- Port: 4000
+
+**Notes:**
+- Auto-deploy enabled from main branch
+- Connected to RDS PostgreSQL and ElastiCache Redis
+- Health endpoint: /health
 
 ---
 
@@ -237,14 +236,14 @@ STAGING_NEXTAUTH_URL=
 - [ ] IAM User
 - [ ] Secrets Manager
 - [x] S3 + CloudFront
-- [ ] App Runner (API - Production)
+- [x] App Runner (API - Production)
 - [ ] App Runner (API - Staging)
 - [ ] App Runner (CMS - Production)
 - [ ] App Runner (CMS - Staging)
 - [ ] AWS Amplify
 - [ ] GitHub Secrets
 
-**Completion:** 2/10 steps ✨
+**Completion:** 3/10 steps 🚀
 
 ---
 

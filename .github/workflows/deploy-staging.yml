@@ -121,8 +121,8 @@ jobs:
       - name: Health check
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.STAGING_CMS_URL }}/_health)
-          if [ $response -eq 200 ]; then
-            echo "✅ CMS health check passed"
+          if [ $response -eq 200 ] || [ $response -eq 204 ]; then
+            echo "✅ CMS health check passed (status: $response)"
           else
             echo "❌ CMS health check failed with status $response"
             exit 1

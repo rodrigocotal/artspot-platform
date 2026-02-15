@@ -82,22 +82,27 @@ AWS_REGION=ap-southeast-2
 
 ---
 
-## ⏳ Step 4: S3 + CloudFront
+## ✅ Step 4: S3 + CloudFront
 
-**Status:** PENDING
+**Status:** COMPLETED ✅
 
 **S3 Bucket:**
-- Name: `artspot-images-production` (or similar, must be globally unique)
+- Name: `artspot-images-production`
 - Region: ap-southeast-2
 
 **CloudFront Distribution:**
-- Domain:
+- Domain: `d1wl8z2nagsf9o.cloudfront.net`
 
-**Save when complete:**
+**Environment Variable:**
 ```bash
-S3_BUCKET=
-CLOUDFRONT_URL=
+CLOUDFRONT_URL=https://d1wl8z2nagsf9o.cloudfront.net
+S3_BUCKET=artspot-images-production
 ```
+
+**Notes:**
+- CloudFront edge locations globally distributed
+- SSL/TLS enabled by default
+- Used for: Image and document delivery
 
 ---
 
@@ -231,7 +236,7 @@ STAGING_NEXTAUTH_URL=
 - [x] ElastiCache Redis
 - [ ] IAM User
 - [ ] Secrets Manager
-- [ ] S3 + CloudFront
+- [x] S3 + CloudFront
 - [ ] App Runner (API - Production)
 - [ ] App Runner (API - Staging)
 - [ ] App Runner (CMS - Production)
@@ -239,7 +244,7 @@ STAGING_NEXTAUTH_URL=
 - [ ] AWS Amplify
 - [ ] GitHub Secrets
 
-**Completion:** 1/10 steps
+**Completion:** 2/10 steps ✨
 
 ---
 

@@ -21,7 +21,7 @@ Complete step-by-step guide to set up ArtSpot infrastructure on AWS using the Co
    ```
    AWS_ACCESS_KEY_ID=AKIA...
    AWS_SECRET_ACCESS_KEY=...
-   AWS_REGION=us-east-1
+   AWS_REGION=ap-southeast-2
    ```
 
 ---
@@ -85,7 +85,7 @@ Complete step-by-step guide to set up ArtSpot infrastructure on AWS using the Co
 ### Create S3 Bucket
 1. **S3 Console** → **Create bucket**
 2. Name: `artspot-images-production` (globally unique)
-3. Region: `us-east-1`
+3. Region: `ap-southeast-2`
 4. Uncheck "Block all public access"
 5. Enable **Bucket Versioning**
 6. Create bucket
@@ -321,7 +321,7 @@ Add each secret:
 ```
 AWS_ACCESS_KEY_ID=<from-step-1>
 AWS_SECRET_ACCESS_KEY=<from-step-1>
-AWS_REGION=us-east-1
+AWS_REGION=ap-southeast-2
 ```
 
 ### Amplify

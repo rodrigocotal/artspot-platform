@@ -50,7 +50,7 @@ export interface ButtonProps
   loading?: boolean;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const ButtonInternal = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, loading, disabled, children, ...props }, ref) => {
     return (
       <button
@@ -87,6 +87,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 
-Button.displayName = 'Button';
+ButtonInternal.displayName = 'Button';
 
-export { Button, buttonVariants };
+// Type assertion to fix React 19 compatibility
+export const Button = ButtonInternal as React.FC<ButtonProps & React.RefAttributes<HTMLButtonElement>>;
+export { buttonVariants };

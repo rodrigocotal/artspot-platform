@@ -6,7 +6,7 @@ export interface InputProps
   error?: boolean;
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const InputInternal = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, error, ...props }, ref) => {
     return (
       <input
@@ -24,6 +24,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
   }
 );
-Input.displayName = 'Input';
+InputInternal.displayName = 'Input';
 
-export { Input };
+export const Input = InputInternal as React.FC<InputProps & React.RefAttributes<HTMLInputElement>>;

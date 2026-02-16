@@ -12,10 +12,15 @@ frontend:
         - echo "Building Next.js application..."
         - cd apps/web
         - pnpm build
+        - cd ../..
   artifacts:
-    baseDirectory: apps/web/.next
+    baseDirectory: apps/web
     files:
-      - '**/*'
+      - '.next/**/*'
+      - 'public/**/*'
+      - 'package.json'
+      - 'next.config.ts'
+      - 'node_modules/**/*'
   cache:
     paths:
       - node_modules/**/*

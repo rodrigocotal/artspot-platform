@@ -6,7 +6,7 @@ export interface TextareaProps
   error?: boolean;
 }
 
-const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+const TextareaInternal = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, error, ...props }, ref) => {
     return (
       <textarea
@@ -23,6 +23,6 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     );
   }
 );
-Textarea.displayName = 'Textarea';
+TextareaInternal.displayName = 'Textarea';
 
-export { Textarea };
+export const Textarea = TextareaInternal as React.FC<TextareaProps & React.RefAttributes<HTMLTextAreaElement>>;

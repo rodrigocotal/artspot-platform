@@ -11,6 +11,12 @@ export {
   CardTitle,
   CardDescription,
   CardContent,
+  type CardProps,
+  type CardHeaderProps,
+  type CardFooterProps,
+  type CardTitleProps,
+  type CardDescriptionProps,
+  type CardContentProps,
 } from './card';
 export { Input, type InputProps } from './input';
 export { Textarea, type TextareaProps } from './textarea';

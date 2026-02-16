@@ -6,7 +6,7 @@ export interface LabelProps
   required?: boolean;
 }
 
-const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
+const LabelInternal = React.forwardRef<HTMLLabelElement, LabelProps>(
   ({ className, required, children, ...props }, ref) => (
     <label
       ref={ref}
@@ -21,6 +21,6 @@ const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
     </label>
   )
 );
-Label.displayName = 'Label';
+LabelInternal.displayName = 'Label';
 
-export { Label };
+export const Label = LabelInternal as React.FC<LabelProps & React.RefAttributes<HTMLLabelElement>>;

@@ -3,7 +3,12 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['res.cloudinary.com'], // For Cloudinary images
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
   },
   // Transpile packages from the monorepo

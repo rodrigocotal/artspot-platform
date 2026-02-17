@@ -1,20 +1,13 @@
 version: 1
-framework:
-  name: next.js
-  version: 15
 frontend:
   phases:
     preBuild:
       commands:
-        - echo "Installing pnpm..."
         - npm install -g pnpm@8.15.0
-        - echo "Installing dependencies..."
         - pnpm install --frozen-lockfile
     build:
       commands:
-        - echo "Building Next.js application..."
-        - cd apps/web
-        - pnpm build
+        - cd apps/web && pnpm build
   artifacts:
     baseDirectory: apps/web
     files:

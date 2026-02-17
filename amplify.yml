@@ -11,11 +11,16 @@ applications:
         build:
           commands:
             - pnpm run build --filter=@artspot/web
-            - cp -r apps/web/.next/standalone/apps/web/.next apps/web/.next/standalone/.next
-            - cp apps/web/.next/standalone/apps/web/server.js apps/web/.next/standalone/server.js
+            - echo "=== standalone root ===" && ls apps/web/.next/standalone/ 2>&1
+            - echo "=== nft.json in standalone ===" && find apps/web/.next/standalone -name "*.nft.json" 2>&1 | head -10
+            - echo "=== nft.json in .next/server ===" && find apps/web/.next/server -name "*.nft.json" 2>&1 | head -10
+            - mkdir -p apps/web/.next/standalone/.next
+            - cp -r apps/web/.next/server apps/web/.next/standalone/.next/server
             - cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
             - '[ -d apps/web/public ] && cp -r apps/web/public apps/web/.next/standalone/public || true'
             - cp apps/web/.next/required-server-files.json apps/web/.next/standalone/
+            - '[ -f apps/web/.next/standalone/apps/web/server.js ] && cp apps/web/.next/standalone/apps/web/server.js apps/web/.next/standalone/server.js || true'
+            - echo "=== nft.json after copy ===" && find apps/web/.next/standalone -name "*.nft.json" 2>&1 | head -5
       artifacts:
         baseDirectory: apps/web/.next/standalone
         files:

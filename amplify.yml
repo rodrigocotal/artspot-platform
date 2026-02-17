@@ -11,8 +11,10 @@ applications:
         build:
           commands:
             - pnpm run build --filter=@artspot/web
-            - '[ -d apps/web/public ] && cp -r apps/web/public apps/web/.next/standalone/apps/web/public || true'
-            - cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
+            - cp -r apps/web/.next/standalone/apps/web/.next apps/web/.next/standalone/.next
+            - cp apps/web/.next/standalone/apps/web/server.js apps/web/.next/standalone/server.js
+            - cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
+            - '[ -d apps/web/public ] && cp -r apps/web/public apps/web/.next/standalone/public || true'
             - cp apps/web/.next/required-server-files.json apps/web/.next/standalone/
       artifacts:
         baseDirectory: apps/web/.next/standalone

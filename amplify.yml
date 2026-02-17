@@ -14,9 +14,12 @@ applications:
             - '[ -d apps/web/public ] && cp -r apps/web/public apps/web/.next/standalone/apps/web/public || true'
             - cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
       artifacts:
-        baseDirectory: apps/web/.next/standalone
+        baseDirectory: apps/web
         files:
-          - '**/*'
+          - '.next/**/*'
+          - 'public/**/*'
+          - 'package.json'
+          - 'next.config.ts'
       cache:
         paths:
           - node_modules/**/*

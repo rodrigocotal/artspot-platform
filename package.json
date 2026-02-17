@@ -23,5 +23,11 @@
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@8.15.0"
+  "packageManager": "pnpm@8.15.0",
+  "pnpm": {
+    "overrides": {
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
+    }
+  }
 }

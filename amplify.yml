@@ -11,8 +11,10 @@ applications:
         build:
           commands:
             - pnpm run build --filter=@artspot/web
+            - cp -r apps/web/public apps/web/.next/standalone/apps/web/public
+            - cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
       artifacts:
-        baseDirectory: apps/web/.next
+        baseDirectory: apps/web/.next/standalone
         files:
           - '**/*'
       cache:

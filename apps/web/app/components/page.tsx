@@ -5,6 +5,12 @@ import { ArrowRight } from 'lucide-react';
 
 const components = [
   {
+    name: 'Filters & Search',
+    description: 'Complete filtering system with search input, checkboxes, price range, and sort dropdown',
+    href: '/components/filters',
+    status: 'Ready',
+  },
+  {
     name: 'Image Zoom',
     description: 'High-resolution artwork viewer with 3.0x zoom and pan functionality',
     href: '/components/image-zoom',

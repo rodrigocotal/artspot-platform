@@ -21,3 +21,4 @@ export {
 export { Input, type InputProps } from './input';
 export { Textarea, type TextareaProps } from './textarea';
 export { Label, type LabelProps } from './label';
+export { ImageZoom, type ImageZoomProps } from './image-zoom';

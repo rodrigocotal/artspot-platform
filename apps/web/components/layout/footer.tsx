@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Container } from './container';
+import { NewsletterForm } from './newsletter-form';
 
 const navigation = {
   explore: [
@@ -53,19 +54,7 @@ export function Footer() {
               <p className="text-xs font-medium tracking-widest uppercase text-neutral-400">
                 Stay Informed
               </p>
-              <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="flex-1 min-w-0 bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-primary-500 transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded transition-colors whitespace-nowrap"
-                >
-                  Subscribe
-                </button>
-              </form>
+              <NewsletterForm />
             </div>
           </div>
 

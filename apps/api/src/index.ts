@@ -14,6 +14,7 @@ import { disconnectDatabase } from './config/database';
 import { errorHandler } from './middleware/error-handler';
 import healthRouter from './routes/health';
 import uploadRouter from './routes/upload';
+import artworksRouter from './routes/artworks';
 import { initializeCloudinary } from './config/cloudinary';
 
 // Initialize Cloudinary AFTER env vars are loaded
@@ -46,6 +47,7 @@ if (config.nodeEnv === 'development') {
 // Routes
 app.use('/health', healthRouter);
 app.use('/upload', uploadRouter);
+app.use('/artworks', artworksRouter);
 
 // 404 handler
 app.use('*', (req, res) => {

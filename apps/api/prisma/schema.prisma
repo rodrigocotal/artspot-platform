@@ -10,7 +10,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model (for authentication and user management)
+// ============================================================================
+// USER MANAGEMENT
+// ============================================================================
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -18,6 +21,10 @@ model User {
   role      UserRole @default(COLLECTOR)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relations
+  inquiries Inquiry[]
+  favorites Favorite[]
 
   @@map("users")
 }
@@ -28,4 +35,271 @@ enum UserRole {
   ADMIN
 }
 
-// Note: Additional models (Artist, Artwork, Collection, etc.) will be added in future sprints
+// ============================================================================
+// ARTIST MANAGEMENT
+// ============================================================================
+
+model Artist {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  bio         String? @db.Text
+  statement   String? @db.Text
+  location    String?
+  website     String?
+  email       String?
+  phoneNumber String?
+
+  // Profile image
+  profileImageUrl String?
+
+  // Metadata
+  featured     Boolean @default(false)
+  verified     Boolean @default(false)
+  displayOrder Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  artworks Artwork[]
+
+  @@map("artists")
+}
+
+// ============================================================================
+// ARTWORK MANAGEMENT
+// ============================================================================
+
+model Artwork {
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  description String? @db.Text
+
+  // Artist relation
+  artistId String
+  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  // Artwork details
+  medium ArtworkMedium
+  style  ArtworkStyle?
+  year   Int?
+
+  // Dimensions (in centimeters)
+  width  Decimal? @db.Decimal(10, 2)
+  height Decimal? @db.Decimal(10, 2)
+  depth  Decimal? @db.Decimal(10, 2)
+
+  // Pricing
+  price    Decimal @db.Decimal(10, 2)
+  currency String  @default("USD")
+
+  // Availability
+  status AvailabilityStatus @default(AVAILABLE)
+
+  // Metadata
+  featured    Boolean @default(false)
+  edition     String? // e.g., "1/10" for limited editions
+  materials   String? // Additional materials info
+  signature   String? // Signature details
+  certificate Boolean @default(false) // Has certificate of authenticity
+  framed      Boolean @default(false)
+
+  // SEO & Display
+  views        Int  @default(0)
+  displayOrder Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  images          ArtworkImage[]
+  collectionItems CollectionArtwork[]
+  inquiries       Inquiry[]
+  favorites       Favorite[]
+
+  @@index([artistId])
+  @@index([medium])
+  @@index([status])
+  @@index([featured])
+  @@map("artworks")
+}
+
+model ArtworkImage {
+  id        String  @id @default(cuid())
+  artworkId String
+  artwork   Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  // Cloudinary info
+  publicId  String @unique
+  url       String
+  secureUrl String
+
+  // Image metadata
+  width  Int
+  height Int
+  format String
+  size   Int // Size in bytes
+
+  // Image type and ordering
+  type         ImageType @default(MAIN)
+  displayOrder Int       @default(0)
+  caption      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([artworkId])
+  @@map("artwork_images")
+}
+
+enum ArtworkMedium {
+  PAINTING
+  SCULPTURE
+  PHOTOGRAPHY
+  PRINT
+  DRAWING
+  MIXED_MEDIA
+  DIGITAL
+  INSTALLATION
+  TEXTILE
+  CERAMICS
+  GLASS
+  METAL
+  WOOD
+  OTHER
+}
+
+enum ArtworkStyle {
+  ABSTRACT
+  CONTEMPORARY
+  FIGURATIVE
+  IMPRESSIONIST
+  MINIMALIST
+  REALISM
+  EXPRESSIONISM
+  SURREALISM
+  POP_ART
+  CONCEPTUAL
+  LANDSCAPE
+  PORTRAIT
+  STILL_LIFE
+  OTHER
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  SOLD
+  RESERVED
+  NOT_FOR_SALE
+  ON_LOAN
+}
+
+enum ImageType {
+  MAIN
+  DETAIL
+  INSTALLATION
+  ALTERNATE
+  FRAME
+}
+
+// ============================================================================
+// COLLECTIONS
+// ============================================================================
+
+model Collection {
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  description String? @db.Text
+
+  // Display
+  coverImageUrl String?
+  featured      Boolean @default(false)
+  displayOrder  Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  artworks CollectionArtwork[]
+
+  @@map("collections")
+}
+
+model CollectionArtwork {
+  id           String @id @default(cuid())
+  collectionId String
+  artworkId    String
+  displayOrder Int    @default(0)
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  artwork    Artwork    @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([collectionId, artworkId])
+  @@index([collectionId])
+  @@index([artworkId])
+  @@map("collection_artworks")
+}
+
+// ============================================================================
+// INQUIRIES & FAVORITES
+// ============================================================================
+
+model Inquiry {
+  id        String @id @default(cuid())
+  userId    String
+  artworkId String
+
+  // Contact info (in case user is not registered)
+  name  String
+  email String
+  phone String?
+
+  // Inquiry details
+  message String        @db.Text
+  status  InquiryStatus @default(PENDING)
+
+  // Response
+  response    String?   @db.Text
+  respondedAt DateTime?
+  respondedBy String? // Admin/staff user ID
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artwork Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([artworkId])
+  @@index([status])
+  @@map("inquiries")
+}
+
+enum InquiryStatus {
+  PENDING
+  RESPONDED
+  CLOSED
+}
+
+model Favorite {
+  id        String @id @default(cuid())
+  userId    String
+  artworkId String
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artwork Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, artworkId])
+  @@index([userId])
+  @@index([artworkId])
+  @@map("favorites")
+}

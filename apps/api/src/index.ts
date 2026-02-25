@@ -15,6 +15,7 @@ import { errorHandler } from './middleware/error-handler';
 import healthRouter from './routes/health';
 import uploadRouter from './routes/upload';
 import artworksRouter from './routes/artworks';
+import artistsRouter from './routes/artists';
 import { initializeCloudinary } from './config/cloudinary';
 
 // Initialize Cloudinary AFTER env vars are loaded
@@ -48,6 +49,7 @@ if (config.nodeEnv === 'development') {
 app.use('/health', healthRouter);
 app.use('/upload', uploadRouter);
 app.use('/artworks', artworksRouter);
+app.use('/artists', artistsRouter);
 
 // 404 handler
 app.use('*', (req, res) => {

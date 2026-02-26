@@ -25,6 +25,14 @@ export interface ArtworkFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface ArtistFilters {
+  featured?: boolean;
+  verified?: boolean;
+  search?: string;
+  sortBy?: 'name' | 'createdAt' | 'displayOrder';
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -40,7 +48,22 @@ export interface Artist {
   id: string;
   name: string;
   slug: string;
+  bio: string | null;
+  statement: string | null;
+  location: string | null;
+  website: string | null;
+  email: string | null;
+  phoneNumber: string | null;
   profileImageUrl: string | null;
+  featured: boolean;
+  verified: boolean;
+  displayOrder: number | null;
+  createdAt: string;
+  updatedAt: string;
+  artworks?: Artwork[];
+  _count?: {
+    artworks: number;
+  };
 }
 
 export interface ArtworkImage {
@@ -167,6 +190,30 @@ class ApiClient {
     limit = 6
   ): Promise<ApiResponse<Artwork[]>> {
     return this.fetch<Artwork[]>(`/artworks/${id}/related?limit=${limit}`);
+  }
+
+  /**
+   * Get list of artists with filtering and pagination
+   */
+  async getArtists(
+    params: ArtistFilters & PaginationParams = {}
+  ): Promise<ApiResponse<Artist[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<Artist[]>(`/artists${queryString}`);
+  }
+
+  /**
+   * Get single artist by ID or slug
+   */
+  async getArtist(id: string): Promise<ApiResponse<Artist>> {
+    return this.fetch<Artist>(`/artists/${id}`);
+  }
+
+  /**
+   * Get featured artists
+   */
+  async getFeaturedArtists(limit = 6): Promise<ApiResponse<Artist[]>> {
+    return this.fetch<Artist[]>(`/artists/featured?limit=${limit}`);
   }
 }
 

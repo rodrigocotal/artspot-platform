@@ -27,10 +27,10 @@ const app: Express = express();
 // Security middleware
 app.use(helmet());
 
-// CORS configuration
+// CORS configuration — origin: true reflects the request origin (compatible with credentials)
 app.use(
   cors({
-    origin: config.allowedOrigins,
+    origin: config.allowedOrigins === '*' ? true : config.allowedOrigins,
     credentials: true,
   })
 );

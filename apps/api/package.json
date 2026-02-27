@@ -11,6 +11,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "seed:collections": "tsx prisma/seed-collections.ts",
+    "seed:sample-data": "tsx prisma/add-sample-data.ts",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts"
   },

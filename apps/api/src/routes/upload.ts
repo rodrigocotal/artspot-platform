@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { uploadArtworkImage, uploadArtworkImages } from '../middleware/upload';
 import { getImageUrl, getImageInfo } from '../config/cloudinary';
+import { authenticate, authorize } from '../middleware/auth';
 
 const router: Router = Router();
 
@@ -9,7 +10,7 @@ const router: Router = Router();
  * @desc    Upload single artwork image
  * @access  Private (Admin/Gallery Staff)
  */
-router.post('/artwork', uploadArtworkImage, async (req: Request, res: Response): Promise<void> => {
+router.post('/artwork', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), uploadArtworkImage, async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.file) {
       res.status(400).json({
@@ -58,7 +59,7 @@ router.post('/artwork', uploadArtworkImage, async (req: Request, res: Response):
  * @desc    Upload multiple artwork images
  * @access  Private (Admin/Gallery Staff)
  */
-router.post('/artworks', uploadArtworkImages, async (req: Request, res: Response): Promise<void> => {
+router.post('/artworks', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), uploadArtworkImages, async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
       res.status(400).json({

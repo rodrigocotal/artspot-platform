@@ -17,6 +17,7 @@ import uploadRouter from './routes/upload';
 import artworksRouter from './routes/artworks';
 import artistsRouter from './routes/artists';
 import collectionsRouter from './routes/collections';
+import authRouter from './routes/auth';
 import { initializeCloudinary } from './config/cloudinary';
 
 // Initialize Cloudinary AFTER env vars are loaded
@@ -48,6 +49,7 @@ if (config.nodeEnv === 'development') {
 
 // Routes
 app.use('/health', healthRouter);
+app.use('/auth', authRouter);
 app.use('/upload', uploadRouter);
 app.use('/artworks', artworksRouter);
 app.use('/artists', artistsRouter);

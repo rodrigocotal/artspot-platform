@@ -18,9 +18,8 @@ declare module 'next-auth' {
     accessToken?: string;
     refreshToken?: string;
   }
-}
 
-declare module 'next-auth/jwt' {
+  // JWT type augmentation (next-auth v5 exports JWT from main module)
   interface JWT {
     id?: string;
     role?: string;

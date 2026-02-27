@@ -33,6 +33,13 @@ export interface ArtistFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface CollectionFilters {
+  featured?: boolean;
+  search?: string;
+  sortBy?: 'title' | 'createdAt' | 'displayOrder';
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -61,6 +68,25 @@ export interface Artist {
   createdAt: string;
   updatedAt: string;
   artworks?: Artwork[];
+  _count?: {
+    artworks: number;
+  };
+}
+
+export interface Collection {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  coverImageUrl: string | null;
+  featured: boolean;
+  displayOrder: number | null;
+  createdAt: string;
+  updatedAt: string;
+  artworks?: {
+    displayOrder: number;
+    artwork: Artwork;
+  }[];
   _count?: {
     artworks: number;
   };
@@ -214,6 +240,30 @@ class ApiClient {
    */
   async getFeaturedArtists(limit = 6): Promise<ApiResponse<Artist[]>> {
     return this.fetch<Artist[]>(`/artists/featured?limit=${limit}`);
+  }
+
+  /**
+   * Get list of collections with filtering and pagination
+   */
+  async getCollections(
+    params: CollectionFilters & PaginationParams = {}
+  ): Promise<ApiResponse<Collection[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<Collection[]>(`/collections${queryString}`);
+  }
+
+  /**
+   * Get single collection by ID or slug
+   */
+  async getCollection(id: string): Promise<ApiResponse<Collection>> {
+    return this.fetch<Collection>(`/collections/${id}`);
+  }
+
+  /**
+   * Get featured collections
+   */
+  async getFeaturedCollections(limit = 6): Promise<ApiResponse<Collection[]>> {
+    return this.fetch<Collection[]>(`/collections/featured?limit=${limit}`);
   }
 }
 

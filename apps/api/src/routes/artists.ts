@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { artistController } from '../controllers/artist.controller';
+import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
@@ -18,12 +19,12 @@ router.get('/featured', artistController.getFeaturedArtists.bind(artistControlle
 router.get('/:id', artistController.getArtist.bind(artistController));
 
 // POST /artists - Create new artist
-router.post('/', artistController.createArtist.bind(artistController));
+router.post('/', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artistController.createArtist.bind(artistController));
 
 // PUT /artists/:id - Update artist
-router.put('/:id', artistController.updateArtist.bind(artistController));
+router.put('/:id', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artistController.updateArtist.bind(artistController));
 
 // DELETE /artists/:id - Delete artist
-router.delete('/:id', artistController.deleteArtist.bind(artistController));
+router.delete('/:id', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artistController.deleteArtist.bind(artistController));
 
 export default router;

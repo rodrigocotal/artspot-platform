@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui';
 import {
@@ -12,6 +13,7 @@ import {
   ShoppingBag,
   User,
   ChevronDown,
+  LogOut,
 } from 'lucide-react';
 
 // Navigation data structure
@@ -69,9 +71,11 @@ interface HeaderProps {
 }
 
 export function Header({ className }: HeaderProps) {
+  const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = React.useState(false);
 
   // Close mobile menu when route changes
   React.useEffect(() => {
@@ -175,13 +179,55 @@ export function Header({ className }: HeaderProps) {
             </Link>
 
             {/* Account */}
-            <Link
-              href="/account"
-              className="hidden sm:block p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
-              aria-label="Account"
-            >
-              <User className="h-5 w-5" />
-            </Link>
+            {session?.user ? (
+              <div
+                className="relative hidden sm:block"
+                onMouseEnter={() => setUserMenuOpen(true)}
+                onMouseLeave={() => setUserMenuOpen(false)}
+              >
+                <button
+                  className="flex items-center gap-2 p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+                  aria-label="Account menu"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-sm font-medium max-w-[100px] truncate">
+                    {session.user.name || 'Account'}
+                  </span>
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-48 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <Link
+                      href="/account"
+                      className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                    >
+                      My Account
+                    </Link>
+                    <Link
+                      href="/favorites"
+                      className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                    >
+                      Favorites
+                    </Link>
+                    <hr className="my-1 border-neutral-200" />
+                    <button
+                      onClick={() => signOut({ callbackUrl: '/' })}
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden sm:block p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+                aria-label="Sign in"
+              >
+                <User className="h-5 w-5" />
+              </Link>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button
@@ -255,12 +301,23 @@ export function Header({ className }: HeaderProps) {
                   Favorites
                 </Button>
               </Link>
-              <Link href="/account" className="flex-1">
-                <Button variant="outline" className="w-full">
-                  <User className="h-4 w-4 mr-2" />
-                  Account
+              {session?.user ? (
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
                 </Button>
-              </Link>
+              ) : (
+                <Link href="/login" className="flex-1">
+                  <Button variant="outline" className="w-full">
+                    <User className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

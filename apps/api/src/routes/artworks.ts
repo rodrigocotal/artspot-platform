@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { artworkController } from '../controllers/artwork.controller';
+import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
@@ -20,16 +21,16 @@ router.get('/:id', artworkController.getArtwork.bind(artworkController));
 // GET /artworks/:id/related?limit=6
 router.get('/:id/related', artworkController.getRelatedArtworks.bind(artworkController));
 
-// Create new artwork (TODO: Add authentication middleware)
+// Create new artwork
 // POST /artworks
-router.post('/', artworkController.createArtwork.bind(artworkController));
+router.post('/', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artworkController.createArtwork.bind(artworkController));
 
-// Update artwork (TODO: Add authentication middleware)
+// Update artwork
 // PUT /artworks/:id
-router.put('/:id', artworkController.updateArtwork.bind(artworkController));
+router.put('/:id', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artworkController.updateArtwork.bind(artworkController));
 
-// Delete artwork (TODO: Add authentication middleware)
+// Delete artwork
 // DELETE /artworks/:id
-router.delete('/:id', artworkController.deleteArtwork.bind(artworkController));
+router.delete('/:id', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artworkController.deleteArtwork.bind(artworkController));
 
 export default router;

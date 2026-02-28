@@ -2,18 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Container, Section } from '@/components/layout';
 import { ImageZoom } from '@/components/ui';
 import { ArtworkCard } from '@/components/artwork';
 import { Button } from '@/components/ui';
 import { apiClient, type Artwork } from '@/lib/api-client';
+import { useFavorite } from '@/hooks/use-favorite';
 import { ArrowLeft, Heart, Share2, Ruler, Calendar, Package, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function ArtworkDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const slug = params.slug as string;
 
   const [artwork, setArtwork] = useState<Artwork | null>(null);
@@ -22,11 +25,15 @@ export default function ArtworkDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  // Fetch artwork details
+  // Fetch artwork details — set access token so API returns isFavorited
   useEffect(() => {
     const fetchArtwork = async () => {
       setLoading(true);
       setError(null);
+
+      if (session?.accessToken) {
+        apiClient.setAccessToken(session.accessToken);
+      }
 
       try {
         const response = await apiClient.getArtwork(slug);
@@ -45,7 +52,7 @@ export default function ArtworkDetailPage() {
     if (slug) {
       fetchArtwork();
     }
-  }, [slug]);
+  }, [slug, session?.accessToken]);
 
   // Format price
   const formatPrice = (price: string, currency: string) => {
@@ -95,6 +102,7 @@ export default function ArtworkDetailPage() {
 
   const selectedImage = artwork.images[selectedImageIndex] || artwork.images[0];
   const isAvailable = artwork.status === 'AVAILABLE';
+  const favoriteCount = artwork._count?.favorites ?? 0;
 
   return (
     <>
@@ -244,9 +252,11 @@ export default function ArtworkDetailPage() {
                     <Button size="lg" className="flex-1">
                       Inquire
                     </Button>
-                    <Button size="lg" variant="outline">
-                      <Heart className="w-5 h-5" />
-                    </Button>
+                    <FavoriteButton
+                      artworkId={artwork.id}
+                      initialFavorited={artwork.isFavorited ?? false}
+                      count={favoriteCount}
+                    />
                   </>
                 ) : (
                   <Button size="lg" variant="outline" className="flex-1" disabled>
@@ -316,5 +326,40 @@ export default function ArtworkDetailPage() {
         </Section>
       )}
     </>
+  );
+}
+
+function FavoriteButton({
+  artworkId,
+  initialFavorited,
+  count,
+}: {
+  artworkId: string;
+  initialFavorited: boolean;
+  count: number;
+}) {
+  const { favorited, isPending, toggle } = useFavorite({ artworkId, initialFavorited });
+
+  return (
+    <Button
+      size="lg"
+      variant="outline"
+      onClick={toggle}
+      disabled={isPending}
+      aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
+      className="gap-2"
+    >
+      {isPending ? (
+        <Loader2 className="w-5 h-5 animate-spin" />
+      ) : (
+        <Heart
+          className={cn(
+            'w-5 h-5 transition-colors',
+            favorited ? 'text-primary-600 fill-primary-600' : ''
+          )}
+        />
+      )}
+      {count > 0 && <span className="text-sm tabular-nums">{count}</span>}
+    </Button>
   );
 }

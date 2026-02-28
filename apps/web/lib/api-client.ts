@@ -130,10 +130,23 @@ export interface Artwork {
   updatedAt: string;
   artist: Artist;
   images: ArtworkImage[];
+  isFavorited?: boolean;
   _count?: {
     favorites: number;
     inquiries: number;
   };
+}
+
+export interface Favorite {
+  id: string;
+  artworkId: string;
+  createdAt: string;
+  artwork: Artwork;
+}
+
+export interface ToggleFavoriteResult {
+  favorited: boolean;
+  id?: string;
 }
 
 class ApiClient {
@@ -278,6 +291,35 @@ class ApiClient {
    */
   async getFeaturedCollections(limit = 6): Promise<ApiResponse<Collection[]>> {
     return this.fetch<Collection[]>(`/collections/featured?limit=${limit}`);
+  }
+
+  // ── Favorites ──────────────────────────────────────────────────────────
+
+  /**
+   * Toggle favorite on an artwork (add if not favorited, remove if already)
+   */
+  async toggleFavorite(artworkId: string): Promise<ApiResponse<ToggleFavoriteResult>> {
+    return this.fetch<ToggleFavoriteResult>('/favorites', {
+      method: 'POST',
+      body: JSON.stringify({ artworkId }),
+    });
+  }
+
+  /**
+   * List the authenticated user's favorites
+   */
+  async getFavorites(
+    params: PaginationParams = {}
+  ): Promise<ApiResponse<Favorite[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<Favorite[]>(`/favorites${queryString}`);
+  }
+
+  /**
+   * Remove a favorite by its ID
+   */
+  async removeFavorite(favoriteId: string): Promise<void> {
+    await this.fetch(`/favorites/${favoriteId}`, { method: 'DELETE' });
   }
 }
 

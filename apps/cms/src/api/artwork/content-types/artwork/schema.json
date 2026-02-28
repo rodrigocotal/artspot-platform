@@ -1,0 +1,134 @@
+{
+  "kind": "collectionType",
+  "collectionName": "artworks",
+  "info": {
+    "singularName": "artwork",
+    "pluralName": "artworks",
+    "displayName": "Artwork",
+    "description": "Artworks managed by gallery staff"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "artist": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::artist.artist",
+      "inversedBy": "artworks"
+    },
+    "medium": {
+      "type": "enumeration",
+      "enum": [
+        "PAINTING",
+        "SCULPTURE",
+        "PHOTOGRAPHY",
+        "PRINT",
+        "DRAWING",
+        "MIXED_MEDIA",
+        "DIGITAL",
+        "INSTALLATION",
+        "TEXTILE",
+        "CERAMICS",
+        "GLASS",
+        "METAL",
+        "WOOD",
+        "OTHER"
+      ]
+    },
+    "style": {
+      "type": "enumeration",
+      "enum": [
+        "ABSTRACT",
+        "CONTEMPORARY",
+        "FIGURATIVE",
+        "IMPRESSIONIST",
+        "MINIMALIST",
+        "REALISM",
+        "EXPRESSIONISM",
+        "SURREALISM",
+        "POP_ART",
+        "CONCEPTUAL",
+        "LANDSCAPE",
+        "PORTRAIT",
+        "STILL_LIFE",
+        "OTHER"
+      ]
+    },
+    "year": {
+      "type": "integer"
+    },
+    "width": {
+      "type": "decimal"
+    },
+    "height": {
+      "type": "decimal"
+    },
+    "depth": {
+      "type": "decimal"
+    },
+    "price": {
+      "type": "decimal",
+      "required": true
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "AVAILABLE",
+        "SOLD",
+        "RESERVED",
+        "NOT_FOR_SALE",
+        "ON_LOAN"
+      ],
+      "default": "AVAILABLE"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "edition": {
+      "type": "string"
+    },
+    "materials": {
+      "type": "string"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "certificate": {
+      "type": "boolean",
+      "default": false
+    },
+    "framed": {
+      "type": "boolean",
+      "default": false
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images"]
+    },
+    "collections": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::collection.collection",
+      "inversedBy": "artworks"
+    }
+  }
+}

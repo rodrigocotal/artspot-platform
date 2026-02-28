@@ -189,6 +189,38 @@ export interface RespondInquiryInput {
   status?: 'RESPONDED' | 'CLOSED';
 }
 
+// ── Articles ──────────────────────────────────────────────────────────
+
+export type ArticleCategory =
+  | 'ARTIST_SPOTLIGHT'
+  | 'EXHIBITION'
+  | 'BEHIND_THE_SCENES'
+  | 'NEWS'
+  | 'GUIDE';
+
+export interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string | null;
+  coverImageUrl: string | null;
+  author: string | null;
+  category: ArticleCategory | null;
+  publishedDate: string | null;
+  featured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ArticleFilters {
+  category?: ArticleCategory;
+  search?: string;
+  featured?: boolean;
+  sortBy?: 'publishedDate' | 'createdAt' | 'title';
+  sortOrder?: 'asc' | 'desc';
+}
+
 class ApiClient {
   private baseUrl: string;
   private accessToken: string | null = null;
@@ -405,6 +437,32 @@ class ApiClient {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
+  }
+
+  // ── Articles ──────────────────────────────────────────────────────────
+
+  /**
+   * Get list of articles with filtering and pagination
+   */
+  async getArticles(
+    params: ArticleFilters & PaginationParams = {}
+  ): Promise<ApiResponse<Article[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<Article[]>(`/articles${queryString}`);
+  }
+
+  /**
+   * Get featured articles
+   */
+  async getFeaturedArticles(limit = 6): Promise<ApiResponse<Article[]>> {
+    return this.fetch<Article[]>(`/articles/featured?limit=${limit}`);
+  }
+
+  /**
+   * Get single article by slug
+   */
+  async getArticle(slug: string): Promise<ApiResponse<Article>> {
+    return this.fetch<Article>(`/articles/${slug}`);
   }
 }
 

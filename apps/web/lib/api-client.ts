@@ -149,6 +149,46 @@ export interface ToggleFavoriteResult {
   id?: string;
 }
 
+export interface CreateInquiryInput {
+  artworkId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+}
+
+export interface Inquiry {
+  id: string;
+  userId: string | null;
+  artworkId: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+  status: 'PENDING' | 'RESPONDED' | 'CLOSED';
+  response: string | null;
+  respondedAt: string | null;
+  respondedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  artwork?: {
+    id: string;
+    title: string;
+    slug: string;
+    images?: ArtworkImage[];
+  };
+  user?: {
+    id: string;
+    email: string;
+    name: string | null;
+  } | null;
+}
+
+export interface RespondInquiryInput {
+  response?: string;
+  status?: 'RESPONDED' | 'CLOSED';
+}
+
 class ApiClient {
   private baseUrl: string;
   private accessToken: string | null = null;
@@ -320,6 +360,51 @@ class ApiClient {
    */
   async removeFavorite(favoriteId: string): Promise<void> {
     await this.fetch(`/favorites/${favoriteId}`, { method: 'DELETE' });
+  }
+
+  // ── Inquiries ──────────────────────────────────────────────────────────
+
+  /**
+   * Submit an inquiry on an artwork (works for guests and authenticated users)
+   */
+  async createInquiry(data: CreateInquiryInput): Promise<ApiResponse<Inquiry>> {
+    return this.fetch<Inquiry>('/inquiries', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * List the authenticated user's inquiries
+   */
+  async getUserInquiries(
+    params: PaginationParams & { status?: string } = {}
+  ): Promise<ApiResponse<Inquiry[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<Inquiry[]>(`/inquiries${queryString}`);
+  }
+
+  /**
+   * List all inquiries (admin/staff only)
+   */
+  async getAdminInquiries(
+    params: PaginationParams & { status?: string; search?: string } = {}
+  ): Promise<ApiResponse<Inquiry[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<Inquiry[]>(`/inquiries/admin${queryString}`);
+  }
+
+  /**
+   * Respond to or update an inquiry (admin/staff only)
+   */
+  async respondToInquiry(
+    id: string,
+    data: RespondInquiryInput
+  ): Promise<ApiResponse<Inquiry>> {
+    return this.fetch<Inquiry>(`/inquiries/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   }
 }
 

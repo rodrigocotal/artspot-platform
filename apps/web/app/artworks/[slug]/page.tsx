@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Container, Section } from '@/components/layout';
 import { ImageZoom } from '@/components/ui';
-import { ArtworkCard } from '@/components/artwork';
+import { ArtworkCard, InquiryForm } from '@/components/artwork';
 import { Button } from '@/components/ui';
 import { apiClient, type Artwork } from '@/lib/api-client';
 import { useFavorite } from '@/hooks/use-favorite';
@@ -24,6 +24,7 @@ export default function ArtworkDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
 
   // Fetch artwork details — set access token so API returns isFavorited
   useEffect(() => {
@@ -249,8 +250,13 @@ export default function ArtworkDetailPage() {
               <div className="flex gap-3">
                 {isAvailable ? (
                   <>
-                    <Button size="lg" className="flex-1">
-                      Inquire
+                    <Button
+                      size="lg"
+                      className="flex-1"
+                      variant={showInquiryForm ? 'outline' : 'primary'}
+                      onClick={() => setShowInquiryForm(!showInquiryForm)}
+                    >
+                      {showInquiryForm ? 'Close' : 'Inquire'}
                     </Button>
                     <FavoriteButton
                       artworkId={artwork.id}
@@ -267,6 +273,11 @@ export default function ArtworkDetailPage() {
                   <Share2 className="w-5 h-5" />
                 </Button>
               </div>
+
+              {/* Inquiry Form */}
+              {showInquiryForm && isAvailable && (
+                <InquiryForm artworkId={artwork.id} />
+              )}
 
               {/* Description */}
               {artwork.description && (

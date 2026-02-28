@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "strapi develop",
     "start": "strapi start",
-    "build": "strapi build && find src/api -name 'schema.json' | while read f; do mkdir -p \"dist/$(dirname \"$f\")\" && cp \"$f\" \"dist/$f\"; done",
+    "build": "strapi build && node scripts/copy-schemas.js",
     "strapi": "strapi",
     "deploy": "strapi deploy"
   },

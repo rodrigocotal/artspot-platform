@@ -267,8 +267,8 @@ model CollectionArtwork {
 // ============================================================================
 
 model Inquiry {
-  id        String @id @default(cuid())
-  userId    String
+  id        String  @id @default(cuid())
+  userId    String?
   artworkId String
 
   // Contact info (in case user is not registered)
@@ -289,7 +289,7 @@ model Inquiry {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   artwork Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
 
   @@index([userId])

@@ -4,3 +4,4 @@
  */
 
 export { ArtworkCard } from './artwork-card';
+export { InquiryForm } from './inquiry-form';

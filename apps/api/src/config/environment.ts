@@ -33,6 +33,7 @@ export const config = {
   email: {
     sendgridApiKey: process.env.SENDGRID_API_KEY || '',
     fromEmail: process.env.FROM_EMAIL || 'noreply@artspot.com',
+    staffEmail: process.env.STAFF_EMAIL || '',
   },
 } as const;
 

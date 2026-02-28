@@ -18,6 +18,7 @@ import artworksRouter from './routes/artworks';
 import artistsRouter from './routes/artists';
 import collectionsRouter from './routes/collections';
 import authRouter from './routes/auth';
+import favoritesRouter from './routes/favorites';
 import { initializeCloudinary } from './config/cloudinary';
 
 // Initialize Cloudinary AFTER env vars are loaded
@@ -54,6 +55,7 @@ app.use('/upload', uploadRouter);
 app.use('/artworks', artworksRouter);
 app.use('/artists', artistsRouter);
 app.use('/collections', collectionsRouter);
+app.use('/favorites', favoritesRouter);
 
 // 404 handler
 app.use('*', (req, res) => {

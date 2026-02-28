@@ -35,6 +35,12 @@ export const config = {
     fromEmail: process.env.FROM_EMAIL || 'noreply@artspot.com',
     staffEmail: process.env.STAFF_EMAIL || '',
   },
+
+  // CMS (Strapi)
+  cms: {
+    webhookSecret: process.env.CMS_WEBHOOK_SECRET || '',
+    strapiUrl: process.env.STRAPI_URL || 'http://localhost:1337',
+  },
 } as const;
 
 // Validate required environment variables in production

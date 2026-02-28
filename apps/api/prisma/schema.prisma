@@ -58,6 +58,7 @@ enum UserRole {
 
 model Artist {
   id          String  @id @default(cuid())
+  strapiId    Int?    @unique
   name        String
   slug        String  @unique
   bio         String? @db.Text
@@ -90,6 +91,7 @@ model Artist {
 
 model Artwork {
   id          String  @id @default(cuid())
+  strapiId    Int?    @unique
   title       String
   slug        String  @unique
   description String? @db.Text
@@ -227,6 +229,7 @@ enum ImageType {
 
 model Collection {
   id          String  @id @default(cuid())
+  strapiId    Int?    @unique
   title       String
   slug        String  @unique
   description String? @db.Text
@@ -319,4 +322,37 @@ model Favorite {
   @@index([userId])
   @@index([artworkId])
   @@map("favorites")
+}
+
+// ============================================================================
+// EDITORIAL CONTENT
+// ============================================================================
+
+model Article {
+  id            String           @id @default(cuid())
+  strapiId      Int?             @unique
+  title         String
+  slug          String           @unique
+  content       String           @db.Text
+  excerpt       String?          @db.Text
+  coverImageUrl String?
+  author        String?
+  category      ArticleCategory?
+  publishedDate DateTime?
+  featured      Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([featured])
+  @@map("articles")
+}
+
+enum ArticleCategory {
+  ARTIST_SPOTLIGHT
+  EXHIBITION
+  BEHIND_THE_SCENES
+  NEWS
+  GUIDE
 }

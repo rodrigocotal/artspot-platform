@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { artworkController } from '../controllers/artwork.controller';
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate, optionalAuth, authorize } from '../middleware/auth';
 
 const router = Router();
 
@@ -9,13 +9,13 @@ const router = Router();
  * Base path: /artworks
  */
 
-// List artworks with filtering and pagination
+// List artworks with filtering and pagination (optionalAuth adds isFavorited for logged-in users)
 // GET /artworks?page=1&limit=20&medium=PAINTING&status=AVAILABLE&sortBy=price&sortOrder=asc
-router.get('/', artworkController.listArtworks.bind(artworkController));
+router.get('/', optionalAuth, artworkController.listArtworks.bind(artworkController));
 
-// Get artwork by ID or slug
+// Get artwork by ID or slug (optionalAuth adds isFavorited for logged-in users)
 // GET /artworks/:id
-router.get('/:id', artworkController.getArtwork.bind(artworkController));
+router.get('/:id', optionalAuth, artworkController.getArtwork.bind(artworkController));
 
 // Get related artworks
 // GET /artworks/:id/related?limit=6

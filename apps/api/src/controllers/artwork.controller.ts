@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { artworkService } from '../services/artwork.service';
+import { favoriteService } from '../services/favorite.service';
 import {
   createArtworkSchema,
   updateArtworkSchema,
@@ -18,10 +19,20 @@ export class ArtworkController {
    */
   async listArtworks(req: Request, res: Response, next: NextFunction) {
     try {
-      // Validate query parameters
+      const userId = (req as any).userId as string | undefined;
       const query = listArtworksQuerySchema.parse(req.query);
 
       const result = await artworkService.listArtworks(query);
+
+      // Annotate with isFavorited for authenticated users
+      if (userId) {
+        const artworkIds = result.data.map((a: any) => a.id);
+        const favoritedSet = await favoriteService.batchCheckFavorites(userId, artworkIds);
+        result.data = result.data.map((artwork: any) => ({
+          ...artwork,
+          isFavorited: favoritedSet.has(artwork.id),
+        }));
+      }
 
       res.json({
         success: true,
@@ -38,13 +49,19 @@ export class ArtworkController {
    */
   async getArtwork(req: Request, res: Response, next: NextFunction) {
     try {
+      const userId = (req as any).userId as string | undefined;
       const id = req.params.id as string;
 
       const artwork = await artworkService.getArtwork(id);
 
+      // Annotate with isFavorited for authenticated users
+      const isFavorited = userId
+        ? await favoriteService.isFavorited(userId, artwork.id)
+        : undefined;
+
       res.json({
         success: true,
-        data: artwork,
+        data: { ...artwork, ...(isFavorited !== undefined && { isFavorited }) },
       });
     } catch (error) {
       if (error instanceof Error && error.message === 'Artwork not found') {

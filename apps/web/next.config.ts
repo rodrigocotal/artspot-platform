@@ -2,13 +2,6 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  // Expose server-side env vars at build time for Amplify WEB_COMPUTE
-  // (Amplify doesn't pass non-NEXT_PUBLIC_ vars to the SSR Lambda runtime)
-  env: {
-    AUTH_SECRET: process.env.AUTH_SECRET,
-    AUTH_URL: process.env.AUTH_URL,
-    AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
-  },
   images: {
     remotePatterns: [
       {

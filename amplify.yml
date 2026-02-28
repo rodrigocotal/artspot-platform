@@ -11,6 +11,9 @@ applications:
             - pnpm install
         build:
           commands:
+            - echo "AUTH_SECRET=$AUTH_SECRET" >> apps/web/.env.production
+            - echo "AUTH_URL=$AUTH_URL" >> apps/web/.env.production
+            - echo "AUTH_TRUST_HOST=$AUTH_TRUST_HOST" >> apps/web/.env.production
             - pnpm run build --filter=@artspot/web
       artifacts:
         baseDirectory: apps/web/.next

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Container, Section } from '@/components/layout';
 import { ArtworkCard } from '@/components/artwork/artwork-card';
 import {
@@ -11,9 +11,11 @@ import {
   SortDropdown,
   type SortOption,
   Button,
+  LiveRegion,
 } from '@/components/ui';
-import { apiClient, type Artwork, type ArtworkFilters } from '@/lib/api-client';
-import { Loader2 } from 'lucide-react';
+import { ArtworkGridSkeleton } from '@/components/ui/skeleton';
+import { useArtworks } from '@/hooks/use-artworks';
+import type { ArtworkFilters } from '@/lib/api-client';
 
 const sortOptions: SortOption[] = [
   { value: 'createdAt', label: 'Recently Added' },
@@ -41,71 +43,48 @@ const styleOptions = [
 ];
 
 export default function ArtworksPage() {
-  const [artworks, setArtworks] = useState<Artwork[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 0,
-  });
-
   // Filter state
   const [search, setSearch] = useState('');
   const [selectedMediums, setSelectedMediums] = useState<string[]>([]);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState('createdAt');
+  const [page, setPage] = useState(1);
 
-  // Fetch artworks
-  const fetchArtworks = async (page = 1) => {
-    setLoading(true);
-    setError(null);
+  // Build filters object for React Query
+  const filters = useMemo(() => {
+    const f: ArtworkFilters & { page: number; limit: number } = {
+      page,
+      limit: 20,
+      status: 'AVAILABLE',
+    };
 
-    try {
-      const filters: ArtworkFilters = {
-        page,
-        limit: 20,
-        status: 'AVAILABLE',
-      };
+    if (search) f.search = search;
+    if (selectedMediums.length > 0) f.medium = selectedMediums[0];
+    if (selectedStyles.length > 0) f.style = selectedStyles[0];
 
-      // Apply filters
-      if (search) filters.search = search;
-      if (selectedMediums.length > 0) filters.medium = selectedMediums[0]; // API supports single medium for now
-      if (selectedStyles.length > 0) filters.style = selectedStyles[0];
-
-      // Parse sort value
-      if (sortValue.includes('-')) {
-        const [field, order] = sortValue.split('-');
-        filters.sortBy = field as any;
-        filters.sortOrder = order as 'asc' | 'desc';
-      } else {
-        filters.sortBy = sortValue as any;
-        filters.sortOrder = 'desc';
-      }
-
-      const response = await apiClient.getArtworks(filters);
-      setArtworks(response.data);
-      if (response.pagination) {
-        setPagination(response.pagination);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load artworks');
-    } finally {
-      setLoading(false);
+    if (sortValue.includes('-')) {
+      const [field, order] = sortValue.split('-');
+      f.sortBy = field as ArtworkFilters['sortBy'];
+      f.sortOrder = order as 'asc' | 'desc';
+    } else {
+      f.sortBy = sortValue as ArtworkFilters['sortBy'];
+      f.sortOrder = 'desc';
     }
-  };
 
-  // Initial load and refetch on filter changes
-  useEffect(() => {
-    fetchArtworks(1);
-  }, [search, selectedMediums, selectedStyles, sortValue]);
+    return f;
+  }, [search, selectedMediums, selectedStyles, sortValue, page]);
+
+  const { data, isLoading, error } = useArtworks(filters);
+
+  const artworks = data?.data ?? [];
+  const pagination = data?.pagination ?? { page: 1, limit: 20, total: 0, totalPages: 0 };
 
   // Handle medium filter
   const handleMediumChange = (id: string, checked: boolean) => {
     setSelectedMediums((prev) =>
       checked ? [...prev, id] : prev.filter((m) => m !== id)
     );
+    setPage(1);
   };
 
   // Handle style filter
@@ -113,6 +92,7 @@ export default function ArtworksPage() {
     setSelectedStyles((prev) =>
       checked ? [...prev, id] : prev.filter((s) => s !== id)
     );
+    setPage(1);
   };
 
   // Clear all filters
@@ -120,6 +100,7 @@ export default function ArtworksPage() {
     setSearch('');
     setSelectedMediums([]);
     setSelectedStyles([]);
+    setPage(1);
   };
 
   // Active filters for tags
@@ -200,7 +181,7 @@ export default function ArtworksPage() {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <SearchInput
                     value={search}
-                    onChange={setSearch}
+                    onChange={(val) => { setSearch(val); setPage(1); }}
                     placeholder="Search artworks..."
                     className="flex-1"
                   />
@@ -232,7 +213,7 @@ export default function ArtworksPage() {
               {/* Results Summary */}
               <div className="flex items-center justify-between text-sm text-neutral-600">
                 <p>
-                  {loading ? (
+                  {isLoading ? (
                     'Loading...'
                   ) : (
                     <>
@@ -242,22 +223,25 @@ export default function ArtworksPage() {
                 </p>
               </div>
 
+              {/* Announce result count to screen readers */}
+              {!isLoading && (
+                <LiveRegion
+                  message={`${pagination.total} artworks found, showing ${artworks.length} results`}
+                />
+              )}
+
               {/* Error State */}
               {error && (
                 <div className="bg-error-50 border border-error-200 rounded-lg p-4 text-error-700">
-                  {error}
+                  {error instanceof Error ? error.message : 'Failed to load artworks'}
                 </div>
               )}
 
-              {/* Loading State */}
-              {loading && (
-                <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
-                </div>
-              )}
+              {/* Loading State — Skeleton Grid */}
+              {isLoading && <ArtworkGridSkeleton count={6} />}
 
               {/* Artwork Grid */}
-              {!loading && !error && (
+              {!isLoading && !error && (
                 <>
                   {artworks.length === 0 ? (
                     <div className="text-center py-20">
@@ -287,7 +271,7 @@ export default function ArtworksPage() {
                     <div className="flex items-center justify-center gap-2 pt-8">
                       <Button
                         variant="outline"
-                        onClick={() => fetchArtworks(pagination.page - 1)}
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
                         disabled={pagination.page === 1}
                       >
                         Previous
@@ -297,7 +281,7 @@ export default function ArtworksPage() {
                       </span>
                       <Button
                         variant="outline"
-                        onClick={() => fetchArtworks(pagination.page + 1)}
+                        onClick={() => setPage((p) => p + 1)}
                         disabled={pagination.page === pagination.totalPages}
                       >
                         Next

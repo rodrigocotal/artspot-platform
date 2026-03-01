@@ -19,4 +19,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Bundle analyzer (enabled with ANALYZE=true)
+let config = nextConfig;
+if (process.env.ANALYZE === 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const withBundleAnalyzer = require('@next/bundle-analyzer')({
+    enabled: true,
+  });
+  config = withBundleAnalyzer(nextConfig);
+}
+
+export default config;

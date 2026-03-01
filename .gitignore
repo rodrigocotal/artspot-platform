@@ -6,6 +6,9 @@ node_modules/
 # Testing
 coverage/
 *.log
+/apps/web/test-results/
+/apps/web/playwright-report/
+/apps/web/blob-report/
 
 # Next.js
 .next/
@@ -26,6 +29,7 @@ yarn-error.log*
 .env
 .env.local
 .env.development.local
+.env.test
 .env.test.local
 .env.production.local
 

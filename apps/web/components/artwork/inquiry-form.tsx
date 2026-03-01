@@ -93,7 +93,7 @@ export function InquiryForm({ artworkId }: InquiryFormProps) {
       </p>
 
       {errors.form && (
-        <div className="bg-error-50 border border-error-200 rounded-lg p-3 text-sm text-error-700">
+        <div role="alert" className="bg-error-50 border border-error-200 rounded-lg p-3 text-sm text-error-700">
           {errors.form}
         </div>
       )}
@@ -107,8 +107,10 @@ export function InquiryForm({ artworkId }: InquiryFormProps) {
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
             error={!!errors.name}
+            aria-invalid={!!errors.name}
+            aria-describedby={errors.name ? 'inquiry-name-error' : undefined}
           />
-          {errors.name && <p className="text-xs text-error-600">{errors.name}</p>}
+          {errors.name && <p id="inquiry-name-error" role="alert" className="text-xs text-error-600">{errors.name}</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -120,8 +122,10 @@ export function InquiryForm({ artworkId }: InquiryFormProps) {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             error={!!errors.email}
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? 'inquiry-email-error' : undefined}
           />
-          {errors.email && <p className="text-xs text-error-600">{errors.email}</p>}
+          {errors.email && <p id="inquiry-email-error" role="alert" className="text-xs text-error-600">{errors.email}</p>}
         </div>
       </div>
 
@@ -145,8 +149,10 @@ export function InquiryForm({ artworkId }: InquiryFormProps) {
           placeholder="I'm interested in this artwork and would like to know more about..."
           rows={4}
           error={!!errors.message}
+          aria-invalid={!!errors.message}
+          aria-describedby={errors.message ? 'inquiry-message-error' : undefined}
         />
-        {errors.message && <p className="text-xs text-error-600">{errors.message}</p>}
+        {errors.message && <p id="inquiry-message-error" role="alert" className="text-xs text-error-600">{errors.message}</p>}
       </div>
 
       <Button type="submit" loading={loading} className="w-full">

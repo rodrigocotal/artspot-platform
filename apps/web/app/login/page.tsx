@@ -56,7 +56,7 @@ function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="rounded-lg bg-error-50 border border-error-200 p-4 text-sm text-error-700">
+          <div role="alert" className="rounded-lg bg-error-50 border border-error-200 p-4 text-sm text-error-700">
             {error}
           </div>
         )}
@@ -71,6 +71,7 @@ function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
+            aria-invalid={!!error}
           />
         </div>
 
@@ -84,6 +85,7 @@ function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
+            aria-invalid={!!error}
           />
         </div>
 

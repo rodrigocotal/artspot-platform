@@ -82,6 +82,60 @@ export function Header({ className }: HeaderProps) {
     setMobileMenuOpen(false);
   }, []);
 
+  // Keyboard handler for nav dropdown
+  const handleNavKeyDown = (e: React.KeyboardEvent, item: typeof primaryNav[0]) => {
+    if (!item.dropdown) return;
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setActiveDropdown(activeDropdown === item.label ? null : item.label);
+    } else if (e.key === 'Escape') {
+      setActiveDropdown(null);
+    } else if (e.key === 'ArrowDown' && activeDropdown === item.label) {
+      e.preventDefault();
+      const menu = (e.currentTarget as HTMLElement).parentElement?.querySelector('[role="menu"]');
+      const firstItem = menu?.querySelector('a') as HTMLElement | null;
+      firstItem?.focus();
+    }
+  };
+
+  // Keyboard handler for dropdown menu items
+  const handleDropdownKeyDown = (e: React.KeyboardEvent) => {
+    const items = Array.from(
+      (e.currentTarget as HTMLElement).closest('[role="menu"]')?.querySelectorAll('a') ?? []
+    ) as HTMLElement[];
+    const idx = items.indexOf(e.target as HTMLElement);
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      items[(idx + 1) % items.length]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      items[(idx - 1 + items.length) % items.length]?.focus();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setActiveDropdown(null);
+      // Focus the trigger button
+      const trigger = (e.currentTarget as HTMLElement).closest('.relative')?.querySelector('a') as HTMLElement | null;
+      trigger?.focus();
+    }
+  };
+
+  // Keyboard handler for user menu
+  const handleUserMenuKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setUserMenuOpen(!userMenuOpen);
+    } else if (e.key === 'Escape') {
+      setUserMenuOpen(false);
+    } else if (e.key === 'ArrowDown' && userMenuOpen) {
+      e.preventDefault();
+      const menu = (e.currentTarget as HTMLElement).parentElement?.querySelector('[role="menu"]');
+      const firstItem = menu?.querySelector('a, button') as HTMLElement | null;
+      firstItem?.focus();
+    }
+  };
+
   return (
     <header
       className={cn(
@@ -102,7 +156,7 @@ export function Header({ className }: HeaderProps) {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-8" aria-label="Main navigation">
             {primaryNav.map((item) => (
               <div
                 key={item.label}
@@ -116,6 +170,9 @@ export function Header({ className }: HeaderProps) {
                     'inline-flex items-center gap-1 text-body font-sans text-neutral-700 hover:text-neutral-900 transition-colors',
                     activeDropdown === item.label && 'text-neutral-900'
                   )}
+                  aria-haspopup={item.dropdown ? 'true' : undefined}
+                  aria-expanded={item.dropdown ? activeDropdown === item.label : undefined}
+                  onKeyDown={(e) => handleNavKeyDown(e, item)}
                 >
                   {item.label}
                   {item.dropdown && (
@@ -124,18 +181,25 @@ export function Header({ className }: HeaderProps) {
                         'h-4 w-4 transition-transform',
                         activeDropdown === item.label && 'rotate-180'
                       )}
+                      aria-hidden="true"
                     />
                   )}
                 </Link>
 
                 {/* Dropdown Menu */}
                 {item.dropdown && activeDropdown === item.label && (
-                  <div className="absolute left-0 top-full mt-2 w-56 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div
+                    role="menu"
+                    aria-label={`${item.label} submenu`}
+                    className="absolute left-0 top-full mt-2 w-56 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
+                  >
                     {item.dropdown.map((subItem) => (
                       <Link
                         key={subItem.label}
                         href={subItem.href}
+                        role="menuitem"
                         className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                        onKeyDown={handleDropdownKeyDown}
                       >
                         {subItem.label}
                       </Link>
@@ -153,8 +217,9 @@ export function Header({ className }: HeaderProps) {
               onClick={() => setSearchOpen(!searchOpen)}
               className="p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               aria-label="Search"
+              aria-expanded={searchOpen}
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-5 w-5" aria-hidden="true" />
             </button>
 
             {/* Favorites */}
@@ -163,7 +228,7 @@ export function Header({ className }: HeaderProps) {
               className="hidden sm:block p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               aria-label="Favorites"
             >
-              <Heart className="h-5 w-5" />
+              <Heart className="h-5 w-5" aria-hidden="true" />
             </Link>
 
             {/* Cart */}
@@ -172,8 +237,8 @@ export function Header({ className }: HeaderProps) {
               className="hidden sm:flex relative p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               aria-label="Shopping cart"
             >
-              <ShoppingBag className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-[10px] font-medium text-white">
+              <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-[10px] font-medium text-white" aria-hidden="true">
                 0
               </span>
             </Link>
@@ -188,22 +253,31 @@ export function Header({ className }: HeaderProps) {
                 <button
                   className="flex items-center gap-2 p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
                   aria-label="Account menu"
+                  aria-haspopup="true"
+                  aria-expanded={userMenuOpen}
+                  onKeyDown={handleUserMenuKeyDown}
                 >
-                  <User className="h-5 w-5" />
+                  <User className="h-5 w-5" aria-hidden="true" />
                   <span className="text-sm font-medium max-w-[100px] truncate">
                     {session.user.name || 'Account'}
                   </span>
                 </button>
                 {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-48 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div
+                    role="menu"
+                    aria-label="Account menu"
+                    className="absolute right-0 top-full mt-1 w-48 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
+                  >
                     <Link
                       href="/account"
+                      role="menuitem"
                       className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                     >
                       My Account
                     </Link>
                     <Link
                       href="/favorites"
+                      role="menuitem"
                       className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                     >
                       Favorites
@@ -211,9 +285,10 @@ export function Header({ className }: HeaderProps) {
                     <hr className="my-1 border-neutral-200" />
                     <button
                       onClick={() => signOut({ callbackUrl: '/' })}
+                      role="menuitem"
                       className="flex w-full items-center gap-2 px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className="h-4 w-4" aria-hidden="true" />
                       Sign Out
                     </button>
                   </div>
@@ -225,7 +300,7 @@ export function Header({ className }: HeaderProps) {
                 className="hidden sm:block p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
                 aria-label="Sign in"
               >
-                <User className="h-5 w-5" />
+                <User className="h-5 w-5" aria-hidden="true" />
               </Link>
             )}
 
@@ -233,12 +308,13 @@ export function Header({ className }: HeaderProps) {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
-              aria-label="Toggle menu"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6" aria-hidden="true" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-6 w-6" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -250,12 +326,13 @@ export function Header({ className }: HeaderProps) {
         <div className="border-t border-neutral-200 bg-white animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" aria-hidden="true" />
               <input
                 type="search"
                 placeholder="Search artworks, artists, or collections..."
                 className="w-full h-12 pl-12 pr-4 rounded-lg border-2 border-neutral-300 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0"
                 autoFocus
+                aria-label="Search artworks, artists, or collections"
               />
             </div>
           </div>
@@ -267,7 +344,7 @@ export function Header({ className }: HeaderProps) {
         <div className="lg:hidden border-t border-neutral-200 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="max-w-8xl mx-auto px-4 py-6 space-y-6">
             {/* Primary Navigation - Mobile */}
-            <nav className="space-y-4">
+            <nav className="space-y-4" aria-label="Mobile navigation">
               {primaryNav.map((item) => (
                 <div key={item.label} className="space-y-2">
                   <Link
@@ -297,7 +374,7 @@ export function Header({ className }: HeaderProps) {
             <div className="flex gap-4 pt-4 border-t border-neutral-200">
               <Link href="/favorites" className="flex-1">
                 <Button variant="outline" className="w-full">
-                  <Heart className="h-4 w-4 mr-2" />
+                  <Heart className="h-4 w-4 mr-2" aria-hidden="true" />
                   Favorites
                 </Button>
               </Link>
@@ -307,13 +384,13 @@ export function Header({ className }: HeaderProps) {
                   className="flex-1"
                   onClick={() => signOut({ callbackUrl: '/' })}
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
+                  <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
                   Sign Out
                 </Button>
               ) : (
                 <Link href="/login" className="flex-1">
                   <Button variant="outline" className="w-full">
-                    <User className="h-4 w-4 mr-2" />
+                    <User className="h-4 w-4 mr-2" aria-hidden="true" />
                     Sign In
                   </Button>
                 </Link>

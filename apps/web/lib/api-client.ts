@@ -213,6 +213,14 @@ export interface Article {
   updatedAt: string;
 }
 
+export interface PageContent {
+  id: string;
+  slug: string;
+  content: Record<string, any>;
+  updatedAt: string;
+  createdAt: string;
+}
+
 export interface ArticleFilters {
   category?: ArticleCategory;
   search?: string;
@@ -463,6 +471,15 @@ class ApiClient {
    */
   async getArticle(slug: string): Promise<ApiResponse<Article>> {
     return this.fetch<Article>(`/articles/${slug}`);
+  }
+
+  // ── Page Content ──────────────────────────────────────────────────────
+
+  /**
+   * Get CMS page content by slug
+   */
+  async getPageContent(slug: string): Promise<ApiResponse<PageContent>> {
+    return this.fetch<PageContent>(`/pages/${slug}`);
   }
 }
 

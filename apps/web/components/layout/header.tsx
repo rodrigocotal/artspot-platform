@@ -10,7 +10,6 @@ import {
   X,
   Search,
   Heart,
-  ShoppingBag,
   User,
   ChevronDown,
   LogOut,
@@ -229,18 +228,6 @@ export function Header({ className }: HeaderProps) {
               aria-label="Favorites"
             >
               <Heart className="h-5 w-5" aria-hidden="true" />
-            </Link>
-
-            {/* Cart */}
-            <Link
-              href="/cart"
-              className="hidden sm:flex relative p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
-              aria-label="Shopping cart"
-            >
-              <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-[10px] font-medium text-white" aria-hidden="true">
-                0
-              </span>
             </Link>
 
             {/* Account */}

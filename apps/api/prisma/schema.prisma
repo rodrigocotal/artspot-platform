@@ -356,3 +356,17 @@ enum ArticleCategory {
   NEWS
   GUIDE
 }
+
+// ============================================================================
+// CMS PAGE CONTENT
+// ============================================================================
+
+model PageContent {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  content   Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("page_contents")
+}

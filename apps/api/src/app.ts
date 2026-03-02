@@ -14,6 +14,7 @@ import favoritesRouter from './routes/favorites';
 import inquiriesRouter from './routes/inquiries';
 import webhooksRouter from './routes/webhooks';
 import articlesRouter from './routes/articles';
+import pageContentsRouter from './routes/page-contents';
 import { initializeCloudinary } from './config/cloudinary';
 
 // Initialize Cloudinary (skip in test environment)
@@ -58,6 +59,7 @@ app.use('/favorites', favoritesRouter);
 app.use('/inquiries', inquiriesRouter);
 app.use('/webhooks', webhooksRouter);
 app.use('/articles', articlesRouter);
+app.use('/pages', pageContentsRouter);
 
 // 404 handler
 app.use('*', (req, res) => {

@@ -2,8 +2,20 @@ import { prisma } from '../config/database';
 
 type StrapiEvent = 'entry.create' | 'entry.update' | 'entry.delete';
 
+const PAGE_SLUGS: Record<string, string> = {
+  'home-page': 'home',
+  'contact-page': 'contact',
+  'collector-services-page': 'collector-services',
+  'discover-page': 'discover',
+};
+
 export class CmsSyncService {
   async handleEvent(event: StrapiEvent, model: string, entry: any) {
+    // Check if this is a page single type
+    if (PAGE_SLUGS[model]) {
+      return this.syncPageContent(model, entry);
+    }
+
     switch (model) {
       case 'artist':
         return this.syncArtist(event, entry);
@@ -16,6 +28,20 @@ export class CmsSyncService {
       default:
         console.log(`CMS sync: unhandled model "${model}"`);
     }
+  }
+
+  private async syncPageContent(model: string, entry: any) {
+    const slug = PAGE_SLUGS[model];
+    if (!slug) return;
+
+    // Strip Strapi internal fields, keep only content attributes
+    const { id, documentId, createdAt, updatedAt, publishedAt, locale, ...content } = entry;
+
+    await prisma.pageContent.upsert({
+      where: { slug },
+      create: { slug, content },
+      update: { content },
+    });
   }
 
   private async syncArtist(event: StrapiEvent, entry: any) {

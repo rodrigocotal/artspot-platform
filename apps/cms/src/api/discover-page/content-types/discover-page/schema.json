@@ -1,0 +1,21 @@
+{
+  "kind": "singleType",
+  "collectionName": "discover_pages",
+  "info": {
+    "singularName": "discover-page",
+    "pluralName": "discover-pages",
+    "displayName": "Discover Page"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "headline": {
+      "type": "string",
+      "required": true
+    },
+    "subtitle": {
+      "type": "text"
+    }
+  }
+}

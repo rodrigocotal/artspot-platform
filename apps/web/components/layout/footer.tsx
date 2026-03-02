@@ -13,21 +13,15 @@ const navigation = {
   artists: [
     { label: 'Browse All Artists', href: '/artists' },
     { label: 'Featured Artists', href: '/artists/featured' },
-    { label: 'Emerging Artists', href: '/artists/emerging' },
     { label: 'Collections', href: '/collections' },
   ],
   services: [
-    { label: 'Art Advisory', href: '/services/advisory' },
-    { label: 'Authentication', href: '/services/authentication' },
-    { label: 'Insurance', href: '/services/insurance' },
-    { label: 'White-Glove Shipping', href: '/services/shipping' },
-    { label: 'Consignment', href: '/services/consignment' },
+    { label: 'Collector Services', href: '/collector-services' },
+    { label: 'Contact Us', href: '/contact' },
   ],
   company: [
-    { label: 'About ArtSpot', href: '/about' },
-    { label: 'Contact', href: '/contact' },
-    { label: 'Press', href: '/press' },
-    { label: 'Careers', href: '/careers' },
+    { label: 'Discover', href: '/discover' },
+    { label: 'Editorial', href: '/discover/editorial' },
   ],
 };
 
@@ -142,17 +136,6 @@ export function Footer() {
             <p className="text-xs text-neutral-500">
               &copy; {new Date().getFullYear()} ArtSpot. All rights reserved.
             </p>
-            <div className="flex items-center gap-6">
-              <Link href="/privacy" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
-                Terms of Service
-              </Link>
-              <Link href="/cookies" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
-                Cookie Policy
-              </Link>
-            </div>
           </div>
         </Container>
       </div>

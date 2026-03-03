@@ -54,7 +54,8 @@ export default function CollectorServicesPage() {
       .catch(() => {});
   }, []);
 
-  const services = Array.isArray(content.services) ? content.services : DEFAULTS.services;
+  const rawServices = content.services?.items ?? content.services;
+  const services = Array.isArray(rawServices) ? rawServices : DEFAULTS.services;
 
   return (
     <>

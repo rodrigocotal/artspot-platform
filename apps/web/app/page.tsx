@@ -53,7 +53,8 @@ export default function HomePage() {
       });
   }, []);
 
-  const features = Array.isArray(content.features) ? content.features : DEFAULTS.features;
+  const rawFeatures = content.features?.items ?? content.features;
+  const features = Array.isArray(rawFeatures) ? rawFeatures : DEFAULTS.features;
 
   return (
     <>

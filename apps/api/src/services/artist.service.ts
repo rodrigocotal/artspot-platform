@@ -74,6 +74,7 @@ export class ArtistService {
           take: 12,
           orderBy: { createdAt: 'desc' },
           include: {
+            artist: true,
             images: {
               where: { type: 'MAIN' },
               take: 1,

@@ -7,6 +7,7 @@ const PAGE_SLUGS: Record<string, string> = {
   'contact-page': 'contact',
   'collector-services-page': 'collector-services',
   'discover-page': 'discover',
+  'site-setting': 'site-settings',
 };
 
 export class CmsSyncService {

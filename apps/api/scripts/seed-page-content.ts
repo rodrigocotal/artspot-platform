@@ -143,6 +143,60 @@ const discoverPage = {
     'Explore the world of art through our editorial content, exhibitions, and curated inspiration.',
 };
 
+const siteSettings = {
+  logoText: 'ArtSpot',
+  navigation: {
+    items: [
+      {
+        label: 'Artworks',
+        href: '/artworks',
+        dropdown: [
+          { label: 'Painting', href: '/artworks?medium=painting' },
+          { label: 'Sculpture', href: '/artworks?medium=sculpture' },
+          { label: 'Photography', href: '/artworks?medium=photography' },
+          { label: 'Works on Paper', href: '/artworks?medium=works-on-paper' },
+          { label: 'Art Installation', href: '/artworks?medium=installation' },
+          { label: 'Art Objects', href: '/artworks?medium=objects' },
+        ],
+      },
+      {
+        label: 'Artists',
+        href: '/artists',
+        dropdown: [
+          { label: 'Browse Artists', href: '/artists' },
+          { label: 'Featured Artists', href: '/artists/featured' },
+        ],
+      },
+      {
+        label: 'Collections',
+        href: '/collections',
+        dropdown: [
+          { label: 'Curated Selections', href: '/collections' },
+          { label: 'New Arrivals', href: '/collections/new-arrivals' },
+          { label: 'Museum-Quality Works', href: '/collections/museum-quality' },
+        ],
+      },
+      {
+        label: 'Discover',
+        href: '/discover',
+        dropdown: [
+          { label: 'Editorial', href: '/discover/editorial' },
+          { label: 'Inspiration', href: '/discover/inspiration' },
+          { label: 'Exhibitions', href: '/discover/exhibitions' },
+        ],
+      },
+      {
+        label: 'Collector Services',
+        href: '/collector-services',
+      },
+      {
+        label: 'Contact',
+        href: '/contact',
+      },
+    ],
+  },
+};
+
 // ── Main ──
 
 async function main() {
@@ -154,6 +208,7 @@ async function main() {
     ['Contact Page', '/contact-page', contactPage],
     ['Collector Services Page', '/collector-services-page', collectorServicesPage],
     ['Discover Page', '/discover-page', discoverPage],
+    ['Site Settings', '/site-setting', siteSettings],
   ];
 
   for (const [label, endpoint, data] of pages) {

@@ -14,9 +14,24 @@ import {
   ChevronDown,
   LogOut,
 } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
 
-// Navigation data structure
-const primaryNav = [
+// Navigation data types
+interface NavDropdownItem {
+  label: string;
+  href: string;
+}
+
+interface NavItem {
+  label: string;
+  href: string;
+  dropdown?: NavDropdownItem[];
+}
+
+// Default navigation (used as fallback when CMS is unreachable)
+const DEFAULT_LOGO_TEXT = 'ArtSpot';
+
+const DEFAULT_NAV: NavItem[] = [
   {
     label: 'Artworks',
     href: '/artworks',
@@ -75,6 +90,25 @@ export function Header({ className }: HeaderProps) {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
+  const [logoText, setLogoText] = React.useState(DEFAULT_LOGO_TEXT);
+  const [navItems, setNavItems] = React.useState<NavItem[]>(DEFAULT_NAV);
+
+  // Fetch CMS site settings
+  React.useEffect(() => {
+    apiClient
+      .getPageContent('site-settings')
+      .then((res) => {
+        const content = res.data?.content;
+        if (!content) return;
+        if (content.logoText) setLogoText(content.logoText);
+        if (content.navigation?.items && Array.isArray(content.navigation.items)) {
+          setNavItems(content.navigation.items);
+        }
+      })
+      .catch(() => {
+        // CMS unreachable — keep defaults
+      });
+  }, []);
 
   // Close mobile menu when route changes
   React.useEffect(() => {
@@ -82,7 +116,7 @@ export function Header({ className }: HeaderProps) {
   }, []);
 
   // Keyboard handler for nav dropdown
-  const handleNavKeyDown = (e: React.KeyboardEvent, item: typeof primaryNav[0]) => {
+  const handleNavKeyDown = (e: React.KeyboardEvent, item: NavItem) => {
     if (!item.dropdown) return;
 
     if (e.key === 'Enter' || e.key === ' ') {
@@ -150,13 +184,13 @@ export function Header({ className }: HeaderProps) {
               href="/"
               className="text-2xl font-serif font-semibold text-neutral-900 hover:text-primary-600 transition-colors"
             >
-              ArtSpot
+              {logoText}
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8" aria-label="Main navigation">
-            {primaryNav.map((item) => (
+            {navItems.map((item) => (
               <div
                 key={item.label}
                 className="relative"
@@ -185,24 +219,26 @@ export function Header({ className }: HeaderProps) {
                   )}
                 </Link>
 
-                {/* Dropdown Menu */}
+                {/* Dropdown Menu — outer div provides invisible hover bridge */}
                 {item.dropdown && activeDropdown === item.label && (
-                  <div
-                    role="menu"
-                    aria-label={`${item.label} submenu`}
-                    className="absolute left-0 top-full mt-2 w-56 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
-                  >
-                    {item.dropdown.map((subItem) => (
-                      <Link
-                        key={subItem.label}
-                        href={subItem.href}
-                        role="menuitem"
-                        className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
-                        onKeyDown={handleDropdownKeyDown}
-                      >
-                        {subItem.label}
-                      </Link>
-                    ))}
+                  <div className="absolute left-0 top-full pt-2">
+                    <div
+                      role="menu"
+                      aria-label={`${item.label} submenu`}
+                      className="w-56 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
+                    >
+                      {item.dropdown.map((subItem) => (
+                        <Link
+                          key={subItem.label}
+                          href={subItem.href}
+                          role="menuitem"
+                          className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                          onKeyDown={handleDropdownKeyDown}
+                        >
+                          {subItem.label}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -332,7 +368,7 @@ export function Header({ className }: HeaderProps) {
           <div className="max-w-8xl mx-auto px-4 py-6 space-y-6">
             {/* Primary Navigation - Mobile */}
             <nav className="space-y-4" aria-label="Mobile navigation">
-              {primaryNav.map((item) => (
+              {navItems.map((item) => (
                 <div key={item.label} className="space-y-2">
                   <Link
                     href={item.href}

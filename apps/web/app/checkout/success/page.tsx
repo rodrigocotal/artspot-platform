@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui';
 import { apiClient, type Order } from '@/lib/api-client';
 import { CheckCircle2, Package, Loader2 } from 'lucide-react';
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const sessionId = searchParams.get('session_id');
@@ -110,5 +110,21 @@ export default function CheckoutSuccessPage() {
         </div>
       </Container>
     </Section>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <Section spacing="lg" background="neutral">
+          <Container size="md" className="text-center py-20">
+            <Loader2 className="w-8 h-8 text-primary-600 animate-spin mx-auto" />
+          </Container>
+        </Section>
+      }
+    >
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }

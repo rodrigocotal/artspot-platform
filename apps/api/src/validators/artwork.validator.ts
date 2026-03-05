@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ArtworkMedium, ArtworkStyle, AvailabilityStatus } from '@prisma/client';
+import { ArtworkMedium, ArtworkStyle, AvailabilityStatus, PurchaseMode } from '@prisma/client';
 
 /**
  * Validation schemas for artwork endpoints
@@ -9,6 +9,7 @@ import { ArtworkMedium, ArtworkStyle, AvailabilityStatus } from '@prisma/client'
 const artworkMediumEnum = z.nativeEnum(ArtworkMedium);
 const artworkStyleEnum = z.nativeEnum(ArtworkStyle);
 const availabilityStatusEnum = z.nativeEnum(AvailabilityStatus);
+const purchaseModeEnum = z.nativeEnum(PurchaseMode);
 
 // Create artwork schema
 export const createArtworkSchema = z.object({
@@ -25,6 +26,7 @@ export const createArtworkSchema = z.object({
   price: z.number().positive('Price must be positive'),
   currency: z.string().length(3, 'Currency must be a 3-letter code').default('USD'),
   status: availabilityStatusEnum.default('AVAILABLE'),
+  purchaseMode: purchaseModeEnum.default('INQUIRY_ONLY'),
   featured: z.boolean().default(false),
   edition: z.string().optional(),
   materials: z.string().optional(),
@@ -49,6 +51,7 @@ export const updateArtworkSchema = z.object({
   price: z.number().positive().optional(),
   currency: z.string().length(3).optional(),
   status: availabilityStatusEnum.optional(),
+  purchaseMode: purchaseModeEnum.optional(),
   featured: z.boolean().optional(),
   edition: z.string().optional().nullable(),
   materials: z.string().optional().nullable(),

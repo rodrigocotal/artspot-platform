@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Container, Section } from '@/components/layout';
 import { ImageZoom } from '@/components/ui';
 import { ArtworkCard, InquiryForm } from '@/components/artwork';
+import { AddToCartButton } from '@/components/artwork/add-to-cart-button';
 import { Button } from '@/components/ui';
 import { apiClient, type Artwork } from '@/lib/api-client';
 import { useFavorite } from '@/hooks/use-favorite';
@@ -250,14 +251,18 @@ export default function ArtworkDetailPage() {
               <div className="flex gap-3">
                 {isAvailable ? (
                   <>
-                    <Button
-                      size="lg"
-                      className="flex-1"
-                      variant={showInquiryForm ? 'outline' : 'primary'}
-                      onClick={() => setShowInquiryForm(!showInquiryForm)}
-                    >
-                      {showInquiryForm ? 'Close' : 'Inquire'}
-                    </Button>
+                    {artwork.purchaseMode === 'DIRECT' ? (
+                      <AddToCartButton artworkId={artwork.id} className="flex-1" />
+                    ) : (
+                      <Button
+                        size="lg"
+                        className="flex-1"
+                        variant={showInquiryForm ? 'outline' : 'primary'}
+                        onClick={() => setShowInquiryForm(!showInquiryForm)}
+                      >
+                        {showInquiryForm ? 'Close' : 'Inquire'}
+                      </Button>
+                    )}
                     <FavoriteButton
                       artworkId={artwork.id}
                       initialFavorited={artwork.isFavorited ?? false}
@@ -266,7 +271,7 @@ export default function ArtworkDetailPage() {
                   </>
                 ) : (
                   <Button size="lg" variant="outline" className="flex-1" disabled>
-                    Not Available
+                    {artwork.status === 'RESERVED' ? 'Reserved' : 'Not Available'}
                   </Button>
                 )}
                 <Button size="lg" variant="ghost">
@@ -274,8 +279,8 @@ export default function ArtworkDetailPage() {
                 </Button>
               </div>
 
-              {/* Inquiry Form */}
-              {showInquiryForm && isAvailable && (
+              {/* Inquiry Form (only for INQUIRY_ONLY artworks) */}
+              {showInquiryForm && isAvailable && artwork.purchaseMode === 'INQUIRY_ONLY' && (
                 <InquiryForm artworkId={artwork.id} />
               )}
 

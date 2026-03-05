@@ -119,6 +119,7 @@ export interface Artwork {
   price: string;
   currency: string;
   status: string;
+  purchaseMode: 'DIRECT' | 'INQUIRY_ONLY';
   featured: boolean;
   edition: string | null;
   materials: string | null;
@@ -227,6 +228,60 @@ export interface ArticleFilters {
   featured?: boolean;
   sortBy?: 'publishedDate' | 'createdAt' | 'title';
   sortOrder?: 'asc' | 'desc';
+}
+
+// ── Cart ──────────────────────────────────────────────────────────────
+
+export interface CartItem {
+  id: string;
+  artworkId: string;
+  createdAt: string;
+  artwork: Artwork;
+}
+
+export interface Cart {
+  id: string;
+  userId: string;
+  items: CartItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CartCount {
+  count: number;
+}
+
+// ── Orders ────────────────────────────────────────────────────────────
+
+export type OrderStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED' | 'REFUNDED';
+
+export interface OrderItem {
+  id: string;
+  artworkId: string;
+  price: string;
+  currency: string;
+  title: string;
+  artistName: string;
+  artwork?: Artwork;
+}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  subtotal: string;
+  currency: string;
+  status: OrderStatus;
+  customerEmail: string;
+  customerName: string | null;
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CheckoutResult {
+  checkoutUrl: string;
+  orderId: string;
+  orderNumber: string;
 }
 
 class ApiClient {
@@ -480,6 +535,52 @@ class ApiClient {
    */
   async getPageContent(slug: string): Promise<ApiResponse<PageContent>> {
     return this.fetch<PageContent>(`/pages/${slug}`);
+  }
+
+  // ── Cart ────────────────────────────────────────────────────────────
+
+  async getCart(): Promise<ApiResponse<Cart>> {
+    return this.fetch<Cart>('/cart');
+  }
+
+  async getCartCount(): Promise<ApiResponse<CartCount>> {
+    return this.fetch<CartCount>('/cart/count');
+  }
+
+  async addToCart(artworkId: string): Promise<ApiResponse<Cart>> {
+    return this.fetch<Cart>('/cart/items', {
+      method: 'POST',
+      body: JSON.stringify({ artworkId }),
+    });
+  }
+
+  async removeFromCart(artworkId: string): Promise<ApiResponse<Cart>> {
+    return this.fetch<Cart>(`/cart/items/${artworkId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async clearCart(): Promise<ApiResponse<Cart>> {
+    return this.fetch<Cart>('/cart', { method: 'DELETE' });
+  }
+
+  // ── Orders ──────────────────────────────────────────────────────────
+
+  async createCheckout(): Promise<ApiResponse<CheckoutResult>> {
+    return this.fetch<CheckoutResult>('/orders/checkout', {
+      method: 'POST',
+    });
+  }
+
+  async getOrders(
+    params: PaginationParams & { status?: string } = {}
+  ): Promise<ApiResponse<Order[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<Order[]>(`/orders${queryString}`);
+  }
+
+  async getOrder(id: string): Promise<ApiResponse<Order>> {
+    return this.fetch<Order>(`/orders/${id}`);
   }
 }
 

@@ -15,6 +15,8 @@ import inquiriesRouter from './routes/inquiries';
 import webhooksRouter from './routes/webhooks';
 import articlesRouter from './routes/articles';
 import pageContentsRouter from './routes/page-contents';
+import cartRouter from './routes/cart';
+import ordersRouter from './routes/orders';
 import { initializeCloudinary } from './config/cloudinary';
 
 // Initialize Cloudinary (skip in test environment)
@@ -34,6 +36,9 @@ app.use(
     credentials: true,
   })
 );
+
+// Stripe webhook needs raw body for signature verification — must be before express.json()
+app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
 
 // Body parsing middleware
 app.use(express.json());
@@ -60,6 +65,8 @@ app.use('/inquiries', inquiriesRouter);
 app.use('/webhooks', webhooksRouter);
 app.use('/articles', articlesRouter);
 app.use('/pages', pageContentsRouter);
+app.use('/cart', cartRouter);
+app.use('/orders', ordersRouter);
 
 // 404 handler
 app.use('*', (req, res) => {

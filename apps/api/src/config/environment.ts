@@ -41,6 +41,14 @@ export const config = {
     webhookSecret: process.env.CMS_WEBHOOK_SECRET || '',
     strapiUrl: process.env.STRAPI_URL || 'http://localhost:1337',
   },
+
+  // Stripe
+  stripe: {
+    secretKey: process.env.STRIPE_SECRET_KEY || '',
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    successUrl: process.env.STRIPE_SUCCESS_URL || 'http://localhost:3000/checkout/success',
+    cancelUrl: process.env.STRIPE_CANCEL_URL || 'http://localhost:3000/checkout/cancel',
+  },
 } as const;
 
 // Validate required environment variables in production

@@ -28,6 +28,8 @@ model User {
   inquiries     Inquiry[]
   favorites     Favorite[]
   refreshTokens RefreshToken[]
+  cart          Cart?
+  orders        Order[]
 
   @@map("users")
 }
@@ -115,7 +117,8 @@ model Artwork {
   currency String  @default("USD")
 
   // Availability
-  status AvailabilityStatus @default(AVAILABLE)
+  status       AvailabilityStatus @default(AVAILABLE)
+  purchaseMode PurchaseMode       @default(INQUIRY_ONLY)
 
   // Metadata
   featured    Boolean @default(false)
@@ -137,6 +140,8 @@ model Artwork {
   collectionItems CollectionArtwork[]
   inquiries       Inquiry[]
   favorites       Favorite[]
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
 
   @@index([artistId])
   @@index([medium])
@@ -213,6 +218,11 @@ enum AvailabilityStatus {
   RESERVED
   NOT_FOR_SALE
   ON_LOAN
+}
+
+enum PurchaseMode {
+  DIRECT
+  INQUIRY_ONLY
 }
 
 enum ImageType {
@@ -369,4 +379,88 @@ model PageContent {
   createdAt DateTime @default(now())
 
   @@map("page_contents")
+}
+
+// ============================================================================
+// SHOPPING CART & ORDERS
+// ============================================================================
+
+model Cart {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String @id @default(cuid())
+  cartId    String
+  artworkId String
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  artwork Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([cartId, artworkId])
+  @@index([cartId])
+  @@index([artworkId])
+  @@map("cart_items")
+}
+
+model Order {
+  id                       String      @id @default(cuid())
+  orderNumber              String      @unique
+  userId                   String
+  stripeCheckoutSessionId  String?     @unique
+  stripePaymentIntentId    String?
+  subtotal                 Decimal     @db.Decimal(10, 2)
+  currency                 String      @default("USD")
+  status                   OrderStatus @default(PENDING)
+  customerEmail            String
+  customerName             String?
+  inquiryId                String?
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  artworkId  String
+  price      Decimal @db.Decimal(10, 2)
+  currency   String  @default("USD")
+  title      String
+  artistName String
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  artwork Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([artworkId])
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
 }

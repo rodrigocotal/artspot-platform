@@ -13,8 +13,10 @@ import {
   User,
   ChevronDown,
   LogOut,
+  ShoppingBag,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { useCart } from '@/components/providers/cart-provider';
 
 // Navigation data types
 interface NavDropdownItem {
@@ -86,6 +88,7 @@ interface HeaderProps {
 
 export function Header({ className }: HeaderProps) {
   const { data: session } = useSession();
+  const { itemCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
@@ -266,6 +269,20 @@ export function Header({ className }: HeaderProps) {
               <Heart className="h-5 w-5" aria-hidden="true" />
             </Link>
 
+            {/* Cart */}
+            <Link
+              href="/cart"
+              className="hidden sm:block relative p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+              aria-label={`Cart${itemCount > 0 ? ` (${itemCount} items)` : ''}`}
+            >
+              <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+              {itemCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white">
+                  {itemCount > 9 ? '9+' : itemCount}
+                </span>
+              )}
+            </Link>
+
             {/* Account */}
             {session?.user ? (
               <div
@@ -304,6 +321,20 @@ export function Header({ className }: HeaderProps) {
                       className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                     >
                       Favorites
+                    </Link>
+                    <Link
+                      href="/cart"
+                      role="menuitem"
+                      className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                    >
+                      Cart{itemCount > 0 ? ` (${itemCount})` : ''}
+                    </Link>
+                    <Link
+                      href="/account/orders"
+                      role="menuitem"
+                      className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                    >
+                      Orders
                     </Link>
                     <hr className="my-1 border-neutral-200" />
                     <button
@@ -394,11 +425,17 @@ export function Header({ className }: HeaderProps) {
             </nav>
 
             {/* Utility Navigation - Mobile */}
-            <div className="flex gap-4 pt-4 border-t border-neutral-200">
+            <div className="flex flex-wrap gap-4 pt-4 border-t border-neutral-200">
               <Link href="/favorites" className="flex-1">
                 <Button variant="outline" className="w-full">
                   <Heart className="h-4 w-4 mr-2" aria-hidden="true" />
                   Favorites
+                </Button>
+              </Link>
+              <Link href="/cart" className="flex-1">
+                <Button variant="outline" className="w-full">
+                  <ShoppingBag className="h-4 w-4 mr-2" aria-hidden="true" />
+                  Cart{itemCount > 0 ? ` (${itemCount})` : ''}
                 </Button>
               </Link>
               {session?.user ? (

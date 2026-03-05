@@ -4,6 +4,7 @@ import { Header, Footer } from '@/components/layout';
 import { SkipToContent } from '@/components/layout/skip-to-content';
 import { SessionProvider } from '@/components/providers/session-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { CartProvider } from '@/components/providers/cart-provider';
 import './globals.css';
 
 const serif = Cormorant_Garamond({
@@ -35,12 +36,14 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-neutral-50 text-neutral-900">
         <QueryProvider>
           <SessionProvider>
-            <SkipToContent />
-            <Header />
-            <main id="main-content" className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
+            <CartProvider>
+              <SkipToContent />
+              <Header />
+              <main id="main-content" className="min-h-screen">
+                {children}
+              </main>
+              <Footer />
+            </CartProvider>
           </SessionProvider>
         </QueryProvider>
       </body>

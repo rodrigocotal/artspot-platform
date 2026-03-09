@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { config } from '../config/environment';
 import { cmsSyncService } from '../services/cms-sync.service';
-import { getStripe } from '../config/stripe';
+import { WebhooksHelper } from 'square';
 import { orderService } from '../services/order.service';
 
 const router = Router();
@@ -37,25 +37,35 @@ router.post('/cms', (req: Request, res: Response) => {
 });
 
 /**
- * POST /webhooks/stripe
- * Handles Stripe webhook events (checkout completed/expired).
+ * POST /webhooks/square
+ * Handles Square webhook events (payment.updated).
  * Uses raw body for signature verification — registered with express.raw() in app.ts.
  */
-router.post('/stripe', async (req: Request, res: Response) => {
-  const sig = req.headers['stripe-signature'] as string;
+router.post('/square', async (req: Request, res: Response) => {
+  const signature = req.headers['x-square-hmacsha256-signature'] as string;
 
-  if (!sig || !config.stripe.webhookSecret) {
+  if (!signature || !config.square.webhookSignatureKey) {
     res.status(400).json({ success: false, message: 'Missing signature or webhook secret' });
     return;
   }
 
-  let event;
+  const rawBody = req.body.toString('utf8');
 
   try {
-    const stripe = getStripe();
-    event = stripe.webhooks.constructEvent(req.body, sig, config.stripe.webhookSecret);
+    const isValid = await WebhooksHelper.verifySignature({
+      requestBody: rawBody,
+      signatureHeader: signature,
+      signatureKey: config.square.webhookSignatureKey,
+      notificationUrl: `${config.apiUrl}/webhooks/square`,
+    });
+
+    if (!isValid) {
+      console.error('Square webhook signature verification failed');
+      res.status(400).json({ success: false, message: 'Invalid signature' });
+      return;
+    }
   } catch (err: any) {
-    console.error('Stripe webhook signature verification failed:', err.message);
+    console.error('Square webhook signature verification error:', err.message);
     res.status(400).json({ success: false, message: 'Invalid signature' });
     return;
   }
@@ -63,25 +73,26 @@ router.post('/stripe', async (req: Request, res: Response) => {
   // Respond immediately
   res.status(200).json({ received: true });
 
-  // Process in background
+  // Parse and process the event
+  const event = JSON.parse(rawBody);
+
   try {
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object;
-        await orderService.handleCheckoutCompleted(session.id);
-        break;
+    if (event.type === 'payment.updated') {
+      const payment = event.data?.object?.payment;
+      if (!payment) return;
+
+      const paymentId = payment.id;
+      const squareOrderId = payment.order_id;
+      const status = payment.status;
+
+      if (status === 'COMPLETED' && squareOrderId) {
+        await orderService.handlePaymentCompleted(paymentId, squareOrderId);
+      } else if ((status === 'FAILED' || status === 'CANCELED') && squareOrderId) {
+        await orderService.handlePaymentFailed(squareOrderId);
       }
-      case 'checkout.session.expired': {
-        const session = event.data.object;
-        await orderService.handleCheckoutExpired(session.id);
-        break;
-      }
-      default:
-        // Ignore other event types
-        break;
     }
   } catch (err) {
-    console.error(`Stripe webhook processing error [${event.type}]:`, err);
+    console.error(`Square webhook processing error [${event.type}]:`, err);
   }
 });
 

@@ -4,7 +4,7 @@ import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
-// POST /orders/checkout — create Stripe checkout session from cart
+// POST /orders/checkout — create Square payment link from cart
 router.post('/checkout', authenticate, orderController.createCheckout.bind(orderController));
 
 // POST /orders/payment-link — staff creates a payment link for an inquiry

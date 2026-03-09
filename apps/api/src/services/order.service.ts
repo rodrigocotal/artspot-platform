@@ -1,6 +1,6 @@
 import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '../config/database';
-import { getStripe } from '../config/stripe';
+import { getSquare } from '../config/square';
 import { config } from '../config/environment';
 import { AppError } from '../middleware/error-handler';
 import { cartService } from './cart.service';
@@ -15,11 +15,11 @@ function generateOrderNumber(): string {
 
 export class OrderService {
   /**
-   * Create a Stripe Checkout Session from the user's cart.
+   * Create a Square Payment Link from the user's cart.
    * Atomically reserves artworks to prevent double-selling.
    */
   async createCheckoutSession(userId: string) {
-    const stripe = getStripe();
+    const square = getSquare();
 
     // Validate cart
     const { cart, invalidItems } = await cartService.validateCartItems(userId);
@@ -107,46 +107,45 @@ export class OrderService {
       return newOrder;
     });
 
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      customer_email: order.customerEmail,
-      client_reference_id: order.id,
-      line_items: order.items.map((item) => ({
-        price_data: {
-          currency: item.currency.toLowerCase(),
-          product_data: {
-            name: item.title,
-            description: `By ${item.artistName}`,
+    // Create Square Payment Link
+    const currency = order.currency.toUpperCase();
+    const response = await square.checkout.paymentLinks.create({
+      idempotencyKey: crypto.randomUUID(),
+      order: {
+        locationId: config.square.locationId,
+        referenceId: order.id,
+        lineItems: order.items.map((item) => ({
+          name: item.title,
+          quantity: '1',
+          basePriceMoney: {
+            amount: BigInt(Math.round(parseFloat(item.price.toString()) * 100)),
+            currency,
           },
-          unit_amount: Math.round(parseFloat(item.price.toString()) * 100),
-        },
-        quantity: 1,
-      })),
-      success_url: `${config.stripe.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${config.stripe.cancelUrl}?order_id=${order.id}`,
-      expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes
-      metadata: {
-        orderId: order.id,
-        orderNumber: order.orderNumber,
+          note: `By ${item.artistName}`,
+        })),
       },
+      checkoutOptions: {
+        redirectUrl: `${config.square.successUrl}?orderId=${order.id}`,
+      },
+      paymentNote: `Order ${order.orderNumber}`,
     });
 
-    // Store session ID on order
+    const paymentLink = response.paymentLink;
+
+    // Store payment link ID on order
     await prisma.order.update({
       where: { id: order.id },
-      data: { stripeCheckoutSessionId: session.id },
+      data: { squarePaymentLinkId: paymentLink?.id },
     });
 
-    return { checkoutUrl: session.url, orderId: order.id, orderNumber: order.orderNumber };
+    return { checkoutUrl: paymentLink?.url || paymentLink?.longUrl, orderId: order.id, orderNumber: order.orderNumber };
   }
 
   /**
    * Staff creates a payment link for an inquiry.
    */
   async createPaymentLinkForInquiry(data: CreatePaymentLinkInput, staffUserId: string) {
-    const stripe = getStripe();
+    const square = getSquare();
 
     const artwork = await prisma.artwork.findUnique({
       where: { id: data.artworkId },
@@ -190,53 +189,72 @@ export class OrderService {
       },
     });
 
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      customer_email: data.customerEmail,
-      client_reference_id: order.id,
-      line_items: [
-        {
-          price_data: {
-            currency: artwork.currency.toLowerCase(),
-            product_data: {
-              name: artwork.title,
-              description: `By ${artwork.artist.name}`,
+    // Create Square Payment Link
+    const currency = artwork.currency.toUpperCase();
+    const response = await square.checkout.paymentLinks.create({
+      idempotencyKey: crypto.randomUUID(),
+      order: {
+        locationId: config.square.locationId,
+        referenceId: order.id,
+        lineItems: [
+          {
+            name: artwork.title,
+            quantity: '1',
+            basePriceMoney: {
+              amount: BigInt(Math.round(parseFloat(artwork.price.toString()) * 100)),
+              currency,
             },
-            unit_amount: Math.round(parseFloat(artwork.price.toString()) * 100),
+            note: `By ${artwork.artist.name}`,
           },
-          quantity: 1,
-        },
-      ],
-      success_url: `${config.stripe.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: config.stripe.cancelUrl,
-      expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
-      metadata: {
-        orderId: order.id,
-        orderNumber: order.orderNumber,
+        ],
       },
+      checkoutOptions: {
+        redirectUrl: `${config.square.successUrl}?orderId=${order.id}`,
+      },
+      paymentNote: `Order ${order.orderNumber} — Inquiry Payment`,
     });
+
+    const paymentLink = response.paymentLink;
 
     await prisma.order.update({
       where: { id: order.id },
-      data: { stripeCheckoutSessionId: session.id },
+      data: { squarePaymentLinkId: paymentLink?.id },
     });
 
-    return { checkoutUrl: session.url, orderId: order.id, orderNumber: order.orderNumber };
+    return { checkoutUrl: paymentLink?.url || paymentLink?.longUrl, orderId: order.id, orderNumber: order.orderNumber };
   }
 
   /**
-   * Handle Stripe checkout.session.completed webhook.
+   * Handle Square payment.updated webhook — payment completed.
    */
-  async handleCheckoutCompleted(sessionId: string) {
+  async handlePaymentCompleted(paymentId: string, squareOrderId: string) {
+    // Find order by Square order reference (we stored our order ID as referenceId)
+    // We need to look up the Square order to get the referenceId
+    const square = getSquare();
+
+    let internalOrderId: string | undefined;
+
+    try {
+      const squareOrder = await square.orders.get({
+        orderId: squareOrderId,
+      });
+      internalOrderId = squareOrder.order?.referenceId || undefined;
+    } catch {
+      console.error(`Could not retrieve Square order: ${squareOrderId}`);
+    }
+
+    if (!internalOrderId) {
+      console.error(`No referenceId found for Square order: ${squareOrderId}`);
+      return;
+    }
+
     const order = await prisma.order.findUnique({
-      where: { stripeCheckoutSessionId: sessionId },
+      where: { id: internalOrderId },
       include: { items: true },
     });
 
     if (!order) {
-      console.error(`Order not found for session: ${sessionId}`);
+      console.error(`Order not found for internal ID: ${internalOrderId}`);
       return;
     }
 
@@ -244,16 +262,13 @@ export class OrderService {
       return; // Already processed (idempotent)
     }
 
-    const stripe = getStripe();
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-
     await prisma.$transaction(async (tx) => {
       // Mark order as paid
       await tx.order.update({
         where: { id: order.id },
         data: {
           status: 'PAID',
-          stripePaymentIntentId: session.payment_intent as string,
+          squarePaymentId: paymentId,
         },
       });
 
@@ -268,11 +283,28 @@ export class OrderService {
   }
 
   /**
-   * Handle Stripe checkout.session.expired webhook.
+   * Handle Square payment.updated webhook — payment failed/cancelled.
    */
-  async handleCheckoutExpired(sessionId: string) {
+  async handlePaymentFailed(squareOrderId: string) {
+    const square = getSquare();
+
+    let internalOrderId: string | undefined;
+
+    try {
+      const squareOrder = await square.orders.get({
+        orderId: squareOrderId,
+      });
+      internalOrderId = squareOrder.order?.referenceId || undefined;
+    } catch {
+      console.error(`Could not retrieve Square order: ${squareOrderId}`);
+    }
+
+    if (!internalOrderId) {
+      return;
+    }
+
     const order = await prisma.order.findUnique({
-      where: { stripeCheckoutSessionId: sessionId },
+      where: { id: internalOrderId },
       include: { items: true },
     });
 

@@ -42,12 +42,14 @@ export const config = {
     strapiUrl: process.env.STRAPI_URL || 'http://localhost:1337',
   },
 
-  // Stripe
-  stripe: {
-    secretKey: process.env.STRIPE_SECRET_KEY || '',
-    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
-    successUrl: process.env.STRIPE_SUCCESS_URL || 'http://localhost:3000/checkout/success',
-    cancelUrl: process.env.STRIPE_CANCEL_URL || 'http://localhost:3000/checkout/cancel',
+  // Square
+  square: {
+    accessToken: process.env.SQUARE_ACCESS_TOKEN || '',
+    environment: process.env.SQUARE_ENVIRONMENT || 'sandbox',
+    locationId: process.env.SQUARE_LOCATION_ID || '',
+    webhookSignatureKey: process.env.SQUARE_WEBHOOK_SIGNATURE_KEY || '',
+    successUrl: process.env.SQUARE_SUCCESS_URL || 'http://localhost:3000/checkout/success',
+    cancelUrl: process.env.SQUARE_CANCEL_URL || 'http://localhost:3000/checkout/cancel',
   },
 } as const;
 

@@ -12,7 +12,7 @@ import { CheckCircle2, Package, Loader2 } from 'lucide-react';
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const orderId = searchParams.get('orderId');
+  const sessionId = searchParams.get('session_id');
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,16 +27,9 @@ function CheckoutSuccessContent() {
       apiClient.setAccessToken(session.accessToken ?? null);
 
       try {
-        if (orderId) {
-          const res = await apiClient.getOrder(orderId);
-          if (res.data) {
-            setOrder(res.data);
-          }
-        } else {
-          const res = await apiClient.getOrders({ limit: 1 });
-          if (res.data && res.data.length > 0) {
-            setOrder(res.data[0]);
-          }
+        const res = await apiClient.getOrders({ limit: 1 });
+        if (res.data && res.data.length > 0) {
+          setOrder(res.data[0]);
         }
       } catch {
         // Order might not be updated yet
@@ -46,7 +39,7 @@ function CheckoutSuccessContent() {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [session?.accessToken, orderId]);
+  }, [session?.accessToken, sessionId]);
 
   const formatPrice = (price: string, currency: string) =>
     new Intl.NumberFormat('en-US', {

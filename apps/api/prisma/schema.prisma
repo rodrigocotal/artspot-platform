@@ -418,8 +418,8 @@ model Order {
   id                       String      @id @default(cuid())
   orderNumber              String      @unique
   userId                   String
-  squarePaymentLinkId      String?     @unique
-  squarePaymentId          String?
+  stripeCheckoutSessionId  String?     @unique
+  stripePaymentIntentId    String?
   subtotal                 Decimal     @db.Decimal(10, 2)
   currency                 String      @default("USD")
   status                   OrderStatus @default(PENDING)

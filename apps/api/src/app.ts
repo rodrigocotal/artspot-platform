@@ -37,8 +37,8 @@ app.use(
   })
 );
 
-// Square webhook needs raw body for signature verification — must be before express.json()
-app.use('/webhooks/square', express.raw({ type: 'application/json' }));
+// Stripe webhook needs raw body for signature verification — must be before express.json()
+app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
 
 // Body parsing middleware
 app.use(express.json());

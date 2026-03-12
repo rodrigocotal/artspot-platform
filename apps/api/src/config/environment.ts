@@ -40,6 +40,7 @@ export const config = {
   cms: {
     webhookSecret: process.env.CMS_WEBHOOK_SECRET || '',
     strapiUrl: process.env.STRAPI_URL || 'http://localhost:1337',
+    strapiToken: process.env.STRAPI_TOKEN || '',
   },
 
   // Stripe

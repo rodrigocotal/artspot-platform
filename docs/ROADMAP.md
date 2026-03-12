@@ -10,7 +10,7 @@
 
 ArtSpot is a luxury art marketplace built with a modern technology stack (Next.js 15, Express.js, PostgreSQL, Stripe). Development is organized into two phases: **Phase 1** delivers a fully functional browse-and-inquiry experience, and **Phase 2** adds complete e-commerce capabilities including payments, shipping, and analytics.
 
-**Current Status:** Phase 1 is complete. Phase 2 is planned and ready to begin.
+**Current Status:** Phase 1 is complete. Phase 2 is in progress — shopping cart, Stripe payments, and order management are live. Shipping, search, and analytics are next.
 
 ---
 
@@ -53,26 +53,29 @@ Phase 1 establishes the core platform — a polished, gallery-quality browsing e
 
 ## Phase 2 — Full E-Commerce
 
-**Duration:** 15 weeks · **Status:** Planned
+**Duration:** 15 weeks · **Status:** In Progress (3 of 8 sprints complete)
 
 Phase 2 transforms ArtSpot from an inquiry-based gallery into a complete e-commerce platform with direct purchasing, secure payments, and integrated shipping.
 
 | Sprint | Focus | Duration | Status |
 |--------|-------|----------|--------|
-| 12 | Shopping Cart | Weeks 16–17 | Planned |
-| 13 | Stripe Payment Integration | Weeks 18–19 | Planned |
-| 14 | Order Management | Weeks 20–21 | Planned |
-| 15 | Shipping Integration | Weeks 22–23 | Planned |
+| 12 | Shopping Cart | Weeks 16–17 | **Done** |
+| 13 | Stripe Payment Integration | Weeks 18–19 | **Done** |
+| 14 | Order Management | Weeks 20–21 | **Done** |
+| 15 | Shipping Integration | Weeks 22–23 | Up Next |
 | 16 | Email Notifications | Week 24 | Planned |
 | 17 | Advanced Search | Weeks 25–26 | Planned |
 | 18 | Admin Analytics Dashboard | Weeks 27–28 | Planned |
 | 19 | E-Commerce Polish & Testing | Weeks 29–30 | Planned |
 
-### Key Deliverables
+### Completed Deliverables
 
 - **Shopping Cart** — Full cart experience with add/remove items, sidebar and full-page views, and session persistence. Built with Zustand for fast, reliable state management.
 - **Stripe Payments** — Secure checkout via Stripe with credit card and ACH bank transfer support for high-value purchases. Automatic sales tax calculation via Stripe Tax. Full PCI compliance.
-- **Order Management** — Complete order lifecycle from creation through fulfillment. Order history for collectors, admin management dashboard, and status notification emails.
+- **Order Management** — Complete order lifecycle with Stripe checkout sessions, staff payment link generation, order history for collectors, and checkout success/cancellation flows.
+
+### Remaining Deliverables
+
 - **Shipping (ShipStation)** — Integrated shipping rate calculation, white-glove shipping options for high-value art, branded tracking pages, and insurance options.
 - **Email Notifications** — Transactional emails via SendGrid for order confirmations, shipping updates, and account activity alerts.
 - **Advanced Search (Algolia)** — Full-text search across artworks, artists, and collections with faceted filtering, suggestions, and autocomplete.
@@ -106,8 +109,8 @@ Phase 2 transforms ArtSpot from an inquiry-based gallery into a complete e-comme
 
 ```
 Phase 1  ████████████████████  100%  (11/11 sprints)
-Phase 2  ░░░░░░░░░░░░░░░░░░░░    0%  ( 0/8  sprints)
-Overall  ███████████░░░░░░░░░   58%  (11/19 sprints)
+Phase 2  ████████░░░░░░░░░░░░   38%  ( 3/8  sprints)
+Overall  ██████████████░░░░░░   74%  (14/19 sprints)
 ```
 
 ---

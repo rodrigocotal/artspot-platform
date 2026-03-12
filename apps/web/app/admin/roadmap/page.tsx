@@ -204,14 +204,14 @@ const PHASES: Phase[] = [
     name: 'Phase 2',
     subtitle: 'Full E-Commerce',
     duration: '15 Weeks (3.5 months)',
-    status: 'planned',
+    status: 'in-progress',
     icon: <ShoppingCart className="w-5 h-5" />,
     sprints: [
       {
         id: 12,
         name: 'Shopping Cart',
         weeks: 'Weeks 16-17',
-        status: 'upcoming',
+        status: 'completed',
         deliverables: [
           'Cart state management with Zustand',
           'Add/remove items from cart',
@@ -223,7 +223,7 @@ const PHASES: Phase[] = [
         id: 13,
         name: 'Stripe Payment Integration',
         weeks: 'Weeks 18-19',
-        status: 'upcoming',
+        status: 'completed',
         deliverables: [
           'Stripe checkout integration',
           'Credit card payments',
@@ -236,19 +236,20 @@ const PHASES: Phase[] = [
         id: 14,
         name: 'Order Management',
         weeks: 'Weeks 20-21',
-        status: 'upcoming',
+        status: 'completed',
         deliverables: [
           'Order creation and tracking',
           'Order history page for collectors',
-          'Admin order management dashboard',
-          'Order status notifications',
+          'Stripe checkout session creation',
+          'Staff payment link generation',
+          'Checkout success and cancellation pages',
         ],
       },
       {
         id: 15,
         name: 'Shipping Integration',
         weeks: 'Weeks 22-23',
-        status: 'upcoming',
+        status: 'current',
         deliverables: [
           'ShipStation API integration',
           'Shipping rate calculation',
@@ -490,9 +491,14 @@ function MilestoneSummary() {
       detail: 'Browse & Inquiry System',
     },
     {
+      label: 'Cart & Payments Live',
+      status: 'completed' as const,
+      detail: 'Stripe checkout & order management',
+    },
+    {
       label: 'Phase 2 E-Commerce',
-      status: 'planned' as const,
-      detail: 'Full shopping & payments',
+      status: 'in-progress' as const,
+      detail: 'Shipping, search & analytics',
     },
     {
       label: 'Full Platform Launch',
@@ -542,11 +548,13 @@ function MilestoneSummary() {
             <li key={i} className="flex items-center gap-2 text-sm">
               {m.status === 'completed' ? (
                 <CheckCircle2 className="w-4 h-4 text-success-500 shrink-0" />
+              ) : m.status === 'in-progress' ? (
+                <Clock className="w-4 h-4 text-primary-500 shrink-0" />
               ) : (
                 <Circle className="w-4 h-4 text-neutral-300 shrink-0" />
               )}
               <span className={cn(
-                m.status === 'completed' ? 'text-neutral-500 line-through' : 'text-neutral-700'
+                m.status === 'completed' ? 'text-neutral-500 line-through' : m.status === 'in-progress' ? 'text-primary-700 font-medium' : 'text-neutral-700'
               )}>
                 {m.label}
               </span>
@@ -571,7 +579,7 @@ function MilestoneSummary() {
           </div>
           <div className="flex justify-between">
             <dt className="text-neutral-500">Phase 2</dt>
-            <dd className="font-medium text-neutral-700">15 weeks (planned)</dd>
+            <dd className="font-medium text-primary-700">15 weeks (in progress)</dd>
           </div>
           <div className="flex justify-between pt-2 border-t border-neutral-100">
             <dt className="text-neutral-500">Full Launch</dt>

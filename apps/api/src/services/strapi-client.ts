@@ -38,8 +38,14 @@ class StrapiClient {
 
   /**
    * Update an artwork's fields in Strapi by its numeric strapiId.
+   * Maps API field names to Strapi field names (e.g., status → availabilityStatus).
    */
   async updateArtwork(strapiId: number, data: Record<string, unknown>) {
+    // Map API field names to Strapi field names
+    if ('status' in data) {
+      data.availabilityStatus = data.status;
+      delete data.status;
+    }
     if (!this.isConfigured) {
       console.warn('Strapi reverse sync skipped: STRAPI_TOKEN not configured');
       return;

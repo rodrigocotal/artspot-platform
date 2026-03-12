@@ -87,7 +87,7 @@
       "type": "string",
       "default": "USD"
     },
-    "status": {
+    "availabilityStatus": {
       "type": "enumeration",
       "enum": [
         "AVAILABLE",

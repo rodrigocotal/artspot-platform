@@ -151,7 +151,7 @@ async function syncArtworks() {
         depth: artwork.depth ? Number(artwork.depth) : undefined,
         price: Number(artwork.price),
         currency: artwork.currency,
-        status: artwork.status,
+        availabilityStatus: artwork.status,
         purchaseMode: artwork.purchaseMode,
         featured: artwork.featured,
         edition: artwork.edition || undefined,

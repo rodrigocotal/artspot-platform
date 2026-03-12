@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { Button } from '@/components/ui';
+import { Button, useToast } from '@/components/ui';
 import { useCart } from '@/components/providers/cart-provider';
 import { ShoppingBag, Check, Loader2 } from 'lucide-react';
 
@@ -17,6 +17,7 @@ export function AddToCartButton({ artworkId, className }: AddToCartButtonProps) 
   const { data: session } = useSession();
   const router = useRouter();
   const { addItem, isInCart } = useCart();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,8 +33,11 @@ export function AddToCartButton({ artworkId, className }: AddToCartButtonProps) 
     setError(null);
     try {
       await addItem(artworkId);
+      toast('Added to cart');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add to cart');
+      const msg = err instanceof Error ? err.message : 'Failed to add to cart';
+      setError(msg);
+      toast(msg, 'error');
     } finally {
       setLoading(false);
     }

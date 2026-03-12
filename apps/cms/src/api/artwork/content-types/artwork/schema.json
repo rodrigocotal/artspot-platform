@@ -98,6 +98,14 @@
       ],
       "default": "AVAILABLE"
     },
+    "purchaseMode": {
+      "type": "enumeration",
+      "enum": [
+        "DIRECT",
+        "INQUIRY_ONLY"
+      ],
+      "default": "INQUIRY_ONLY"
+    },
     "featured": {
       "type": "boolean",
       "default": false

@@ -17,6 +17,7 @@ import articlesRouter from './routes/articles';
 import pageContentsRouter from './routes/page-contents';
 import cartRouter from './routes/cart';
 import ordersRouter from './routes/orders';
+import docsRouter from './routes/docs';
 import { initializeCloudinary } from './config/cloudinary';
 import { authLimiter, inquiryLimiter, generalLimiter } from './middleware/rate-limit';
 
@@ -62,6 +63,7 @@ if (config.nodeEnv !== 'test') {
 }
 
 // Routes
+app.use('/docs', docsRouter);
 app.use('/health', healthRouter);
 app.use('/auth', authRouter);
 app.use('/upload', uploadRouter);

@@ -48,9 +48,6 @@ importers:
       express:
         specifier: ^4.21.2
         version: 4.22.1
-      express-rate-limit:
-        specifier: ^8.3.1
-        version: 8.3.1(express@4.22.1)
       helmet:
         specifier: ^8.0.0
         version: 8.1.0
@@ -100,6 +97,9 @@ importers:
       '@types/supertest':
         specifier: ^6.0.3
         version: 6.0.3
+      '@types/swagger-ui-express':
+        specifier: ^4.1.8
+        version: 4.1.8
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.21.0
         version: 8.55.0(@typescript-eslint/parser@8.55.0)(eslint@8.57.1)(typescript@5.9.3)
@@ -6575,6 +6575,13 @@ packages:
       '@types/superagent': 8.1.9
     dev: true
 
+  /@types/swagger-ui-express@4.1.8:
+    resolution: {integrity: sha512-AhZV8/EIreHFmBV5wAs0gzJUNq9JbbSXgJLQubCC0jtIo6prnI9MIRRxnU4MZX9RB9yXxF1V4R7jtLl/Wcj31g==}
+    dependencies:
+      '@types/express': 5.0.6
+      '@types/serve-static': 2.2.0
+    dev: true
+
   /@types/through@0.0.33:
     resolution: {integrity: sha512-HsJ+z3QuETzP3cswwtzt2vEIiHBk/dCcHGhbmG5X3ecnwFD/lPrMpliGXxSCg03L9AhrdwA4Oz/qfspkDW+xGQ==}
     dependencies:
@@ -9744,16 +9751,6 @@ packages:
       jest-util: 29.7.0
     dev: true
 
-  /express-rate-limit@8.3.1(express@4.22.1):
-    resolution: {integrity: sha512-D1dKN+cmyPWuvB+G2SREQDzPY1agpBIcTa9sJxOPMCNeH3gwzhqJRDWCXW3gg0y//+LQ/8j52JbMROWyrKdMdw==}
-    engines: {node: '>= 16'}
-    peerDependencies:
-      express: '>= 4.11'
-    dependencies:
-      express: 4.22.1
-      ip-address: 10.1.0
-    dev: false
-
   /express@4.22.1:
     resolution: {integrity: sha512-F2X8g9P1X7uCPZMA3MVf9wcTqlyNp7IhH5qPCI0izhaOIYXaW9L535tGA3qmjRzpH+bZczqq7hVKxTR4NWnu+g==}
     engines: {node: '>= 0.10.0'}
@@ -11007,11 +11004,6 @@ packages:
     resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
     dependencies:
       loose-envify: 1.4.0
-    dev: false
-
-  /ip-address@10.1.0:
-    resolution: {integrity: sha512-XXADHxXmvT9+CRxhXg56LJovE+bmWnEWB78LB83VZTprKTmaC5QfruXocxzTZ2Kl0DNwKuBdlIhjL8LeY8Sf8Q==}
-    engines: {node: '>= 12'}
     dev: false
 
   /ipaddr.js@1.9.1:

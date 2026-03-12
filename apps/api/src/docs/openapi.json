@@ -1,0 +1,666 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ArtAldo API",
+    "description": "REST API for the ArtAldo art gallery platform. Manages artworks, artists, collections, user accounts, favorites, inquiries, shopping cart, and orders.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "ArtAldo",
+      "url": "https://www.artaldo.com"
+    }
+  },
+  "servers": [
+    { "url": "https://api.artaldo.com", "description": "Production" },
+    { "url": "http://localhost:4000", "description": "Development" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string" }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "integer" },
+          "limit": { "type": "integer" },
+          "total": { "type": "integer" },
+          "totalPages": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "name"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 8, "description": "Min 8 chars, 1 uppercase, 1 number" },
+                  "name": { "type": "string", "minLength": 1, "maxLength": 100 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Account created, returns tokens" },
+          "409": { "description": "Email already in use" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Returns access token, refresh token, and user info" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Refresh access token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["refreshToken"],
+                "properties": {
+                  "refreshToken": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Returns new access and refresh tokens" },
+          "401": { "description": "Invalid or expired refresh token" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Logout and invalidate refresh token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["refreshToken"],
+                "properties": {
+                  "refreshToken": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Logged out successfully" }
+        }
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get current user profile",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns user profile" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/artworks": {
+      "get": {
+        "tags": ["Artworks"],
+        "summary": "List artworks with filtering and pagination",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20, "maximum": 100 } },
+          { "name": "artistId", "in": "query", "schema": { "type": "string" } },
+          { "name": "medium", "in": "query", "schema": { "type": "string", "enum": ["PAINTING","SCULPTURE","PHOTOGRAPHY","PRINT","DRAWING","MIXED_MEDIA","DIGITAL","INSTALLATION","TEXTILE","CERAMICS","GLASS","METAL","WOOD","OTHER"] } },
+          { "name": "style", "in": "query", "schema": { "type": "string", "enum": ["ABSTRACT","CONTEMPORARY","FIGURATIVE","IMPRESSIONIST","MINIMALIST","REALISM","EXPRESSIONISM","SURREALISM","POP_ART","CONCEPTUAL","LANDSCAPE","PORTRAIT","STILL_LIFE","OTHER"] } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["AVAILABLE","SOLD","RESERVED","NOT_FOR_SALE","ON_LOAN"] } },
+          { "name": "featured", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "minPrice", "in": "query", "schema": { "type": "number" } },
+          { "name": "maxPrice", "in": "query", "schema": { "type": "number" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["createdAt","price","year","title","views"], "default": "createdAt" } },
+          { "name": "sortOrder", "in": "query", "schema": { "type": "string", "enum": ["asc","desc"], "default": "desc" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns paginated list of artworks" }
+        }
+      },
+      "post": {
+        "tags": ["Artworks"],
+        "summary": "Create artwork (admin/staff)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "slug", "artistId", "price"],
+                "properties": {
+                  "title": { "type": "string" },
+                  "slug": { "type": "string" },
+                  "description": { "type": "string" },
+                  "artistId": { "type": "string" },
+                  "medium": { "type": "string" },
+                  "style": { "type": "string" },
+                  "year": { "type": "integer" },
+                  "price": { "type": "number" },
+                  "currency": { "type": "string", "default": "USD" },
+                  "status": { "type": "string", "default": "AVAILABLE" },
+                  "purchaseMode": { "type": "string", "enum": ["DIRECT","INQUIRY_ONLY"], "default": "INQUIRY_ONLY" },
+                  "featured": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Artwork created" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden — admin/staff only" }
+        }
+      }
+    },
+    "/artworks/{id}": {
+      "get": {
+        "tags": ["Artworks"],
+        "summary": "Get artwork by ID or slug",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns artwork details with images, artist, and related data" },
+          "404": { "description": "Artwork not found" }
+        }
+      },
+      "put": {
+        "tags": ["Artworks"],
+        "summary": "Update artwork (admin/staff)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Artwork updated" }
+        }
+      },
+      "delete": {
+        "tags": ["Artworks"],
+        "summary": "Delete artwork (admin/staff)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Artwork deleted" }
+        }
+      }
+    },
+    "/artworks/{id}/related": {
+      "get": {
+        "tags": ["Artworks"],
+        "summary": "Get related artworks",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 6 } }
+        ],
+        "responses": {
+          "200": { "description": "Returns list of related artworks" }
+        }
+      }
+    },
+    "/artists": {
+      "get": {
+        "tags": ["Artists"],
+        "summary": "List artists with filtering and pagination",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "featured", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["name","createdAt","displayOrder"] } }
+        ],
+        "responses": {
+          "200": { "description": "Returns paginated list of artists" }
+        }
+      }
+    },
+    "/artists/featured": {
+      "get": {
+        "tags": ["Artists"],
+        "summary": "Get featured artists",
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 6 } }
+        ],
+        "responses": {
+          "200": { "description": "Returns featured artists" }
+        }
+      }
+    },
+    "/artists/{id}": {
+      "get": {
+        "tags": ["Artists"],
+        "summary": "Get artist by ID or slug",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns artist details with artworks" },
+          "404": { "description": "Artist not found" }
+        }
+      }
+    },
+    "/collections": {
+      "get": {
+        "tags": ["Collections"],
+        "summary": "List collections",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "featured", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns paginated list of collections" }
+        }
+      }
+    },
+    "/collections/featured": {
+      "get": {
+        "tags": ["Collections"],
+        "summary": "Get featured collections",
+        "responses": {
+          "200": { "description": "Returns featured collections" }
+        }
+      }
+    },
+    "/collections/{id}": {
+      "get": {
+        "tags": ["Collections"],
+        "summary": "Get collection by ID or slug",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns collection with artworks" }
+        }
+      }
+    },
+    "/favorites": {
+      "post": {
+        "tags": ["Favorites"],
+        "summary": "Toggle favorite on artwork",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["artworkId"],
+                "properties": {
+                  "artworkId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Favorite added" },
+          "200": { "description": "Favorite removed" }
+        }
+      },
+      "get": {
+        "tags": ["Favorites"],
+        "summary": "List user's favorites",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": { "description": "Returns paginated list of favorited artworks" }
+        }
+      }
+    },
+    "/inquiries": {
+      "post": {
+        "tags": ["Inquiries"],
+        "summary": "Submit inquiry for artwork",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["artworkId", "name", "email", "message"],
+                "properties": {
+                  "artworkId": { "type": "string" },
+                  "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+                  "email": { "type": "string", "format": "email" },
+                  "phone": { "type": "string" },
+                  "message": { "type": "string", "minLength": 10, "maxLength": 5000 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Inquiry submitted" }
+        }
+      },
+      "get": {
+        "tags": ["Inquiries"],
+        "summary": "List user's inquiries",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns user's inquiries" }
+        }
+      }
+    },
+    "/inquiries/admin": {
+      "get": {
+        "tags": ["Inquiries"],
+        "summary": "List all inquiries (admin/staff)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns all inquiries" }
+        }
+      }
+    },
+    "/inquiries/{id}": {
+      "patch": {
+        "tags": ["Inquiries"],
+        "summary": "Respond to inquiry (admin/staff)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "response": { "type": "string", "maxLength": 5000 },
+                  "status": { "type": "string", "enum": ["RESPONDED","CLOSED"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Inquiry updated" }
+        }
+      }
+    },
+    "/cart": {
+      "get": {
+        "tags": ["Cart"],
+        "summary": "Get user's cart",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns cart with items" }
+        }
+      },
+      "delete": {
+        "tags": ["Cart"],
+        "summary": "Clear cart",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Cart cleared" }
+        }
+      }
+    },
+    "/cart/count": {
+      "get": {
+        "tags": ["Cart"],
+        "summary": "Get cart item count",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns item count" }
+        }
+      }
+    },
+    "/cart/items": {
+      "post": {
+        "tags": ["Cart"],
+        "summary": "Add artwork to cart",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["artworkId"],
+                "properties": {
+                  "artworkId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Item added to cart" }
+        }
+      }
+    },
+    "/cart/items/{artworkId}": {
+      "delete": {
+        "tags": ["Cart"],
+        "summary": "Remove artwork from cart",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "artworkId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Item removed" }
+        }
+      }
+    },
+    "/orders/checkout": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Create Stripe checkout session from cart",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns checkoutUrl, orderId, orderNumber" }
+        }
+      }
+    },
+    "/orders/payment-link": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Create payment link for inquiry (admin/staff)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["artworkId", "customerEmail"],
+                "properties": {
+                  "artworkId": { "type": "string" },
+                  "inquiryId": { "type": "string" },
+                  "customerEmail": { "type": "string", "format": "email" },
+                  "customerName": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Returns payment link URL" }
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "List user's orders",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["PENDING","PAID","FAILED","CANCELLED","REFUNDED"] } }
+        ],
+        "responses": {
+          "200": { "description": "Returns paginated list of orders" }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get order by ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns order details with items" }
+        }
+      }
+    },
+    "/articles": {
+      "get": {
+        "tags": ["Articles"],
+        "summary": "List articles",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "category", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "featured", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns paginated list of articles" }
+        }
+      }
+    },
+    "/articles/featured": {
+      "get": {
+        "tags": ["Articles"],
+        "summary": "Get featured articles",
+        "responses": {
+          "200": { "description": "Returns featured articles" }
+        }
+      }
+    },
+    "/articles/{slug}": {
+      "get": {
+        "tags": ["Articles"],
+        "summary": "Get article by slug",
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns article" }
+        }
+      }
+    },
+    "/pages/{slug}": {
+      "get": {
+        "tags": ["Pages"],
+        "summary": "Get CMS page content by slug",
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Page slug: home, contact, collector-services, discover, site-settings" }
+        ],
+        "responses": {
+          "200": { "description": "Returns page content JSON" },
+          "404": { "description": "Page not found" }
+        }
+      }
+    },
+    "/upload/artwork": {
+      "post": {
+        "tags": ["Upload"],
+        "summary": "Upload single artwork image (admin/staff)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Returns image metadata with multiple sizes" }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "API health check",
+        "responses": {
+          "200": { "description": "Returns API status, uptime, memory usage" }
+        }
+      }
+    },
+    "/health/db": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Database health check",
+        "responses": {
+          "200": { "description": "Database connected" },
+          "503": { "description": "Database connection failed" }
+        }
+      }
+    }
+  }
+}

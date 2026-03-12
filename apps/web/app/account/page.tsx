@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Container, Section } from '@/components/layout';
 import { Button } from '@/components/ui';
-import { User, Heart, MessageSquare, LogIn, Package } from 'lucide-react';
+import { User, Heart, MessageSquare, LogIn, Package, Settings } from 'lucide-react';
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -49,12 +49,18 @@ export default function AccountPage() {
             <div className="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
               <User className="w-10 h-10 text-primary-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-heading-2 font-serif text-neutral-900">
                 {session.user.name || 'Art Collector'}
               </h2>
               <p className="text-body text-neutral-600">{session.user.email}</p>
             </div>
+            <Link href="/account/profile">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Settings className="w-4 h-4" />
+                Edit Profile
+              </Button>
+            </Link>
           </div>
         </div>
 

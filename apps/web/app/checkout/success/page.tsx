@@ -17,28 +17,46 @@ function CheckoutSuccessContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Small delay to allow webhook to process
-    const timer = setTimeout(async () => {
-      if (!session?.accessToken) {
-        setLoading(false);
-        return;
-      }
+    if (!session?.accessToken) {
+      setLoading(false);
+      return;
+    }
 
-      apiClient.setAccessToken(session.accessToken ?? null);
+    apiClient.setAccessToken(session.accessToken ?? null);
+
+    let cancelled = false;
+    const maxAttempts = 5;
+    const delayMs = 2000;
+
+    async function pollOrder(attempt: number) {
+      if (cancelled) return;
 
       try {
         const res = await apiClient.getOrders({ limit: 1 });
-        if (res.data && res.data.length > 0) {
-          setOrder(res.data[0]);
+        if (res.data && res.data.length > 0 && res.data[0].status === 'PAID') {
+          if (!cancelled) setOrder(res.data[0]);
+          if (!cancelled) setLoading(false);
+          return;
         }
       } catch {
         // Order might not be updated yet
-      } finally {
+      }
+
+      if (attempt < maxAttempts && !cancelled) {
+        setTimeout(() => pollOrder(attempt + 1), delayMs);
+      } else if (!cancelled) {
+        // Show success anyway after timeout — webhook may still be processing
         setLoading(false);
       }
-    }, 2000);
+    }
 
-    return () => clearTimeout(timer);
+    // Initial delay to give webhook time to process
+    const timer = setTimeout(() => pollOrder(1), delayMs);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [session?.accessToken, sessionId]);
 
   const formatPrice = (price: string, currency: string) =>
@@ -98,7 +116,15 @@ function CheckoutSuccessContent() {
               </span>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <p className="text-sm text-neutral-500 mb-8">
+            Your order details will appear in your{' '}
+            <Link href="/account/orders" className="text-primary-600 hover:underline">
+              order history
+            </Link>{' '}
+            shortly.
+          </p>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/account/orders">

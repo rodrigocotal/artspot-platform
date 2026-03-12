@@ -1,25 +1,41 @@
 'use client';
 
 import * as React from 'react';
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
-import { Button, useToast } from '@/components/ui';
-import { Input } from '@/components/ui';
-import { Label } from '@/components/ui';
+import { Button, Input, Label } from '@/components/ui';
+import { Loader2 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-export default function RegisterPage() {
-  const router = useRouter();
-  const { toast } = useToast();
+function ResetPasswordForm() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
 
-  const [name, setName] = React.useState('');
-  const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
-  const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  if (!token) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center px-4">
+        <div className="w-full max-w-md text-center space-y-4">
+          <h1 className="font-serif text-3xl font-semibold text-neutral-900">
+            Invalid Link
+          </h1>
+          <p className="text-neutral-600">
+            This password reset link is invalid or has expired.
+          </p>
+          <Link href="/forgot-password" className="inline-block font-medium text-primary-600 hover:text-primary-700">
+            Request a new link
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -33,36 +49,20 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // Register via API
-      const res = await fetch(`${API_URL}/auth/register`, {
+      const res = await fetch(`${API_URL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ token, password }),
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ message: 'Registration failed' }));
-        setError(data.message || 'Registration failed');
+        const data = await res.json().catch(() => ({ message: 'Something went wrong' }));
+        setError(data.message || 'Something went wrong');
         setLoading(false);
         return;
       }
 
-      // Auto-login after registration
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        // Registration worked but auto-login failed — redirect to login
-        toast('Account created! Please sign in.', 'success');
-        router.push('/login');
-      } else {
-        toast('Welcome to ArtAldo!', 'success');
-        router.push('/');
-        router.refresh();
-      }
+      setSuccess(true);
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
@@ -70,15 +70,33 @@ export default function RegisterPage() {
     }
   }
 
+  if (success) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center px-4">
+        <div className="w-full max-w-md text-center space-y-6">
+          <h1 className="font-serif text-3xl font-semibold text-neutral-900">
+            Password Reset
+          </h1>
+          <p className="text-neutral-600">
+            Your password has been reset successfully. You can now sign in with your new password.
+          </p>
+          <Link href="/login">
+            <Button className="w-full">Sign In</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="font-serif text-3xl font-semibold text-neutral-900">
-            Create Account
+            Set New Password
           </h1>
           <p className="mt-2 text-neutral-600">
-            Join ArtSpot to start collecting
+            Enter your new password below.
           </p>
         </div>
 
@@ -90,33 +108,7 @@ export default function RegisterPage() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="name" required>Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              autoComplete="name"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email" required>Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password" required>Password</Label>
+            <Label htmlFor="password" required>New Password</Label>
             <Input
               id="password"
               type="password"
@@ -133,7 +125,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" required>Confirm Password</Label>
+            <Label htmlFor="confirmPassword" required>Confirm New Password</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -147,17 +139,24 @@ export default function RegisterPage() {
           </div>
 
           <Button type="submit" className="w-full" loading={loading}>
-            Create Account
+            Reset Password
           </Button>
         </form>
-
-        <p className="text-center text-sm text-neutral-600">
-          Already have an account?{' '}
-          <Link href="/login" className="font-medium text-primary-600 hover:text-primary-700">
-            Sign in
-          </Link>
-        </p>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[80vh] items-center justify-center">
+          <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+        </div>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

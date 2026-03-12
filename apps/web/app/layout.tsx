@@ -1,5 +1,10 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Inter } from 'next/font/google';
+import { Header, Footer } from '@/components/layout';
+import { SkipToContent } from '@/components/layout/skip-to-content';
+import { SessionProvider } from '@/components/providers/session-provider';
+import { QueryProvider } from '@/components/providers/query-provider';
+import { CartProvider } from '@/components/providers/cart-provider';
 import './globals.css';
 
 const serif = Cormorant_Garamond({
@@ -29,7 +34,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable}`}>
       <body className="font-sans antialiased bg-neutral-50 text-neutral-900">
-        {children}
+        <QueryProvider>
+          <SessionProvider>
+            <CartProvider>
+              <SkipToContent />
+              <Header />
+              <main id="main-content" className="min-h-screen">
+                {children}
+              </main>
+              <Footer />
+            </CartProvider>
+          </SessionProvider>
+        </QueryProvider>
       </body>
     </html>
   );

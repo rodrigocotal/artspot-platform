@@ -9,12 +9,19 @@ const router: Router = Router();
  * @access  Public
  */
 router.get('/', (_req: Request, res: Response) => {
+  const mem = process.memoryUsage();
   res.status(200).json({
     success: true,
     message: 'ArtSpot API is running',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
+    version: process.env.npm_package_version || '1.0.0',
+    memory: {
+      heapUsedMB: Math.round(mem.heapUsed / 1024 / 1024),
+      heapTotalMB: Math.round(mem.heapTotal / 1024 / 1024),
+      rssMB: Math.round(mem.rss / 1024 / 1024),
+    },
   });
 });
 

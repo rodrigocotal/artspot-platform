@@ -1,52 +1,120 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui';
+import { Container, Section } from '@/components/layout';
+import { apiClient } from '@/lib/api-client';
+
+const DEFAULTS = {
+  heroBadgeText: 'Platform in Development — Phase 1',
+  heroHeadline: 'Discover Museum-Quality Art',
+  heroSubtitle:
+    'Elevating the experience of collecting art online. We believe collecting art goes beyond ownership—it is valued as a personal, intellectual, and emotional asset.',
+  heroPrimaryCta: 'Explore Collection',
+  heroPrimaryCtaLink: '/artworks',
+  heroSecondaryCta: 'Browse Artists',
+  heroSecondaryCtaLink: '/artists',
+  featuresHeadline: 'Why Collectors Choose ArtSpot',
+  featuresSubtitle: 'A premium platform designed for serious art collectors',
+  features: [
+    {
+      icon: '🎨',
+      title: 'Curated Selection',
+      description:
+        'Every artwork is carefully selected by our team of art experts guided by institutional standards.',
+    },
+    {
+      icon: '✓',
+      title: 'Authenticity Guaranteed',
+      description:
+        'Certificates of authenticity and provenance for all works based on honesty and trust.',
+    },
+    {
+      icon: '🤝',
+      title: 'Collector Services',
+      description:
+        'Personalized assistance and art advisory services for discerning collectors.',
+    },
+  ],
+};
+
 export default function HomePage() {
+  const [content, setContent] = useState(DEFAULTS);
+
+  useEffect(() => {
+    apiClient
+      .getPageContent('home')
+      .then((res) => {
+        setContent({ ...DEFAULTS, ...res.data.content });
+      })
+      .catch(() => {
+        // CMS unreachable — keep defaults
+      });
+  }, []);
+
+  const rawFeatures = content.features?.items ?? content.features;
+  const features = Array.isArray(rawFeatures) ? rawFeatures : DEFAULTS.features;
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8">
-      <div className="max-w-4xl mx-auto text-center space-y-8">
-        {/* Logo/Brand */}
-        <div className="space-y-4">
-          <h1 className="font-serif text-display text-neutral-900">
-            ArtSpot
+    <>
+      {/* Hero Section */}
+      <Section
+        spacing="xl"
+        className="relative flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-50"
+      >
+        <Container size="md" className="text-center space-y-8">
+          {content.heroBadgeText && (
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-primary-50 border border-primary-200 rounded-full">
+              <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
+              <span className="text-sm font-medium text-primary-700">
+                {content.heroBadgeText}
+              </span>
+            </div>
+          )}
+
+          <h1 className="text-display-lg font-serif text-neutral-900">
+            {content.heroHeadline}
           </h1>
-          <p className="font-serif text-heading-4 text-neutral-600 italic">
-            Atelier ArtSpot
+          <p className="text-body-lg text-neutral-600 max-w-2xl mx-auto leading-relaxed">
+            {content.heroSubtitle}
           </p>
-        </div>
-
-        {/* Tagline */}
-        <div className="space-y-4 max-w-2xl mx-auto">
-          <h2 className="font-serif text-heading-2 text-neutral-800">
-            Elevating the Experience of Collecting Art Online
-          </h2>
-          <p className="text-body-lg text-neutral-600 leading-relaxed">
-            We believe collecting art goes beyond ownership or decoration—it is valued as a personal,
-            intellectual, and emotional asset. Our platform prioritizes curation and expertise guided
-            by institutional standards and values based on honesty and trust.
-          </p>
-        </div>
-
-        {/* Status Badge */}
-        <div className="inline-flex items-center gap-3 px-6 py-3 bg-primary-50 border border-primary-200 rounded-full">
-          <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></div>
-          <span className="text-sm font-medium text-primary-700">
-            Platform in Development - Phase 1
-          </span>
-        </div>
-
-        {/* Tech Stack Info */}
-        <div className="pt-8 border-t border-neutral-200">
-          <p className="text-body-sm text-neutral-500 mb-4">
-            Built with Next.js 15 + React 19 + TypeScript + Tailwind CSS
-          </p>
-          <div className="flex items-center justify-center gap-2">
-            <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm">
-              <svg className="w-2 h-2 fill-current" viewBox="0 0 8 8">
-                <circle cx="4" cy="4" r="4" />
-              </svg>
-              Development Server Running
-            </span>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Link href={content.heroPrimaryCtaLink}>
+              <Button size="lg">{content.heroPrimaryCta}</Button>
+            </Link>
+            <Link href={content.heroSecondaryCtaLink}>
+              <Button size="lg" variant="outline">{content.heroSecondaryCta}</Button>
+            </Link>
           </div>
-        </div>
-      </div>
-    </main>
+        </Container>
+      </Section>
+
+      {/* Features Section */}
+      <Section spacing="lg" background="white">
+        <Container>
+          <div className="text-center mb-16">
+            <h2 className="text-heading-1 font-serif text-neutral-900 mb-4">
+              {content.featuresHeadline}
+            </h2>
+            <p className="text-body-lg text-neutral-600 max-w-2xl mx-auto">
+              {content.featuresSubtitle}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {features.map((feature: any) => (
+              <div key={feature.title} className="text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mx-auto">
+                  <span className="text-2xl">{feature.icon}</span>
+                </div>
+                <h3 className="text-heading-3 font-serif text-neutral-900">{feature.title}</h3>
+                <p className="text-body text-neutral-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </Section>
+    </>
   );
 }

@@ -18,6 +18,7 @@ import pageContentsRouter from './routes/page-contents';
 import cartRouter from './routes/cart';
 import ordersRouter from './routes/orders';
 import { initializeCloudinary } from './config/cloudinary';
+import { authLimiter, inquiryLimiter, generalLimiter } from './middleware/rate-limit';
 
 // Initialize Cloudinary (skip in test environment)
 if (config.nodeEnv !== 'test') {
@@ -51,6 +52,13 @@ if (config.nodeEnv !== 'test') {
   } else {
     app.use(morgan('combined'));
   }
+}
+
+// Rate limiting (skip in test environment)
+if (config.nodeEnv !== 'test') {
+  app.use('/auth', authLimiter);
+  app.use('/inquiries', inquiryLimiter);
+  app.use(generalLimiter);
 }
 
 // Routes

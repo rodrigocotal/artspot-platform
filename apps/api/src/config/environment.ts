@@ -11,6 +11,8 @@ export const config = {
         'http://localhost:3001',
         'https://main.db0y1lrxbre06.amplifyapp.com',
         'https://develop.db0y1lrxbre06.amplifyapp.com',
+        'https://www.artaldo.com',
+        'https://artaldo.com',
       ],
 
   // Database

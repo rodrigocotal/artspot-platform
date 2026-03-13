@@ -187,6 +187,8 @@ jobs:
           JWT_SECRET: ci-e2e-jwt-secret
           JWT_REFRESH_SECRET: ci-e2e-jwt-refresh-secret
           ALLOWED_ORIGINS: '*'
+          AUTH_SECRET: ci-e2e-auth-secret
+          NEXTAUTH_SECRET: ci-e2e-auth-secret
           NEXT_PUBLIC_API_URL: http://localhost:4000
           NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: placeholder
 

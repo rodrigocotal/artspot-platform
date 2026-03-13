@@ -77,38 +77,6 @@ export class AuthController {
     }
   }
 
-  async forgotPassword(req: Request, res: Response, next: NextFunction) {
-    try {
-      const data = forgotPasswordSchema.parse(req.body);
-      await authService.forgotPassword(data);
-
-      // Always return success to prevent email enumeration
-      res.json({
-        success: true,
-        message: 'If an account with that email exists, a password reset link has been sent.',
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async resetPassword(req: Request, res: Response, next: NextFunction) {
-    try {
-      const data = resetPasswordSchema.parse(req.body);
-      await authService.resetPassword(data);
-
-      res.json({
-        success: true,
-        message: 'Password has been reset successfully.',
-      });
-    } catch (error) {
-      if (error instanceof Error && error.message === 'Invalid or expired reset token') {
-        return next(new AppError('Invalid or expired reset token', 400));
-      }
-      next(error);
-    }
-  }
-
   async getProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).userId;
@@ -125,16 +93,35 @@ export class AuthController {
       next(error);
     }
   }
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = forgotPasswordSchema.parse(req.body);
+      await authService.forgotPassword(email);
+      res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token, password } = resetPasswordSchema.parse(req.body);
+      await authService.resetPassword(token, password);
+      res.json({ success: true, message: 'Password reset successfully.' });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Invalid or expired reset token') {
+        return next(new AppError('Invalid or expired reset token', 400));
+      }
+      next(error);
+    }
+  }
+
   async updateProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).userId;
       const data = updateProfileSchema.parse(req.body);
       const user = await authService.updateProfile(userId, data);
-
-      res.json({
-        success: true,
-        data: user,
-      });
+      res.json({ success: true, data: user });
     } catch (error) {
       if (error instanceof Error && error.message === 'Email already in use') {
         return next(new AppError('Email already in use', 409));
@@ -146,13 +133,9 @@ export class AuthController {
   async changePassword(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).userId;
-      const data = changePasswordSchema.parse(req.body);
-      await authService.changePassword(userId, data);
-
-      res.json({
-        success: true,
-        message: 'Password changed successfully.',
-      });
+      const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
+      await authService.changePassword(userId, currentPassword, newPassword);
+      res.json({ success: true, message: 'Password changed successfully.' });
     } catch (error) {
       if (error instanceof Error && error.message === 'Current password is incorrect') {
         return next(new AppError('Current password is incorrect', 400));

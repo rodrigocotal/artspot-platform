@@ -5,7 +5,7 @@ import { SkipToContent } from '@/components/layout/skip-to-content';
 import { SessionProvider } from '@/components/providers/session-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { CartProvider } from '@/components/providers/cart-provider';
-import { ToastProvider } from '@/components/ui';
+import { ToastProvider } from '@/components/ui/toast';
 import './globals.css';
 
 const serif = Cormorant_Garamond({

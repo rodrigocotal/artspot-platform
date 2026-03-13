@@ -9,7 +9,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 export default function ForgotPasswordPage() {
   const [email, setEmail] = React.useState('');
   const [loading, setLoading] = React.useState(false);
-  const [submitted, setSubmitted] = React.useState(false);
+  const [sent, setSent] = React.useState(false);
   const [error, setError] = React.useState('');
 
   async function handleSubmit(e: React.FormEvent) {
@@ -25,13 +25,13 @@ export default function ForgotPasswordPage() {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ message: 'Something went wrong' }));
+        const data = await res.json().catch(() => ({}));
         setError(data.message || 'Something went wrong');
         setLoading(false);
         return;
       }
 
-      setSubmitted(true);
+      setSent(true);
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
@@ -39,18 +39,16 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  if (submitted) {
+  if (sent) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4">
         <div className="w-full max-w-md space-y-6 text-center">
-          <h1 className="font-serif text-3xl font-semibold text-neutral-900">
-            Check Your Email
-          </h1>
+          <h1 className="font-serif text-3xl font-semibold text-neutral-900">Check Your Email</h1>
           <p className="text-neutral-600">
-            If an account with <strong>{email}</strong> exists, we&apos;ve sent a password reset link. Please check your inbox.
+            If an account exists for <strong>{email}</strong>, we&apos;ve sent a password reset link.
           </p>
-          <Link href="/login" className="inline-block font-medium text-primary-600 hover:text-primary-700">
-            Back to Sign In
+          <Link href="/login">
+            <Button variant="outline">Back to Sign In</Button>
           </Link>
         </div>
       </div>
@@ -61,12 +59,8 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="font-serif text-3xl font-semibold text-neutral-900">
-            Forgot Password
-          </h1>
-          <p className="mt-2 text-neutral-600">
-            Enter your email and we&apos;ll send you a reset link.
-          </p>
+          <h1 className="font-serif text-3xl font-semibold text-neutral-900">Forgot Password</h1>
+          <p className="mt-2 text-neutral-600">Enter your email to receive a reset link</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

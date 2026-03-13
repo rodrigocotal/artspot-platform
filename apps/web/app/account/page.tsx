@@ -116,6 +116,23 @@ export default function AccountPage() {
               </div>
             </div>
           </Link>
+
+          <Link
+            href="/account/profile"
+            className="group bg-white rounded-xl p-6 hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                <Settings className="w-6 h-6 text-neutral-500" />
+              </div>
+              <div>
+                <h3 className="text-heading-4 font-serif text-neutral-900 group-hover:text-primary-600 transition-colors">
+                  Edit Profile
+                </h3>
+                <p className="text-sm text-neutral-600">Update your info & password</p>
+              </div>
+            </div>
+          </Link>
         </div>
       </Container>
     </Section>

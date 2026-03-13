@@ -4,6 +4,7 @@ const API_PORT = 4000;
 const WEB_PORT = 3000;
 
 export default defineConfig({
+  globalSetup: './e2e/global-setup.ts',
   testDir: './e2e',
   fullyParallel: false,
   workers: 1,
@@ -50,8 +51,8 @@ export default defineConfig({
       timeout: 30_000,
       env: {
         NEXT_PUBLIC_API_URL: `http://localhost:${API_PORT}`,
-        ...(process.env.AUTH_SECRET && { AUTH_SECRET: process.env.AUTH_SECRET }),
-        ...(process.env.NEXTAUTH_SECRET && { NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET }),
+        AUTH_SECRET: process.env.AUTH_SECRET || 'e2e-test-auth-secret-at-least-32-chars',
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'e2e-test-auth-secret-at-least-32-chars',
       },
     },
   ],

@@ -2,10 +2,9 @@
 
 import * as React from 'react';
 import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Button, Input, Label } from '@/components/ui';
-import { Loader2 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -21,18 +20,12 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="flex min-h-[80vh] items-center justify-center px-4">
-        <div className="w-full max-w-md text-center space-y-4">
-          <h1 className="font-serif text-3xl font-semibold text-neutral-900">
-            Invalid Link
-          </h1>
-          <p className="text-neutral-600">
-            This password reset link is invalid or has expired.
-          </p>
-          <Link href="/forgot-password" className="inline-block font-medium text-primary-600 hover:text-primary-700">
-            Request a new link
-          </Link>
-        </div>
+      <div className="w-full max-w-md space-y-6 text-center">
+        <h1 className="font-serif text-3xl font-semibold text-neutral-900">Invalid Link</h1>
+        <p className="text-neutral-600">This password reset link is invalid or has expired.</p>
+        <Link href="/forgot-password">
+          <Button>Request New Link</Button>
+        </Link>
       </div>
     );
   }
@@ -56,8 +49,8 @@ function ResetPasswordForm() {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ message: 'Something went wrong' }));
-        setError(data.message || 'Something went wrong');
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || 'Failed to reset password');
         setLoading(false);
         return;
       }
@@ -72,91 +65,72 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="flex min-h-[80vh] items-center justify-center px-4">
-        <div className="w-full max-w-md text-center space-y-6">
-          <h1 className="font-serif text-3xl font-semibold text-neutral-900">
-            Password Reset
-          </h1>
-          <p className="text-neutral-600">
-            Your password has been reset successfully. You can now sign in with your new password.
-          </p>
-          <Link href="/login">
-            <Button className="w-full">Sign In</Button>
-          </Link>
-        </div>
+      <div className="w-full max-w-md space-y-6 text-center">
+        <h1 className="font-serif text-3xl font-semibold text-neutral-900">Password Reset</h1>
+        <p className="text-neutral-600">Your password has been reset successfully.</p>
+        <Link href="/login">
+          <Button>Sign In</Button>
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="font-serif text-3xl font-semibold text-neutral-900">
-            Set New Password
-          </h1>
-          <p className="mt-2 text-neutral-600">
-            Enter your new password below.
-          </p>
+    <div className="w-full max-w-md space-y-8">
+      <div className="text-center">
+        <h1 className="font-serif text-3xl font-semibold text-neutral-900">Set New Password</h1>
+        <p className="mt-2 text-neutral-600">Enter your new password below</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <div role="alert" className="rounded-lg bg-error-50 border border-error-200 p-4 text-sm text-error-700">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="password" required>New Password</Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="Min 8 chars, 1 uppercase, 1 number"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+            autoComplete="new-password"
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div role="alert" className="rounded-lg bg-error-50 border border-error-200 p-4 text-sm text-error-700">
-              {error}
-            </div>
-          )}
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword" required>Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="Re-enter your password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={8}
+            autoComplete="new-password"
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" required>New Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Min 8 chars, 1 uppercase, 1 number"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-            <p className="text-xs text-neutral-500">
-              At least 8 characters, one uppercase letter, and one number
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword" required>Confirm New Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </div>
-
-          <Button type="submit" className="w-full" loading={loading}>
-            Reset Password
-          </Button>
-        </form>
-      </div>
+        <Button type="submit" className="w-full" loading={loading}>
+          Reset Password
+        </Button>
+      </form>
     </div>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[80vh] items-center justify-center">
-          <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
-        </div>
-      }
-    >
-      <ResetPasswordForm />
-    </Suspense>
+    <div className="flex min-h-[80vh] items-center justify-center px-4">
+      <Suspense fallback={<div className="text-neutral-500">Loading...</div>}>
+        <ResetPasswordForm />
+      </Suspense>
+    </div>
   );
 }

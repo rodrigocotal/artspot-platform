@@ -3,8 +3,7 @@ import jwt, { type SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '../config/database';
 import { config } from '../config/environment';
-import type { RegisterInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, UpdateProfileInput, ChangePasswordInput } from '../validators/auth.validator';
-import { emailService } from './email.service';
+import type { RegisterInput, LoginInput } from '../validators/auth.validator';
 
 const SALT_ROUNDS = 12;
 const REFRESH_TOKEN_DAYS = 7;
@@ -95,7 +94,49 @@ export class AuthService {
     return user;
   }
 
-  async updateProfile(userId: string, data: UpdateProfileInput) {
+  async forgotPassword(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return; // Silent to prevent email enumeration
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetToken: hashedToken, resetTokenExpiry: expiry } as any,
+    });
+
+    const { emailService } = await import('./email.service');
+    emailService.sendPasswordResetEmail(email, rawToken, user.name || 'there');
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: hashedToken,
+        resetTokenExpiry: { gt: new Date() },
+      } as any,
+    });
+
+    if (!user) throw new Error('Invalid or expired reset token');
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash, resetToken: null, resetTokenExpiry: null } as any,
+    });
+
+    await prisma.refreshToken.updateMany({
+      where: { userId: user.id, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
+  async updateProfile(userId: string, data: { name?: string; email?: string }) {
     if (data.email) {
       const existing = await prisma.user.findFirst({
         where: { email: data.email, id: { not: userId } },
@@ -103,83 +144,25 @@ export class AuthService {
       if (existing) throw new Error('Email already in use');
     }
 
-    const user = await prisma.user.update({
+    return prisma.user.update({
       where: { id: userId },
-      data: {
-        ...(data.name !== undefined && { name: data.name }),
-        ...(data.email !== undefined && { email: data.email }),
-      },
+      data,
       select: safeUserSelect,
     });
-    return user;
   }
 
-  async changePassword(userId: string, data: ChangePasswordInput) {
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || !user.passwordHash) throw new Error('User not found');
 
-    const valid = await bcrypt.compare(data.currentPassword, user.passwordHash);
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!valid) throw new Error('Current password is incorrect');
 
-    const passwordHash = await bcrypt.hash(data.newPassword, SALT_ROUNDS);
-    await prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash },
-    });
-  }
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
 
-  async forgotPassword(data: ForgotPasswordInput) {
-    const user = await prisma.user.findUnique({ where: { email: data.email } });
-    // Always return success to prevent email enumeration
-    if (!user) return;
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
-    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        resetToken: resetTokenHash,
-        resetTokenExpiry: resetTokenExpiry,
-      } as any,
-    });
-
-    // Send reset email (fire-and-forget)
-    const resetUrl = `${config.apiUrl.replace('/api', '').replace(':4000', ':3000')}/reset-password?token=${resetToken}`;
-    emailService.sendPasswordResetEmail({
-      email: data.email,
-      name: user.name || 'Customer',
-      resetUrl,
-    });
-  }
-
-  async resetPassword(data: ResetPasswordInput) {
-    const tokenHash = crypto.createHash('sha256').update(data.token).digest('hex');
-
-    const user = await prisma.user.findFirst({
-      where: {
-        resetToken: tokenHash,
-        resetTokenExpiry: { gt: new Date() },
-      } as any,
-    });
-
-    if (!user) throw new Error('Invalid or expired reset token');
-
-    const passwordHash = await bcrypt.hash(data.password, SALT_ROUNDS);
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        passwordHash,
-        resetToken: null,
-        resetTokenExpiry: null,
-      } as any,
-    });
-
-    // Revoke all refresh tokens for security
     await prisma.refreshToken.updateMany({
-      where: { userId: user.id },
+      where: { userId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
   }

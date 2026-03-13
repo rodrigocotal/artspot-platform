@@ -5,7 +5,6 @@ import { config } from '../config/environment';
 import { AppError } from '../middleware/error-handler';
 import { cartService } from './cart.service';
 import { strapiClient } from './strapi-client';
-import { emailService } from './email.service';
 import type { CreatePaymentLinkInput, ListOrdersQuery } from '../validators/order.validator';
 import crypto from 'crypto';
 
@@ -268,22 +267,22 @@ export class OrderService {
       }
     });
 
-    // Send order emails (fire-and-forget)
-    const emailData = {
-      orderNumber: order.orderNumber,
-      customerName: order.customerName || 'Customer',
-      customerEmail: order.customerEmail,
-      items: order.items.map((item) => ({
-        title: item.title,
-        artistName: item.artistName,
-        price: item.price.toString(),
-        currency: item.currency,
-      })),
-      subtotal: order.subtotal.toString(),
-      currency: order.currency,
-    };
-    emailService.sendOrderConfirmationEmail(emailData);
-    emailService.sendNewOrderNotification(emailData);
+    // Send email notifications (fire-and-forget)
+    import('./email.service').then(({ emailService }) => {
+      const emailData = {
+        orderNumber: order.orderNumber,
+        customerName: order.customerName || 'Customer',
+        customerEmail: order.customerEmail,
+        items: order.items.map((item) => ({
+          title: item.title, artistName: item.artistName,
+          price: item.price.toString(), currency: item.currency,
+        })),
+        subtotal: order.subtotal.toString(),
+        currency: order.currency,
+      };
+      emailService.sendOrderConfirmationEmail(emailData);
+      emailService.sendNewOrderNotification(emailData);
+    });
 
     // Reverse sync to Strapi (fire-and-forget)
     this.syncArtworkStatusToStrapi(order.items.map((i) => i.artworkId), 'SOLD');

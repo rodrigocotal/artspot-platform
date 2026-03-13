@@ -24,39 +24,33 @@ function CheckoutSuccessContent() {
 
     apiClient.setAccessToken(session.accessToken ?? null);
 
-    let cancelled = false;
+    let attempt = 0;
     const maxAttempts = 5;
-    const delayMs = 2000;
+    let cancelled = false;
 
-    async function pollOrder(attempt: number) {
+    const poll = async () => {
       if (cancelled) return;
-
+      attempt++;
       try {
         const res = await apiClient.getOrders({ limit: 1 });
         if (res.data && res.data.length > 0 && res.data[0].status === 'PAID') {
-          if (!cancelled) setOrder(res.data[0]);
-          if (!cancelled) setLoading(false);
+          setOrder(res.data[0]);
+          setLoading(false);
           return;
         }
       } catch {
-        // Order might not be updated yet
+        // ignore
       }
 
       if (attempt < maxAttempts && !cancelled) {
-        setTimeout(() => pollOrder(attempt + 1), delayMs);
-      } else if (!cancelled) {
-        // Show success anyway after timeout — webhook may still be processing
+        setTimeout(poll, 2000);
+      } else {
         setLoading(false);
       }
-    }
-
-    // Initial delay to give webhook time to process
-    const timer = setTimeout(() => pollOrder(1), delayMs);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
     };
+
+    const timer = setTimeout(poll, 2000);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [session?.accessToken, sessionId]);
 
   const formatPrice = (price: string, currency: string) =>
@@ -117,13 +111,12 @@ function CheckoutSuccessContent() {
             </div>
           </div>
         ) : (
-          <p className="text-sm text-neutral-500 mb-8">
-            Your order details will appear in your{' '}
-            <Link href="/account/orders" className="text-primary-600 hover:underline">
-              order history
-            </Link>{' '}
-            shortly.
-          </p>
+          <div className="bg-white rounded-xl p-6 mb-8 max-w-md mx-auto">
+            <p className="text-body text-neutral-600">
+              Your order is being processed. Check your email for confirmation details,
+              or visit your <Link href="/account/orders" className="text-primary-600 hover:text-primary-700 font-medium">order history</Link> shortly.
+            </p>
+          </div>
         )}
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

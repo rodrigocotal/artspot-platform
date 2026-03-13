@@ -16,14 +16,14 @@ router.post('/refresh', authController.refresh.bind(authController));
 // POST /auth/logout
 router.post('/logout', authController.logout.bind(authController));
 
+// GET /auth/profile (protected)
+router.get('/profile', authenticate, authController.getProfile.bind(authController));
+
 // POST /auth/forgot-password
 router.post('/forgot-password', authController.forgotPassword.bind(authController));
 
 // POST /auth/reset-password
 router.post('/reset-password', authController.resetPassword.bind(authController));
-
-// GET /auth/profile (protected)
-router.get('/profile', authenticate, authController.getProfile.bind(authController));
 
 // PATCH /auth/profile (protected)
 router.patch('/profile', authenticate, authController.updateProfile.bind(authController));

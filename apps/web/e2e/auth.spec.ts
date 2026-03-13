@@ -7,7 +7,8 @@ test.describe('Authentication', () => {
     await expect(page.getByRole('heading', { name: 'Create Account' })).toBeVisible();
     await expect(page.getByLabel('Name')).toBeVisible();
     await expect(page.getByLabel('Email')).toBeVisible();
-    await expect(page.getByLabel('Password')).toBeVisible();
+    await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Confirm Password')).toBeVisible();
   });
 
   test('login page loads with form', async ({ page }) => {
@@ -23,7 +24,8 @@ test.describe('Authentication', () => {
     await page.goto('/register');
     await page.getByLabel('Name').fill('E2E Registration Test');
     await page.getByLabel('Email').fill(email);
-    await page.getByLabel('Password').fill('TestPass123');
+    await page.getByLabel('Password', { exact: true }).fill('TestPass123');
+    await page.getByLabel('Confirm Password').fill('TestPass123');
     await page.getByRole('button', { name: 'Create Account' }).click();
 
     // Should redirect to home or login after registration

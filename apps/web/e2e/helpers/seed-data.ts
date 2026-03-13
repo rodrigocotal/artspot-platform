@@ -1,12 +1,14 @@
 /**
- * E2E Global Setup — Seeds the test database with minimal data
- * so browse/favorites/inquiry tests have artworks to interact with.
+ * Seeds the test database with minimal data for E2E tests.
+ * Call from test.beforeAll() — at that point webServers are running.
  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-async function globalSetup() {
-  console.log('[E2E Setup] Seeding test data...');
+let seeded = false;
+
+export async function seedTestData() {
+  if (seeded) return;
 
   try {
     // Check if artworks already exist
@@ -14,7 +16,7 @@ async function globalSetup() {
     if (checkRes.ok) {
       const checkData = await checkRes.json();
       if (checkData.data && checkData.data.length > 0) {
-        console.log('[E2E Setup] Test data already exists, skipping seed.');
+        seeded = true;
         return;
       }
     }
@@ -31,20 +33,12 @@ async function globalSetup() {
       }),
     });
 
-    if (!artistRes.ok) {
-      console.warn('[E2E Setup] Could not create artist:', artistRes.status, await artistRes.text());
-      return;
-    }
+    if (!artistRes.ok) return;
 
     const artistData = await artistRes.json();
     const artistId = artistData.data?.id;
+    if (!artistId) return;
 
-    if (!artistId) {
-      console.warn('[E2E Setup] No artist ID returned');
-      return;
-    }
-
-    // Create test artworks
     const artworks = [
       { title: 'Sunset Over Mountains', medium: 'PAINTING', style: 'LANDSCAPE', price: 2500 },
       { title: 'Abstract Composition No. 7', medium: 'PAINTING', style: 'ABSTRACT', price: 3200 },
@@ -52,7 +46,7 @@ async function globalSetup() {
     ];
 
     for (const artwork of artworks) {
-      const res = await fetch(`${API_URL}/artworks`, {
+      await fetch(`${API_URL}/artworks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -65,16 +59,10 @@ async function globalSetup() {
           currency: 'USD',
         }),
       });
-
-      if (!res.ok) {
-        console.warn(`[E2E Setup] Could not create artwork "${artwork.title}":`, res.status);
-      }
     }
 
-    console.log('[E2E Setup] Test data seeded successfully.');
-  } catch (error) {
-    console.warn('[E2E Setup] Seed failed (tests will handle empty state):', error);
+    seeded = true;
+  } catch {
+    // Seed failed — tests will handle empty state gracefully
   }
 }
-
-export default globalSetup;

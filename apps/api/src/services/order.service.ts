@@ -267,6 +267,23 @@ export class OrderService {
       }
     });
 
+    // Send email notifications (fire-and-forget)
+    import('./email.service').then(({ emailService }) => {
+      const emailData = {
+        orderNumber: order.orderNumber,
+        customerName: order.customerName || 'Customer',
+        customerEmail: order.customerEmail,
+        items: order.items.map((item) => ({
+          title: item.title, artistName: item.artistName,
+          price: item.price.toString(), currency: item.currency,
+        })),
+        subtotal: order.subtotal.toString(),
+        currency: order.currency,
+      };
+      emailService.sendOrderConfirmationEmail(emailData);
+      emailService.sendNewOrderNotification(emailData);
+    });
+
     // Reverse sync to Strapi (fire-and-forget)
     this.syncArtworkStatusToStrapi(order.items.map((i) => i.artworkId), 'SOLD');
   }

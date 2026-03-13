@@ -16,12 +16,19 @@ export default function RegisterPage() {
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -120,6 +127,20 @@ export default function RegisterPage() {
             <p className="text-xs text-neutral-500">
               At least 8 characters, one uppercase letter, and one number
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" required>Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="Re-enter your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+            />
           </div>
 
           <Button type="submit" className="w-full" loading={loading}>

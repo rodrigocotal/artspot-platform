@@ -36,3 +36,4 @@ export {
   type SkeletonProps,
 } from './skeleton';
 export { LiveRegion, type LiveRegionProps } from './live-region';
+export { ToastProvider, useToast } from './toast';

@@ -94,6 +94,79 @@ export class AuthService {
     return user;
   }
 
+  async forgotPassword(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return; // Silent to prevent email enumeration
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetToken: hashedToken, resetTokenExpiry: expiry } as any,
+    });
+
+    const { emailService } = await import('./email.service');
+    emailService.sendPasswordResetEmail(email, rawToken, user.name || 'there');
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: hashedToken,
+        resetTokenExpiry: { gt: new Date() },
+      } as any,
+    });
+
+    if (!user) throw new Error('Invalid or expired reset token');
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash, resetToken: null, resetTokenExpiry: null } as any,
+    });
+
+    await prisma.refreshToken.updateMany({
+      where: { userId: user.id, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
+  async updateProfile(userId: string, data: { name?: string; email?: string }) {
+    if (data.email) {
+      const existing = await prisma.user.findFirst({
+        where: { email: data.email, id: { not: userId } },
+      });
+      if (existing) throw new Error('Email already in use');
+    }
+
+    return prisma.user.update({
+      where: { id: userId },
+      data,
+      select: safeUserSelect,
+    });
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.passwordHash) throw new Error('User not found');
+
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) throw new Error('Current password is incorrect');
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+
+    await prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
   verifyAccessToken(token: string): { sub: string } {
     return jwt.verify(token, config.jwtSecret) as { sub: string };
   }

@@ -17,28 +17,40 @@ function CheckoutSuccessContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Small delay to allow webhook to process
-    const timer = setTimeout(async () => {
-      if (!session?.accessToken) {
-        setLoading(false);
-        return;
-      }
+    if (!session?.accessToken) {
+      setLoading(false);
+      return;
+    }
 
-      apiClient.setAccessToken(session.accessToken ?? null);
+    apiClient.setAccessToken(session.accessToken ?? null);
 
+    let attempt = 0;
+    const maxAttempts = 5;
+    let cancelled = false;
+
+    const poll = async () => {
+      if (cancelled) return;
+      attempt++;
       try {
         const res = await apiClient.getOrders({ limit: 1 });
-        if (res.data && res.data.length > 0) {
+        if (res.data && res.data.length > 0 && res.data[0].status === 'PAID') {
           setOrder(res.data[0]);
+          setLoading(false);
+          return;
         }
       } catch {
-        // Order might not be updated yet
-      } finally {
+        // ignore
+      }
+
+      if (attempt < maxAttempts && !cancelled) {
+        setTimeout(poll, 2000);
+      } else {
         setLoading(false);
       }
-    }, 2000);
+    };
 
-    return () => clearTimeout(timer);
+    const timer = setTimeout(poll, 2000);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [session?.accessToken, sessionId]);
 
   const formatPrice = (price: string, currency: string) =>
@@ -98,7 +110,14 @@ function CheckoutSuccessContent() {
               </span>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="bg-white rounded-xl p-6 mb-8 max-w-md mx-auto">
+            <p className="text-body text-neutral-600">
+              Your order is being processed. Check your email for confirmation details,
+              or visit your <Link href="/account/orders" className="text-primary-600 hover:text-primary-700 font-medium">order history</Link> shortly.
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/account/orders">

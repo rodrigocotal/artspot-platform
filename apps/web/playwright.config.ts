@@ -50,6 +50,8 @@ export default defineConfig({
       timeout: 30_000,
       env: {
         NEXT_PUBLIC_API_URL: `http://localhost:${API_PORT}`,
+        ...(process.env.AUTH_SECRET && { AUTH_SECRET: process.env.AUTH_SECRET }),
+        ...(process.env.NEXTAUTH_SECRET && { NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET }),
       },
     },
   ],

@@ -172,7 +172,7 @@ jobs:
         run: pnpm --filter @artspot/api prisma:generate
 
       - name: Push schema to test DB
-        run: pnpm --filter @artspot/api prisma db push --force-reset --accept-data-loss
+        run: pnpm --filter @artspot/api exec prisma db push --force-reset --accept-data-loss
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/artspot_e2e
 

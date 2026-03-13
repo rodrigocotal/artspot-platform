@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { seedTestData } from './helpers/seed-data';
 
 test.describe('Inquiry Form', () => {
+  test.beforeAll(async () => {
+    await seedTestData();
+  });
+
   test('artwork detail page shows inquiry form', async ({ page }) => {
     await page.goto('/artworks');
 

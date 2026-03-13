@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { seedTestData } from './helpers/seed-data';
 
 test.describe('Browse & Navigation', () => {
+  test.beforeAll(async () => {
+    await seedTestData();
+  });
+
   test('home page loads with header and logo', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('link', { name: 'ArtSpot' })).toBeVisible();

@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { registerTestUser, loginTestUser } from './helpers/test-utils';
+import { seedTestData } from './helpers/seed-data';
 
 test.describe('Favorites', () => {
+  test.beforeAll(async () => {
+    await seedTestData();
+  });
+
   test('favorites page is accessible after login', async ({ page }) => {
     const user = await registerTestUser();
     await loginTestUser(page, user);

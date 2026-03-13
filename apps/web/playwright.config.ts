@@ -4,7 +4,6 @@ const API_PORT = 4000;
 const WEB_PORT = 3000;
 
 export default defineConfig({
-  globalSetup: './e2e/global-setup.ts',
   testDir: './e2e',
   fullyParallel: false,
   workers: 1,

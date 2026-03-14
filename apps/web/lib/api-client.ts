@@ -284,6 +284,39 @@ export interface CheckoutResult {
   orderNumber: string;
 }
 
+// ── Admin ──────────────────────────────────────────────────────────────
+
+export interface AdminStats {
+  totalUsers: number;
+  totalArtworks: number;
+  pendingInquiries: number;
+  totalOrders: number;
+  totalRevenue: string;
+  recentOrders: number;
+  recentUsers: number;
+}
+
+export interface AdminOrder extends Order {
+  user?: {
+    id: string;
+    email: string;
+    name: string | null;
+  };
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
+  emailVerified: boolean;
+  createdAt: string;
+  _count: {
+    orders: number;
+    inquiries: number;
+  };
+}
+
 class ApiClient {
   private baseUrl: string;
   private accessToken: string | null = null;
@@ -581,6 +614,46 @@ class ApiClient {
 
   async getOrder(id: string): Promise<ApiResponse<Order>> {
     return this.fetch<Order>(`/orders/${id}`);
+  }
+
+  // ── Admin ──────────────────────────────────────────────────────────
+
+  async getAdminStats(): Promise<ApiResponse<AdminStats>> {
+    return this.fetch<AdminStats>('/admin/stats');
+  }
+
+  async getAdminOrders(
+    params: PaginationParams & { status?: string; search?: string } = {}
+  ): Promise<ApiResponse<AdminOrder[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<AdminOrder[]>(`/admin/orders${queryString}`);
+  }
+
+  async updateAdminOrderStatus(
+    id: string,
+    data: { status: string }
+  ): Promise<ApiResponse<AdminOrder>> {
+    return this.fetch<AdminOrder>(`/admin/orders/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getAdminUsers(
+    params: PaginationParams & { search?: string; role?: string } = {}
+  ): Promise<ApiResponse<AdminUser[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<AdminUser[]>(`/admin/users${queryString}`);
+  }
+
+  async updateUserRole(
+    id: string,
+    data: { role: string }
+  ): Promise<ApiResponse<AdminUser>> {
+    return this.fetch<AdminUser>(`/admin/users/${id}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   }
 }
 

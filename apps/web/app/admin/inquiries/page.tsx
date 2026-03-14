@@ -3,10 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { Container, Section } from '@/components/layout';
 import { Button, Input, Textarea } from '@/components/ui';
 import { apiClient, type Inquiry } from '@/lib/api-client';
-import { Loader2, Mail, Phone, ChevronDown, ChevronUp, Send, XCircle, ShieldAlert } from 'lucide-react';
+import { Loader2, Mail, Phone, ChevronDown, ChevronUp, Send, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const STATUS_STYLES: Record<string, string> = {
@@ -45,9 +44,6 @@ export default function AdminInquiriesPage() {
     totalPages: 0,
   });
 
-  const isAuthorized =
-    session?.user?.role === 'ADMIN' || session?.user?.role === 'GALLERY_STAFF';
-
   const fetchInquiries = async (page = 1) => {
     setLoading(true);
     setError(null);
@@ -74,10 +70,8 @@ export default function AdminInquiriesPage() {
   };
 
   useEffect(() => {
-    if (session?.accessToken && isAuthorized) {
+    if (session?.accessToken) {
       fetchInquiries(1);
-    } else if (session && !isAuthorized) {
-      setLoading(false);
     }
   }, [session?.accessToken, statusFilter]);
 
@@ -122,31 +116,8 @@ export default function AdminInquiriesPage() {
     }
   };
 
-  // Access denied for non-admin/staff
-  if (session && !isAuthorized) {
-    return (
-      <Section spacing="lg" background="neutral">
-        <Container>
-          <div className="text-center py-20">
-            <ShieldAlert className="w-12 h-12 text-error-500 mx-auto mb-4" />
-            <h1 className="text-heading-2 font-serif text-neutral-900 mb-2">
-              Access Denied
-            </h1>
-            <p className="text-neutral-600 mb-6">
-              You don&apos;t have permission to view this page.
-            </p>
-            <Button asChild>
-              <Link href="/">Go Home</Link>
-            </Button>
-          </div>
-        </Container>
-      </Section>
-    );
-  }
-
   return (
-    <Section spacing="lg" background="neutral">
-      <Container size="xl">
+    <div>
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-display font-serif text-neutral-900 mb-2">
@@ -407,7 +378,6 @@ export default function AdminInquiriesPage() {
             )}
           </>
         )}
-      </Container>
-    </Section>
+    </div>
   );
 }

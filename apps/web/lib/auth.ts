@@ -74,6 +74,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               const { data } = await res.json();
               token.accessToken = data.accessToken;
               token.refreshToken = data.refreshToken;
+              if (data.user?.role) {
+                token.role = data.user.role;
+              }
             } else {
               // Refresh failed — force re-login
               token.error = 'RefreshAccessTokenError';

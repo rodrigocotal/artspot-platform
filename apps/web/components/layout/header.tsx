@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui';
@@ -89,8 +90,10 @@ interface HeaderProps {
 export function Header({ className }: HeaderProps) {
   const { data: session } = useSession();
   const { itemCount } = useCart();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [logoText, setLogoText] = React.useState(DEFAULT_LOGO_TEXT);
@@ -379,16 +382,29 @@ export function Header({ className }: HeaderProps) {
       {searchOpen && (
         <div className="border-t border-neutral-200 bg-white animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="relative">
+            <form
+              className="relative"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = searchQuery.trim();
+                if (q) {
+                  router.push(`/artworks?search=${encodeURIComponent(q)}`);
+                  setSearchOpen(false);
+                  setSearchQuery('');
+                }
+              }}
+            >
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" aria-hidden="true" />
               <input
                 type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search artworks, artists, or collections..."
                 className="w-full h-12 pl-12 pr-4 rounded-lg border-2 border-neutral-300 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0"
                 autoFocus
                 aria-label="Search artworks, artists, or collections"
               />
-            </div>
+            </form>
           </div>
         </div>
       )}

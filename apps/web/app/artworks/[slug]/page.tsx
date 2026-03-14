@@ -26,6 +26,24 @@ export default function ArtworkDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [shareConfirm, setShareConfirm] = useState(false);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = artwork?.title ?? 'Artwork';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch {
+        // User cancelled share — ignore
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShareConfirm(true);
+      setTimeout(() => setShareConfirm(false), 2000);
+    }
+  };
 
   // Fetch artwork details — set access token so API returns isFavorited
   useEffect(() => {
@@ -251,18 +269,17 @@ export default function ArtworkDetailPage() {
               <div className="flex gap-3">
                 {isAvailable ? (
                   <>
-                    {artwork.purchaseMode === 'DIRECT' ? (
+                    {artwork.purchaseMode === 'DIRECT' && (
                       <AddToCartButton artworkId={artwork.id} className="flex-1" />
-                    ) : (
-                      <Button
-                        size="lg"
-                        className="flex-1"
-                        variant={showInquiryForm ? 'outline' : 'primary'}
-                        onClick={() => setShowInquiryForm(!showInquiryForm)}
-                      >
-                        {showInquiryForm ? 'Close' : 'Inquire'}
-                      </Button>
                     )}
+                    <Button
+                      size="lg"
+                      className="flex-1"
+                      variant={showInquiryForm ? 'outline' : 'primary'}
+                      onClick={() => setShowInquiryForm(!showInquiryForm)}
+                    >
+                      {showInquiryForm ? 'Close' : 'Inquire'}
+                    </Button>
                     <FavoriteButton
                       artworkId={artwork.id}
                       initialFavorited={artwork.isFavorited ?? false}
@@ -274,13 +291,13 @@ export default function ArtworkDetailPage() {
                     {artwork.status === 'RESERVED' ? 'Reserved' : 'Not Available'}
                   </Button>
                 )}
-                <Button size="lg" variant="ghost">
-                  <Share2 className="w-5 h-5" />
+                <Button size="lg" variant="ghost" onClick={handleShare} title="Share artwork">
+                  {shareConfirm ? <CheckCircle2 className="w-5 h-5 text-green-600" /> : <Share2 className="w-5 h-5" />}
                 </Button>
               </div>
 
-              {/* Inquiry Form (only for INQUIRY_ONLY artworks) */}
-              {showInquiryForm && isAvailable && artwork.purchaseMode === 'INQUIRY_ONLY' && (
+              {/* Inquiry Form */}
+              {showInquiryForm && isAvailable && (
                 <InquiryForm artworkId={artwork.id} />
               )}
 

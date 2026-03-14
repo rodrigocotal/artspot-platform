@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ShoppingBag, Mail, Users } from 'lucide-react';
+import { LayoutDashboard, FileText, Newspaper, ShoppingBag, Mail, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { label: 'Content', href: '/admin/content', icon: FileText },
+  { label: 'Articles', href: '/admin/articles', icon: Newspaper },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingBag },
   { label: 'Inquiries', href: '/admin/inquiries', icon: Mail },
   { label: 'Users', href: '/admin/users', icon: Users },

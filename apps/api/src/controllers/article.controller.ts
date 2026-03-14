@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { articleService } from '../services/article.service';
-import { listArticlesQuerySchema } from '../validators/article.validator';
+import { listArticlesQuerySchema, createArticleSchema, updateArticleSchema } from '../validators/article.validator';
 import { AppError } from '../middleware/error-handler';
 
 export class ArticleController {
@@ -57,6 +57,94 @@ export class ArticleController {
       res.json({
         success: true,
         data: article,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /articles/id/:id
+   * Get single article by ID (admin)
+   */
+  async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const article = await articleService.getById(req.params.id as string);
+
+      if (!article) {
+        return next(new AppError('Article not found', 404));
+      }
+
+      res.json({
+        success: true,
+        data: article,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /articles
+   * Create a new article (admin)
+   */
+  async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = createArticleSchema.parse(req.body);
+      const article = await articleService.create(data);
+
+      res.status(201).json({
+        success: true,
+        data: article,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * PUT /articles/:id
+   * Update an article (admin)
+   */
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id as string;
+      const existing = await articleService.getById(id);
+
+      if (!existing) {
+        return next(new AppError('Article not found', 404));
+      }
+
+      const data = updateArticleSchema.parse(req.body);
+      const article = await articleService.update(id, data);
+
+      res.json({
+        success: true,
+        data: article,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * DELETE /articles/:id
+   * Delete an article (admin)
+   */
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id as string;
+      const existing = await articleService.getById(id);
+
+      if (!existing) {
+        return next(new AppError('Article not found', 404));
+      }
+
+      await articleService.delete(id);
+
+      res.json({
+        success: true,
+        data: { message: 'Article deleted' },
       });
     } catch (error) {
       next(error);

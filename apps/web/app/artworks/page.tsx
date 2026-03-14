@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Container, Section } from '@/components/layout';
 import { ArtworkCard } from '@/components/artwork/artwork-card';
 import {
@@ -43,8 +44,17 @@ const styleOptions = [
 ];
 
 export default function ArtworksPage() {
+  return (
+    <Suspense>
+      <ArtworksPageContent />
+    </Suspense>
+  );
+}
+
+function ArtworksPageContent() {
+  const searchParams = useSearchParams();
   // Filter state
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('search') ?? '');
   const [selectedMediums, setSelectedMediums] = useState<string[]>([]);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState('createdAt');

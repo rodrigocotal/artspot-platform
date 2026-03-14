@@ -49,6 +49,58 @@ export class ArticleService {
   async getBySlug(slug: string) {
     return prisma.article.findUnique({ where: { slug } });
   }
+
+  async getById(id: string) {
+    return prisma.article.findUnique({ where: { id } });
+  }
+
+  async create(data: {
+    title: string;
+    slug: string;
+    content: string;
+    excerpt?: string;
+    coverImageUrl?: string;
+    author?: string;
+    category?: 'ARTIST_SPOTLIGHT' | 'EXHIBITION' | 'BEHIND_THE_SCENES' | 'NEWS' | 'GUIDE';
+    publishedDate?: string;
+    featured?: boolean;
+  }) {
+    return prisma.article.create({
+      data: {
+        ...data,
+        publishedDate: data.publishedDate ? new Date(data.publishedDate) : null,
+        coverImageUrl: data.coverImageUrl || null,
+      },
+    });
+  }
+
+  async update(id: string, data: {
+    title?: string;
+    slug?: string;
+    content?: string;
+    excerpt?: string;
+    coverImageUrl?: string;
+    author?: string;
+    category?: 'ARTIST_SPOTLIGHT' | 'EXHIBITION' | 'BEHIND_THE_SCENES' | 'NEWS' | 'GUIDE';
+    publishedDate?: string;
+    featured?: boolean;
+  }) {
+    const updateData: any = { ...data };
+    if (data.publishedDate !== undefined) {
+      updateData.publishedDate = data.publishedDate ? new Date(data.publishedDate) : null;
+    }
+    if (data.coverImageUrl !== undefined) {
+      updateData.coverImageUrl = data.coverImageUrl || null;
+    }
+    return prisma.article.update({
+      where: { id },
+      data: updateData,
+    });
+  }
+
+  async delete(id: string) {
+    return prisma.article.delete({ where: { id } });
+  }
 }
 
 export const articleService = new ArticleService();

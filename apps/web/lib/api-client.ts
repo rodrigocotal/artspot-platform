@@ -222,6 +222,18 @@ export interface PageContent {
   createdAt: string;
 }
 
+export interface CreateArticleInput {
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  coverImageUrl?: string;
+  author?: string;
+  category?: ArticleCategory;
+  publishedDate?: string;
+  featured?: boolean;
+}
+
 export interface ArticleFilters {
   category?: ArticleCategory;
   search?: string;
@@ -561,6 +573,42 @@ class ApiClient {
     return this.fetch<Article>(`/articles/${slug}`);
   }
 
+  /**
+   * Get single article by ID (admin)
+   */
+  async getArticleById(id: string): Promise<ApiResponse<Article>> {
+    return this.fetch<Article>(`/articles/id/${id}`);
+  }
+
+  /**
+   * Create article (admin)
+   */
+  async createArticle(data: CreateArticleInput): Promise<ApiResponse<Article>> {
+    return this.fetch<Article>('/articles', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update article (admin)
+   */
+  async updateArticle(id: string, data: Partial<CreateArticleInput>): Promise<ApiResponse<Article>> {
+    return this.fetch<Article>(`/articles/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Delete article (admin)
+   */
+  async deleteArticle(id: string): Promise<ApiResponse<{ message: string }>> {
+    return this.fetch<{ message: string }>(`/articles/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   // ── Page Content ──────────────────────────────────────────────────────
 
   /**
@@ -568,6 +616,23 @@ class ApiClient {
    */
   async getPageContent(slug: string): Promise<ApiResponse<PageContent>> {
     return this.fetch<PageContent>(`/pages/${slug}`);
+  }
+
+  /**
+   * List all page contents (admin)
+   */
+  async listPageContents(): Promise<ApiResponse<PageContent[]>> {
+    return this.fetch<PageContent[]>('/pages');
+  }
+
+  /**
+   * Update page content by slug (admin)
+   */
+  async updatePageContent(slug: string, content: Record<string, any>): Promise<ApiResponse<PageContent>> {
+    return this.fetch<PageContent>(`/pages/${slug}`, {
+      method: 'PUT',
+      body: JSON.stringify({ content }),
+    });
   }
 
   // ── Cart ────────────────────────────────────────────────────────────

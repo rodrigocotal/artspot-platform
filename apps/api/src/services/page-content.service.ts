@@ -6,6 +6,20 @@ export class PageContentService {
       where: { slug },
     });
   }
+
+  async listAll() {
+    return prisma.pageContent.findMany({
+      orderBy: { slug: 'asc' },
+    });
+  }
+
+  async upsertBySlug(slug: string, content: Record<string, any>) {
+    return prisma.pageContent.upsert({
+      where: { slug },
+      update: { content },
+      create: { slug, content },
+    });
+  }
 }
 
 export const pageContentService = new PageContentService();

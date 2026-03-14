@@ -107,6 +107,58 @@ export class EmailService {
       console.error('Failed to send inquiry response notification:', error);
     }
   }
+  async sendWelcomeEmail(email: string, name: string) {
+    if (!isConfigured) return;
+
+    const siteUrl = config.apiUrl.replace(/\/api$/, '').replace(':4000', ':3000');
+
+    const msg = {
+      to: email,
+      from: config.email.fromEmail,
+      subject: 'Welcome to ArtAldo!',
+      text: [
+        `Hi ${name},`,
+        '',
+        'Welcome to ArtAldo! Your account has been created successfully.',
+        '',
+        'Here\'s what you can do:',
+        '- Browse and discover curated artworks',
+        '- Save your favorites',
+        '- Inquire about pieces you love',
+        '- Purchase directly from our gallery',
+        '',
+        `Start exploring: ${siteUrl}`,
+        '',
+        'Best regards,',
+        'The ArtAldo Team',
+      ].join('\n'),
+      html: `
+        <div style="max-width: 600px; margin: 0 auto; font-family: sans-serif;">
+          <h2>Welcome to ArtAldo!</h2>
+          <p>Hi ${name},</p>
+          <p>Your account has been created successfully. We're excited to have you!</p>
+          <p><strong>Here's what you can do:</strong></p>
+          <ul>
+            <li>Browse and discover curated artworks</li>
+            <li>Save your favorites</li>
+            <li>Inquire about pieces you love</li>
+            <li>Purchase directly from our gallery</li>
+          </ul>
+          <p style="text-align: center; margin: 32px 0;">
+            <a href="${siteUrl}" style="background: #1a1a1a; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; display: inline-block;">Start Exploring</a>
+          </p>
+          <p>Best regards,<br />The ArtAldo Team</p>
+        </div>
+      `,
+    };
+
+    try {
+      await sgMail.send(msg);
+    } catch (error) {
+      console.error('Failed to send welcome email:', error);
+    }
+  }
+
   async sendPasswordResetEmail(email: string, token: string, name: string) {
     if (!isConfigured) return;
 

@@ -34,6 +34,12 @@ export class AuthService {
     });
 
     const tokens = await this.generateTokens(user.id);
+
+    // Send welcome email (fire-and-forget)
+    import('./email.service').then(({ emailService }) => {
+      emailService.sendWelcomeEmail(user.email, user.name || 'there');
+    });
+
     return { user, ...tokens };
   }
 

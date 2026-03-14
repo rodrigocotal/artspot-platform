@@ -39,8 +39,8 @@ export async function loginTestUser(
   credentials: { email: string; password: string }
 ) {
   await page.goto('/login');
-  await page.getByLabel('Email').fill(credentials.email);
-  await page.getByLabel('Password').fill(credentials.password);
+  await page.locator('#email').fill(credentials.email);
+  await page.locator('#password').fill(credentials.password);
   await page.getByRole('button', { name: 'Sign In' }).click();
 
   // Wait for redirect away from login page

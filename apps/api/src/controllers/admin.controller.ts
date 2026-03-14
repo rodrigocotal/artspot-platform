@@ -22,7 +22,7 @@ export class AdminController {
     try {
       const query = listAdminOrdersQuerySchema.parse(req.query);
       const result = await adminService.getAllOrders(query);
-      res.json({ success: true, ...result });
+      res.json({ success: true, data: result.orders, pagination: result.pagination });
     } catch (error) {
       next(error);
     }
@@ -44,7 +44,7 @@ export class AdminController {
     try {
       const query = listAdminUsersQuerySchema.parse(req.query);
       const result = await adminService.getAllUsers(query);
-      res.json({ success: true, ...result });
+      res.json({ success: true, data: result.users, pagination: result.pagination });
     } catch (error) {
       next(error);
     }

@@ -218,6 +218,8 @@ export interface PageContent {
   id: string;
   slug: string;
   content: Record<string, any>;
+  draftContent?: Record<string, any> | null;
+  status?: 'DRAFT' | 'PUBLISHED';
   updatedAt: string;
   createdAt: string;
 }
@@ -626,12 +628,28 @@ class ApiClient {
   }
 
   /**
-   * Update page content by slug (admin)
+   * Get CMS page content with draft (admin)
+   */
+  async getPageContentDraft(slug: string): Promise<ApiResponse<PageContent>> {
+    return this.fetch<PageContent>(`/pages/${slug}?draft=true`);
+  }
+
+  /**
+   * Update page content by slug (saves as draft)
    */
   async updatePageContent(slug: string, content: Record<string, any>): Promise<ApiResponse<PageContent>> {
     return this.fetch<PageContent>(`/pages/${slug}`, {
       method: 'PUT',
       body: JSON.stringify({ content }),
+    });
+  }
+
+  /**
+   * Publish page content by slug
+   */
+  async publishPageContent(slug: string): Promise<ApiResponse<PageContent>> {
+    return this.fetch<PageContent>(`/pages/${slug}/publish`, {
+      method: 'POST',
     });
   }
 

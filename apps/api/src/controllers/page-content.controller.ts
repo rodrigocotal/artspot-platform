@@ -11,7 +11,13 @@ export class PageContentController {
   async getBySlug(req: Request, res: Response, next: NextFunction) {
     try {
       const slug = req.params.slug as string;
-      const page = await pageContentService.getBySlug(slug);
+      const includeDraft = req.query.draft === 'true';
+
+      if (includeDraft && !(req as any).userId) {
+        return next(new AppError('Authentication required to view drafts', 401));
+      }
+
+      const page = await pageContentService.getBySlug(slug, includeDraft);
 
       if (!page) {
         return next(new AppError('Page not found', 404));
@@ -42,7 +48,25 @@ export class PageContentController {
     try {
       const slug = req.params.slug as string;
       const { content } = updatePageContentSchema.parse(req.body);
-      const page = await pageContentService.upsertBySlug(slug, content);
+      const page = await pageContentService.saveDraft(slug, content);
+      res.json({
+        success: true,
+        data: page,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async publishBySlug(req: Request, res: Response, next: NextFunction) {
+    try {
+      const slug = req.params.slug as string;
+      const page = await pageContentService.publishBySlug(slug);
+
+      if (!page) {
+        return next(new AppError('Page not found', 404));
+      }
+
       res.json({
         success: true,
         data: page,

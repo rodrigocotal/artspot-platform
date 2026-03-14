@@ -176,6 +176,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/artspot_e2e
 
+      - name: Seed E2E test data
+        run: pnpm --filter @artspot/api exec tsx scripts/seed-e2e.ts
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/artspot_e2e
+
       - name: Install Playwright browsers
         run: pnpm --filter @artspot/web test:e2e:install
 
@@ -187,8 +192,8 @@ jobs:
           JWT_SECRET: ci-e2e-jwt-secret
           JWT_REFRESH_SECRET: ci-e2e-jwt-refresh-secret
           ALLOWED_ORIGINS: '*'
-          AUTH_SECRET: ci-e2e-auth-secret
-          NEXTAUTH_SECRET: ci-e2e-auth-secret
+          AUTH_SECRET: ci-e2e-auth-secret-at-least-32-characters-long
+          NEXTAUTH_SECRET: ci-e2e-auth-secret-at-least-32-characters-long-at-least-32-characters-long
           NEXT_PUBLIC_API_URL: http://localhost:4000
           NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: placeholder
 

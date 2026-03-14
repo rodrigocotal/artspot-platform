@@ -13,8 +13,8 @@ This guide covers deploying ArtSpot to AWS using a serverless-first architecture
 
 ```
 Frontend (Amplify) → API (App Runner) → Database (RDS PostgreSQL)
-                   ↓                   ↓
-              CMS (App Runner)    Cache (ElastiCache)
+                                       ↓
+                                  Cache (ElastiCache)
                                        ↓
                                   Storage (S3)
 ```
@@ -211,48 +211,12 @@ aws apprunner update-service \
   }'
 ```
 
-### 4.2 Deploy CMS Service
-
-```bash
-# Create App Runner service for CMS
-aws apprunner create-service \
-  --service-name artspot-cms-production \
-  --source-configuration '{
-    "CodeRepository": {
-      "RepositoryUrl": "https://github.com/rodrigocotal/artspot-platform",
-      "SourceCodeVersion": {
-        "Type": "BRANCH",
-        "Value": "main"
-      },
-      "CodeConfiguration": {
-        "ConfigurationSource": "API",
-        "CodeConfigurationValues": {
-          "Runtime": "NODEJS_18",
-          "BuildCommand": "cd apps/cms && pnpm install && pnpm build",
-          "StartCommand": "cd apps/cms && pnpm start",
-          "Port": "1337"
-        }
-      }
-    },
-    "AutoDeploymentsEnabled": true
-  }' \
-  --instance-configuration '{
-    "Cpu": "1 vCPU",
-    "Memory": "2 GB"
-  }'
-```
-
-### 4.3 Get Service URLs
+### 4.2 Get Service URL
 
 ```bash
 # Get API URL
 aws apprunner describe-service \
   --service-arn "arn:aws:apprunner:us-east-1:ACCOUNT:service/artspot-api-production" \
-  --query 'Service.ServiceUrl'
-
-# Get CMS URL
-aws apprunner describe-service \
-  --service-arn "arn:aws:apprunner:us-east-1:ACCOUNT:service/artspot-cms-production" \
   --query 'Service.ServiceUrl'
 ```
 
@@ -324,10 +288,6 @@ AWS_REGION=us-east-1
 # API Service
 AWS_APPRUNNER_API_SERVICE_ARN=arn:aws:apprunner:...
 PRODUCTION_API_URL=https://xxxxx.us-east-1.awsapprunner.com
-
-# CMS Service
-AWS_APPRUNNER_CMS_SERVICE_ARN=arn:aws:apprunner:...
-PRODUCTION_CMS_URL=https://xxxxx.us-east-1.awsapprunner.com
 
 # Amplify
 AWS_AMPLIFY_APP_ID=xxxxx
@@ -452,14 +412,10 @@ Expected response:
 
 Visit: `https://main.xxxxx.amplifyapp.com`
 
-### 10.3 Test CMS
-
-Visit: `https://xxxxx.us-east-1.awsapprunner.com/admin`
-
 ## Staging Environment
 
 Repeat steps 4-6 with:
-- Different App Runner services (`artspot-api-staging`, `artspot-cms-staging`)
+- Different App Runner service (`artspot-api-staging`)
 - Different Amplify branch (`develop`)
 - Different environment variables
 - Same RDS database (different schema or database)

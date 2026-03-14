@@ -15,7 +15,7 @@
 
 ### 2. Project Structure ✅
 Created monorepo structure with:
-- **apps/** - Application code (web, api, cms)
+- **apps/** - Application code (web, api)
 - **packages/** - Shared code (ui, types, utils, config)
 - **docs/** - Documentation
 - **Turborepo** configured for efficient builds
@@ -57,7 +57,6 @@ Created comprehensive labeling system:
 **Area Labels:**
 - area: frontend
 - area: backend
-- area: cms
 - area: payments
 - area: shipping
 
@@ -85,10 +84,6 @@ Committed and pushed all initial setup files to the repository.
 - **Authentication**: JWT tokens
 - **Email**: SendGrid
 - **Background Jobs**: Bull + Redis
-
-### CMS
-- **Platform**: Strapi (headless CMS)
-- **Purpose**: Content management for gallery staff
 
 ### Infrastructure
 - **Hosting**: Railway (recommended for MVP) or Vercel + Render
@@ -154,7 +149,7 @@ Committed and pushed all initial setup files to the repository.
 6. User Authentication (Week 9)
 7. Wishlist & Favorites (Week 10)
 8. Inquiry System (Week 11)
-9. CMS Integration (Week 12)
+9. Admin Dashboard (Week 12)
 10. Polish & Testing (Weeks 13-14)
 11. Launch Preparation (Week 15)
 
@@ -168,7 +163,7 @@ Committed and pushed all initial setup files to the repository.
 - Wishlist/favorites functionality
 - Inquiry system for artwork purchases
 - Gallery staff dashboard for managing inquiries
-- Content management via Strapi CMS
+- Content management via admin dashboard
 
 ### Phase 2: Full E-Commerce (15 weeks)
 **Start**: After Phase 1 validation
@@ -224,7 +219,6 @@ Complete issues #1-8 to establish the foundation:
 - #2: Next.js application setup
 - #3: Express.js API setup
 - #4: PostgreSQL database configuration
-- #5: Strapi CMS setup
 - #6: Cloudinary configuration
 - #7: CI/CD pipeline (GitHub Actions)
 - #8: Deploy to staging environments
@@ -303,8 +297,8 @@ Complete issues #1-8 to establish the foundation:
 - Email notifications
 
 ✅ **Content Management**
-- Strapi CMS for gallery staff
-- Easy artwork/artist/collection management
+- Admin dashboard for gallery staff
+- Artwork/artist/collection management
 - Image upload workflow
 
 ### Phase 2 (Future)

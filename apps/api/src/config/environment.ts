@@ -38,13 +38,6 @@ export const config = {
     staffEmail: process.env.STAFF_EMAIL || '',
   },
 
-  // CMS (Strapi)
-  cms: {
-    webhookSecret: process.env.CMS_WEBHOOK_SECRET || '',
-    strapiUrl: process.env.STRAPI_URL || 'http://localhost:1337',
-    strapiToken: process.env.STRAPI_TOKEN || '',
-  },
-
   // Stripe
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY || '',

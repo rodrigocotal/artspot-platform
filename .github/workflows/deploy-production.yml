@@ -147,87 +147,6 @@ jobs:
             exit 1
           fi
 
-  deploy-cms-production:
-    name: Deploy CMS to AWS App Runner (Production)
-    runs-on: ubuntu-latest
-    environment:
-      name: production-cms
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Wait for service to be ready
-        run: |
-          echo "Checking App Runner service status..."
-          for i in $(seq 1 45); do
-            STATUS=$(aws apprunner describe-service \
-              --service-arn ${{ secrets.AWS_APPRUNNER_CMS_PRODUCTION_ARN }} \
-              --query 'Service.Status' --output text)
-
-            echo "  [$i/45] Service status: $STATUS"
-
-            if [ "$STATUS" == "RUNNING" ]; then
-              echo "✅ Service is ready"
-              break
-            elif [ "$STATUS" == "CREATE_FAILED" ] || [ "$STATUS" == "DELETE_FAILED" ] || [ "$STATUS" == "DELETED" ]; then
-              echo "❌ Service is in a failed state: $STATUS"
-              exit 1
-            fi
-
-            sleep 20
-          done
-
-          if [ "$STATUS" != "RUNNING" ]; then
-            echo "❌ Service did not reach RUNNING state after 15 minutes"
-            exit 1
-          fi
-
-      - name: Trigger App Runner deployment
-        run: |
-          aws apprunner start-deployment \
-            --service-arn ${{ secrets.AWS_APPRUNNER_CMS_PRODUCTION_ARN }}
-
-      - name: Wait for deployment to complete
-        run: |
-          echo "Polling App Runner deployment status..."
-          for i in $(seq 1 45); do
-            STATUS=$(aws apprunner describe-service \
-              --service-arn ${{ secrets.AWS_APPRUNNER_CMS_PRODUCTION_ARN }} \
-              --query 'Service.Status' --output text)
-
-            echo "  [$i/45] Service status: $STATUS"
-
-            if [ "$STATUS" == "RUNNING" ]; then
-              echo "✅ Deployment complete — service is running"
-              exit 0
-            elif [ "$STATUS" == "CREATE_FAILED" ] || [ "$STATUS" == "DELETE_FAILED" ]; then
-              echo "❌ Deployment failed with status: $STATUS"
-              exit 1
-            fi
-
-            sleep 20
-          done
-          echo "❌ Deployment timed out after 15 minutes"
-          exit 1
-
-      - name: Health check
-        run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_CMS_URL }}/_health)
-          if [ $response -eq 200 ] || [ $response -eq 204 ]; then
-            echo "✅ CMS health check passed (status: $response)"
-          else
-            echo "❌ CMS health check failed with status $response"
-            exit 1
-          fi
-
   run-migrations:
     name: Run Database Migrations
     runs-on: ubuntu-latest
@@ -259,7 +178,7 @@ jobs:
   notify-deployment:
     name: Notify Deployment Status
     runs-on: ubuntu-latest
-    needs: [deploy-web-production, deploy-api-production, deploy-cms-production, run-migrations]
+    needs: [deploy-web-production, deploy-api-production, run-migrations]
     if: always()
 
     steps:
@@ -267,21 +186,18 @@ jobs:
         run: |
           if [ "${{ needs.deploy-web-production.result }}" == "success" ] && \
              [ "${{ needs.deploy-api-production.result }}" == "success" ] && \
-             [ "${{ needs.deploy-cms-production.result }}" == "success" ] && \
              [ "${{ needs.run-migrations.result }}" == "success" ]; then
             echo "✅ All production deployments successful!"
             echo "🚀 Production is live on AWS!"
             echo ""
             echo "Frontend: AWS Amplify"
             echo "API: AWS App Runner"
-            echo "CMS: AWS App Runner"
             echo "Database: AWS RDS PostgreSQL"
           else
             echo "❌ One or more production deployments failed"
             echo ""
             echo "Web: ${{ needs.deploy-web-production.result }}"
             echo "API: ${{ needs.deploy-api-production.result }}"
-            echo "CMS: ${{ needs.deploy-cms-production.result }}"
             echo "Migrations: ${{ needs.run-migrations.result }}"
             exit 1
           fi

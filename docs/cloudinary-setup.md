@@ -32,15 +32,6 @@ CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-### CMS Configuration
-
-Add to `apps/cms/.env`:
-```bash
-CLOUDINARY_NAME=your-cloud-name
-CLOUDINARY_KEY=your-api-key
-CLOUDINARY_SECRET=your-api-secret
-```
-
 ### Frontend Configuration
 
 Add to `apps/web/.env.local`:

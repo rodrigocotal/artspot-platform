@@ -11,9 +11,7 @@ ArtSpot is a premium art marketplace built with a modern monorepo architecture u
 ```
 Users → CloudFront CDN → Next.js (Amplify) → Node.js API (App Runner) → RDS PostgreSQL
               ↓                                        ↓
-           WAF + Shield                          Strapi CMS (App Runner)
-                                                       ↓
-                                                  ElastiCache Redis
+           WAF + Shield                          ElastiCache Redis
                                                        ↓
                                                    S3 + CloudFront
                                                        ↓
@@ -33,20 +31,17 @@ Users → CloudFront CDN → Next.js (Amplify) → Node.js API (App Runner) → 
 │              CloudFront CDN + WAF + Shield               │
 └───────────────────┬─────────────────────────────────────┘
                     │
-        ┌───────────┴───────────┐
-        │                       │
-        ▼                       ▼
-┌──────────────────┐    ┌──────────────────┐
-│   Next.js App    │    │   Strapi CMS     │
-│   (Frontend)     │    │   (Content Mgmt) │
-│                  │    │                  │
-│  - AWS Amplify   │    │  - App Runner    │
-│  - Auto-scaling  │    │  - Auto-scaling  │
-└────────┬─────────┘    └────────┬─────────┘
-         │                       │
-         └───────────┬───────────┘
-                     │
-                     ▼
+                    │
+                    ▼
+┌──────────────────┐
+│   Next.js App    │
+│   (Frontend)     │
+│                  │
+│  - AWS Amplify   │
+│  - Auto-scaling  │
+└────────┬─────────┘
+         │
+         ▼
          ┌─────────────────────┐
          │   Node.js API        │
          │   (Express)          │
@@ -88,7 +83,7 @@ Users → CloudFront CDN → Next.js (Amplify) → Node.js API (App Runner) → 
 - Bull + Redis for background jobs
 
 **AWS Infrastructure**
-- **Hosting**: AWS Amplify (frontend) + App Runner (backend/CMS)
+- **Hosting**: AWS Amplify (frontend) + App Runner (backend)
 - **CDN**: CloudFront with WAF and Shield
 - **Database**: RDS PostgreSQL (Multi-AZ, automated backups)
 - **Cache**: ElastiCache Redis (for sessions and background jobs)
@@ -147,8 +142,6 @@ See [Database Schema Documentation](./database-schema.md) (to be created)
 ### Compute
 - **AWS Amplify**: Next.js frontend hosting ($15/month)
 - **App Runner (API)**: Node.js/Express API ($25-50/month)
-- **App Runner (CMS)**: Strapi headless CMS ($25-50/month)
-
 ### Data & Storage
 - **RDS PostgreSQL**: t3.micro/small with Multi-AZ (existing)
 - **ElastiCache Redis**: t4g.micro for caching ($15/month)

@@ -17,6 +17,7 @@ import articlesRouter from './routes/articles';
 import pageContentsRouter from './routes/page-contents';
 import cartRouter from './routes/cart';
 import ordersRouter from './routes/orders';
+import adminRouter from './routes/admin';
 import docsRouter from './routes/docs';
 import { initializeCloudinary } from './config/cloudinary';
 import { authLimiter, inquiryLimiter, generalLimiter } from './middleware/rate-limit';
@@ -77,6 +78,7 @@ app.use('/articles', articlesRouter);
 app.use('/pages', pageContentsRouter);
 app.use('/cart', cartRouter);
 app.use('/orders', ordersRouter);
+app.use('/admin', adminRouter);
 
 // 404 handler
 app.use('*', (req, res) => {

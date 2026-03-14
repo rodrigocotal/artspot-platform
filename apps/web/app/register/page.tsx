@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { Button } from '@/components/ui';
+import { Button, useToast } from '@/components/ui';
 import { Input } from '@/components/ui';
 import { Label } from '@/components/ui';
 
@@ -12,6 +12,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { toast } = useToast();
 
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
@@ -55,8 +56,10 @@ export default function RegisterPage() {
 
       if (result?.error) {
         // Registration worked but auto-login failed — redirect to login
+        toast('Account created! Please sign in.', 'success');
         router.push('/login');
       } else {
+        toast('Welcome to ArtAldo!', 'success');
         router.push('/');
         router.refresh();
       }

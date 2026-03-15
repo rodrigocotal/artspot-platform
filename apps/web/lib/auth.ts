@@ -46,13 +46,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: '/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       // Initial sign-in — persist tokens from authorize()
-      if (user) {
+      if (user && account) {
         token.id = user.id;
-        token.role = (user as any).role;
-        token.accessToken = (user as any).accessToken;
-        token.refreshToken = (user as any).refreshToken;
+        // In NextAuth v5, custom fields from authorize() are on the user object
+        const u = user as any;
+        token.role = u.role;
+        token.accessToken = u.accessToken;
+        token.refreshToken = u.refreshToken;
+
+        // Fallback: if role is missing, fetch it from the API
+        if (!token.role && token.accessToken) {
+          try {
+            const res = await fetch(`${API_URL}/auth/profile`, {
+              headers: { Authorization: `Bearer ${token.accessToken}` },
+            });
+            if (res.ok) {
+              const { data } = await res.json();
+              token.role = data.role;
+            }
+          } catch {}
+        }
       }
 
       // Refresh access token if needed (check expiry with 1-min buffer)

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
-import { apiClient, type Artist, type CreateArtworkInput } from '@/lib/api-client';
-import { ArrowLeft, Save } from 'lucide-react';
+import { apiClient, type Artist, type UploadedImage } from '@/lib/api-client';
+import { ArrowLeft, Save, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
 const MEDIUMS = [
@@ -35,6 +35,14 @@ function slugify(text: string): string {
     .trim();
 }
 
+interface StagedImage {
+  file: File;
+  preview: string;
+  uploading?: boolean;
+  uploaded?: UploadedImage;
+  error?: string;
+}
+
 export default function NewArtworkPage() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -42,6 +50,8 @@ export default function NewArtworkPage() {
   const [error, setError] = useState<string | null>(null);
   const [slugEdited, setSlugEdited] = useState(false);
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [images, setImages] = useState<StagedImage[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -68,7 +78,7 @@ export default function NewArtworkPage() {
 
   useEffect(() => {
     if (!session?.accessToken) return;
-    apiClient.setAccessToken(session.accessToken);
+    apiClient.setAccessToken(session.accessToken as string);
     apiClient.getArtists({ limit: 100 }).then((res) => setArtists(res.data));
   }, [session?.accessToken]);
 
@@ -82,6 +92,23 @@ export default function NewArtworkPage() {
     }
   };
 
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setImages((prev) => [...prev, ...newImages]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => {
+      URL.revokeObjectURL(prev[index].preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -89,10 +116,37 @@ export default function NewArtworkPage() {
 
     try {
       if (session?.accessToken) {
-        apiClient.setAccessToken(session.accessToken);
+        apiClient.setAccessToken(session.accessToken as string);
       }
 
-      const data: CreateArtworkInput = {
+      // 1. Upload all images to Cloudinary
+      const uploadedImages: UploadedImage[] = [];
+      for (let i = 0; i < images.length; i++) {
+        setImages((prev) =>
+          prev.map((img, idx) => (idx === i ? { ...img, uploading: true } : img))
+        );
+        try {
+          const result = await apiClient.uploadArtworkImage(images[i].file);
+          uploadedImages.push(result.image);
+          setImages((prev) =>
+            prev.map((img, idx) =>
+              idx === i ? { ...img, uploading: false, uploaded: result.image } : img
+            )
+          );
+        } catch (err) {
+          setImages((prev) =>
+            prev.map((img, idx) =>
+              idx === i
+                ? { ...img, uploading: false, error: err instanceof Error ? err.message : 'Upload failed' }
+                : img
+            )
+          );
+          throw new Error(`Failed to upload image ${i + 1}`);
+        }
+      }
+
+      // 2. Create the artwork
+      const data: any = {
         title: form.title,
         slug: form.slug,
         artistId: form.artistId,
@@ -115,7 +169,23 @@ export default function NewArtworkPage() {
       if (form.materials) data.materials = form.materials;
       if (form.signature) data.signature = form.signature;
 
-      await apiClient.createArtwork(data);
+      const artworkRes = await apiClient.createArtwork(data);
+
+      // 3. Link uploaded images to the artwork
+      for (let i = 0; i < uploadedImages.length; i++) {
+        const img = uploadedImages[i];
+        await apiClient.addArtworkImage(artworkRes.data.id, {
+          publicId: img.publicId,
+          url: img.url,
+          secureUrl: img.url,
+          width: img.width,
+          height: img.height,
+          format: img.format,
+          size: img.size,
+          type: i === 0 ? 'MAIN' : 'ALTERNATE',
+        });
+      }
+
       router.push('/admin/artworks');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create artwork');
@@ -144,6 +214,68 @@ export default function NewArtworkPage() {
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-neutral-200 p-6 space-y-6">
+        {/* Images */}
+        <fieldset>
+          <legend className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">Images</legend>
+          <div className="flex flex-wrap gap-4">
+            {images.map((img, i) => (
+              <div key={i} className="relative w-32 h-32 rounded-lg overflow-hidden border border-neutral-200 group">
+                <img
+                  src={img.preview}
+                  alt={`Upload ${i + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {img.uploading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+                {img.uploaded && (
+                  <div className="absolute top-1 left-1 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
+                    &#10003;
+                  </div>
+                )}
+                {img.error && (
+                  <div className="absolute inset-0 bg-red-500/50 flex items-center justify-center">
+                    <span className="text-white text-xs px-1 text-center">{img.error}</span>
+                  </div>
+                )}
+                {i === 0 && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] text-center py-0.5">
+                    Main
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeImage(i)}
+                  className="absolute top-1 right-1 w-5 h-5 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-32 h-32 rounded-lg border-2 border-dashed border-neutral-300 hover:border-primary-400 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:text-primary-500 transition-colors"
+            >
+              <Upload className="w-6 h-6" />
+              <span className="text-xs">Add Image</span>
+            </button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFilesSelected}
+            className="hidden"
+          />
+          <p className="text-xs text-neutral-500 mt-2">
+            First image will be the main image. Supports JPG, PNG, WebP up to 50MB.
+          </p>
+        </fieldset>
+
         {/* Basic Info */}
         <fieldset>
           <legend className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">Basic Info</legend>
@@ -330,7 +462,7 @@ export default function NewArtworkPage() {
         <div className="pt-4 border-t border-neutral-200">
           <Button type="submit" loading={saving}>
             <Save className="w-4 h-4" />
-            Create Artwork
+            {images.length > 0 ? `Upload ${images.length} Image${images.length > 1 ? 's' : ''} & Create Artwork` : 'Create Artwork'}
           </Button>
         </div>
       </form>

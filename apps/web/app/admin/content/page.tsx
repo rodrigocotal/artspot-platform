@@ -30,7 +30,7 @@ export default function AdminContentPage() {
 
     const fetchPages = async () => {
       try {
-        apiClient.setAccessToken(session.accessToken);
+        apiClient.setAccessToken(session.accessToken as string);
         const response = await apiClient.listPageContents();
         setPages(response.data);
       } catch (err) {
@@ -74,10 +74,26 @@ export default function AdminContentPage() {
             >
               <div className="flex items-start gap-3">
                 <FileText className="w-5 h-5 text-neutral-400 group-hover:text-primary-500 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-neutral-900 group-hover:text-primary-700">
-                    {formatSlug(page.slug)}
-                  </h3>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-neutral-900 group-hover:text-primary-700">
+                      {formatSlug(page.slug)}
+                    </h3>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                        page.status === 'DRAFT'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          page.status === 'DRAFT' ? 'bg-yellow-500' : 'bg-green-500'
+                        }`}
+                      />
+                      {page.status === 'DRAFT' ? 'Draft' : 'Published'}
+                    </span>
+                  </div>
                   <p className="text-sm text-neutral-500 mt-1">
                     Last updated{' '}
                     {new Date(page.updatedAt).toLocaleDateString('en-US', {

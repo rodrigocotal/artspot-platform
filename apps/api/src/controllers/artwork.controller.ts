@@ -152,6 +152,44 @@ export class ArtworkController {
   }
 
   /**
+   * POST /artworks/:id/images
+   * Add image to artwork
+   */
+  async addImage(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id as string;
+      const image = await artworkService.addImage(id, req.body);
+
+      res.status(201).json({
+        success: true,
+        data: image,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Artwork not found') {
+        return next(new AppError('Artwork not found', 404));
+      }
+      next(error);
+    }
+  }
+
+  /**
+   * DELETE /artworks/:id/images/:imageId
+   * Remove image from artwork
+   */
+  async removeImage(req: Request, res: Response, next: NextFunction) {
+    try {
+      const imageId = req.params.imageId as string;
+      await artworkService.removeImage(imageId);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Image not found') {
+        return next(new AppError('Image not found', 404));
+      }
+      next(error);
+    }
+  }
+
+  /**
    * GET /artworks/:id/related
    * Get related artworks
    */

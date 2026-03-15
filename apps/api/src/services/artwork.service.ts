@@ -230,6 +230,55 @@ export class ArtworkService {
   }
 
   /**
+   * Add image to artwork
+   */
+  async addImage(artworkId: string, imageData: {
+    publicId: string;
+    url: string;
+    secureUrl: string;
+    width: number;
+    height: number;
+    format: string;
+    size: number;
+    type?: string;
+    displayOrder?: number;
+    caption?: string;
+  }) {
+    const artwork = await prisma.artwork.findUnique({ where: { id: artworkId } });
+    if (!artwork) {
+      throw new Error('Artwork not found');
+    }
+
+    return prisma.artworkImage.create({
+      data: {
+        artworkId,
+        publicId: imageData.publicId,
+        url: imageData.url,
+        secureUrl: imageData.secureUrl,
+        width: imageData.width,
+        height: imageData.height,
+        format: imageData.format,
+        size: imageData.size,
+        type: (imageData.type as any) || 'MAIN',
+        displayOrder: imageData.displayOrder ?? 0,
+        caption: imageData.caption,
+      },
+    });
+  }
+
+  /**
+   * Remove image from artwork
+   */
+  async removeImage(imageId: string) {
+    const image = await prisma.artworkImage.findUnique({ where: { id: imageId } });
+    if (!image) {
+      throw new Error('Image not found');
+    }
+
+    return prisma.artworkImage.delete({ where: { id: imageId } });
+  }
+
+  /**
    * Get related artworks (same artist or medium)
    */
   async getRelatedArtworks(artworkId: string, limit = 6) {

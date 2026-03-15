@@ -23,7 +23,6 @@ This directory contains the CI/CD workflows for the ArtSpot platform deployed on
 **Jobs:**
 - **Deploy Web to AWS Amplify:** Deploys Next.js frontend to Amplify staging
 - **Deploy API to AWS App Runner:** Deploys Express.js API to App Runner staging
-- **Deploy CMS to AWS App Runner:** Deploys Strapi CMS to App Runner staging
 - **Notify Deployment:** Checks all deployments succeeded
 
 **Purpose:** Automatically deploys to AWS staging environment for testing.
@@ -36,7 +35,6 @@ This directory contains the CI/CD workflows for the ArtSpot platform deployed on
 **Jobs:**
 - **Deploy Web to AWS Amplify:** Deploys Next.js frontend to Amplify production
 - **Deploy API to AWS App Runner:** Deploys Express.js API to App Runner production
-- **Deploy CMS to AWS App Runner:** Deploys Strapi CMS to App Runner production
 - **Run Migrations:** Runs Prisma database migrations
 - **Notify Deployment:** Checks all deployments succeeded
 
@@ -56,26 +54,22 @@ Configure these secrets in your GitHub repository settings (`Settings > Secrets 
 ### AWS Amplify (Web Frontend)
 - `AWS_AMPLIFY_APP_ID` - Amplify application ID
 
-### AWS App Runner (API & CMS Backend)
+### AWS App Runner (API Backend)
 
 **Staging:**
 - `AWS_APPRUNNER_API_STAGING_ARN` - App Runner service ARN for staging API
-- `AWS_APPRUNNER_CMS_STAGING_ARN` - App Runner service ARN for staging CMS
 
 **Production:**
 - `AWS_APPRUNNER_API_PRODUCTION_ARN` - App Runner service ARN for production API
-- `AWS_APPRUNNER_CMS_PRODUCTION_ARN` - App Runner service ARN for production CMS
 
 ### Environment URLs
 
 **Staging:**
 - `STAGING_API_URL` - Staging API URL (e.g., `https://xxxxx.us-east-1.awsapprunner.com`)
-- `STAGING_CMS_URL` - Staging CMS URL (e.g., `https://yyyyy.us-east-1.awsapprunner.com`)
 - `STAGING_NEXTAUTH_URL` - Staging frontend URL (e.g., `https://develop.xxxxx.amplifyapp.com`)
 
 **Production:**
 - `PRODUCTION_API_URL` - Production API URL (e.g., `https://xxxxx.us-east-1.awsapprunner.com`)
-- `PRODUCTION_CMS_URL` - Production CMS URL (e.g., `https://yyyyy.us-east-1.awsapprunner.com`)
 - `PRODUCTION_NEXTAUTH_URL` - Production frontend URL (e.g., `https://main.xxxxx.amplifyapp.com` or custom domain)
 
 ### Database
@@ -96,7 +90,7 @@ Configure these secrets in your GitHub repository settings (`Settings > Secrets 
 Quick summary:
 1. Create AWS account and IAM user with appropriate permissions
 2. Set up AWS Amplify for frontend hosting
-3. Create App Runner services for API and CMS
+3. Create App Runner service for API
 4. Configure ElastiCache Redis
 5. Set up S3 + CloudFront for image storage
 6. Configure secrets in AWS Secrets Manager
@@ -109,7 +103,6 @@ aws amplify list-apps --query 'apps[?name==`artspot-web`].appId' --output text
 
 # Get App Runner Service ARNs
 aws apprunner list-services --query 'ServiceSummaryList[?ServiceName==`artspot-api-production`].ServiceArn' --output text
-aws apprunner list-services --query 'ServiceSummaryList[?ServiceName==`artspot-cms-production`].ServiceArn' --output text
 
 # Get App Runner Service URLs
 aws apprunner describe-service --service-arn <SERVICE_ARN> --query 'Service.ServiceUrl' --output text
@@ -123,7 +116,7 @@ aws apprunner describe-service --service-arn <SERVICE_ARN> --query 'Service.Serv
 
 ### 4. Create Environments (Optional but Recommended)
 1. Go to **Settings > Environments**
-2. Create environments: `staging-web`, `staging-api`, `staging-cms`, `production-web`, `production-api`, `production-cms`
+2. Create environments: `staging-web`, `staging-api`, `production-web`, `production-api`
 3. For production environments, enable **Required reviewers** for manual approval before deployment
 
 ### 5. Test the Workflows
@@ -157,7 +150,7 @@ Add these to your main README.md:
 
 ### Deployment Failing
 - Verify all secrets are correctly set in GitHub
-- Check Render/Vercel logs for deployment errors
+- Check App Runner/Amplify logs for deployment errors
 - Ensure deploy hooks are correct and services are properly configured
 - Test health check endpoints manually
 

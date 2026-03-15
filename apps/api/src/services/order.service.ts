@@ -4,7 +4,6 @@ import { getStripe } from '../config/stripe';
 import { config } from '../config/environment';
 import { AppError } from '../middleware/error-handler';
 import { cartService } from './cart.service';
-import { strapiClient } from './strapi-client';
 import type { CreatePaymentLinkInput, ListOrdersQuery } from '../validators/order.validator';
 import crypto from 'crypto';
 
@@ -284,8 +283,6 @@ export class OrderService {
       emailService.sendNewOrderNotification(emailData);
     });
 
-    // Reverse sync to Strapi (fire-and-forget)
-    this.syncArtworkStatusToStrapi(order.items.map((i) => i.artworkId), 'SOLD');
   }
 
   /**
@@ -317,30 +314,6 @@ export class OrderService {
       }
     });
 
-    // Reverse sync to Strapi (fire-and-forget)
-    this.syncArtworkStatusToStrapi(order.items.map((i) => i.artworkId), 'AVAILABLE');
-  }
-
-  /**
-   * Sync artwork status back to Strapi CMS.
-   */
-  private async syncArtworkStatusToStrapi(artworkIds: string[], status: string) {
-    try {
-      const artworks = await prisma.artwork.findMany({
-        where: { id: { in: artworkIds }, strapiId: { not: null } },
-        select: { strapiId: true },
-      });
-
-      for (const artwork of artworks) {
-        if (artwork.strapiId) {
-          strapiClient.updateArtwork(artwork.strapiId, { status }).catch((err) => {
-            console.error(`Failed to reverse-sync artwork strapiId=${artwork.strapiId}:`, err);
-          });
-        }
-      }
-    } catch (err) {
-      console.error('Failed to reverse-sync artwork status to Strapi:', err);
-    }
   }
 
   /**

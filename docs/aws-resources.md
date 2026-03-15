@@ -147,61 +147,9 @@ AWS_APPRUNNER_API_STAGING_ARN=arn:aws:apprunner:ap-southeast-2:357559222118:serv
 
 ---
 
-## ✅ Step 7: App Runner - CMS (Production)
+## ~~Step 7-8: App Runner - CMS~~ (DECOMMISSIONED)
 
-**Status:** COMPLETED ✅
-
-**Service Name:** artspot-cms-production
-**Branch:** main
-**Region:** ap-southeast-2
-
-**Service URL:** https://rwaxtjdazy.ap-southeast-2.awsapprunner.com
-
-**Environment Variables:**
-```bash
-PRODUCTION_CMS_URL=https://rwaxtjdazy.ap-southeast-2.awsapprunner.com
-AWS_APPRUNNER_CMS_PRODUCTION_ARN=arn:aws:apprunner:ap-southeast-2:357559222118:service/artspot-cms-production/17d247ef33dd43f9bb25a1af86cbc826
-```
-
-**Build Configuration:**
-- Build: `cd apps/cms && npx pnpm@8.15.0 install --frozen-lockfile && npx pnpm@8.15.0 build`
-- Start: `cd apps/cms && npx pnpm@8.15.0 start`
-- Port: 1337
-
-**Notes:**
-- Auto-deploy enabled from main branch
-- Connected to RDS PostgreSQL (schema: strapi)
-- Strapi Admin: /admin
-- Health endpoint: /_health
-- Uses production-grade security keys
-
----
-
-## ✅ Step 8: App Runner - CMS (Staging)
-
-**Status:** COMPLETED ✅
-
-**Service Name:** artspot-cms-staging
-**Branch:** develop
-**Region:** ap-southeast-2
-
-**Service URL:** https://p6ynpume2f.ap-southeast-2.awsapprunner.com
-
-**Environment Variables:**
-```bash
-STAGING_CMS_URL=https://p6ynpume2f.ap-southeast-2.awsapprunner.com
-AWS_APPRUNNER_CMS_STAGING_ARN=arn:aws:apprunner:ap-southeast-2:357559222118:service/artspot-cms-staging/ee7244783ceb41fc8bedd8a46ceac8af
-```
-
-**Build Configuration:**
-- Build: `cd apps/cms && npx pnpm@8.15.0 install --frozen-lockfile && npx pnpm@8.15.0 build`
-- Start: `cd apps/cms && npx pnpm@8.15.0 start`
-- Port: 1337
-
-**Notes:**
-- Auto-deploy enabled from develop branch
-- Connected to RDS PostgreSQL (schema: strapi)
-- Same configuration as production, different branch
+> CMS (Strapi) services have been removed. Page content is now managed directly via the admin panel and API.
 
 ---
 
@@ -263,14 +211,10 @@ NEXTAUTH_SECRET=xh5rGDWQ6dfb/yjRCnSDyu/cmUEEX96s0YeYQXAEYgw=
 - `AWS_AMPLIFY_APP_ID`
 - `AWS_APPRUNNER_API_PRODUCTION_ARN`
 - `AWS_APPRUNNER_API_STAGING_ARN`
-- `AWS_APPRUNNER_CMS_PRODUCTION_ARN`
-- `AWS_APPRUNNER_CMS_STAGING_ARN`
 
 ### Service URLs
 - `PRODUCTION_API_URL`
-- `PRODUCTION_CMS_URL`
 - `STAGING_API_URL`
-- `STAGING_CMS_URL`
 
 ### Database & Application
 - `PRODUCTION_DATABASE_URL`
@@ -297,8 +241,8 @@ NEXTAUTH_SECRET=xh5rGDWQ6dfb/yjRCnSDyu/cmUEEX96s0YeYQXAEYgw=
 - [x] S3 + CloudFront
 - [x] App Runner (API - Production)
 - [x] App Runner (API - Staging)
-- [x] App Runner (CMS - Production)
-- [x] App Runner (CMS - Staging)
+- [x] ~~App Runner (CMS - Production)~~ (decommissioned)
+- [x] ~~App Runner (CMS - Staging)~~ (decommissioned)
 - [x] AWS Amplify
 - [x] GitHub Secrets
 

@@ -62,7 +62,6 @@ enum UserRole {
 
 model Artist {
   id          String  @id @default(cuid())
-  strapiId    Int?    @unique
   name        String
   slug        String  @unique
   bio         String? @db.Text
@@ -95,7 +94,6 @@ model Artist {
 
 model Artwork {
   id          String  @id @default(cuid())
-  strapiId    Int?    @unique
   title       String
   slug        String  @unique
   description String? @db.Text
@@ -241,7 +239,6 @@ enum ImageType {
 
 model Collection {
   id          String  @id @default(cuid())
-  strapiId    Int?    @unique
   title       String
   slug        String  @unique
   description String? @db.Text
@@ -342,7 +339,6 @@ model Favorite {
 
 model Article {
   id            String           @id @default(cuid())
-  strapiId      Int?             @unique
   title         String
   slug          String           @unique
   content       String           @db.Text
@@ -374,13 +370,20 @@ enum ArticleCategory {
 // ============================================================================
 
 model PageContent {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  content   Json
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  id           String            @id @default(cuid())
+  slug         String            @unique
+  content      Json
+  draftContent Json?
+  status       PageContentStatus @default(PUBLISHED)
+  updatedAt    DateTime          @updatedAt
+  createdAt    DateTime          @default(now())
 
   @@map("page_contents")
+}
+
+enum PageContentStatus {
+  DRAFT
+  PUBLISHED
 }
 
 // ============================================================================

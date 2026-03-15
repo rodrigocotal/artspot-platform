@@ -201,72 +201,9 @@ Repeat Step 5 with:
 
 ---
 
-## Step 7: App Runner - CMS (Production)
+## ~~Step 7-8: App Runner - CMS~~ (DECOMMISSIONED)
 
-1. **App Runner** → **Create service**
-2. Source: **Source code repository**
-3. Connection: Select `artspot-github`
-4. Repository: `rodrigocotal/artspot-platform`
-5. Branch: `main`
-
-**Build configuration:**
-- Runtime: `Node.js 18`
-- Build command:
-  ```bash
-  cd apps/cms && npx pnpm@8.15.0 install --frozen-lockfile && npx pnpm@8.15.0 build
-  ```
-- Start command:
-  ```bash
-  npx pnpm@8.15.0 --filter @artspot/cms start
-  ```
-- Port: `1337`
-- Source Directory: `/` (root)
-
-**Service settings:**
-- Name: `artspot-cms-production`
-- CPU: `1 vCPU`
-- Memory: `2 GB`
-
-**Environment variables:**
-```
-HOST=0.0.0.0
-PORT=1337
-NODE_ENV=production
-APP_KEYS=Q9XuuPVMOV22zm893hy6v+VxgTqV/IOCc/V1xmRuBbk=,sb7zLBqC42jNzPE1UkuZ35Bw7dTCuixEG/tj1E8LczM=
-API_TOKEN_SALT=+46uBNvimb/fPFU3QHDr45/KKRiSJqyujYPs7di384Q=
-ADMIN_JWT_SECRET=LCuuVQDgVmfQI4jdTBEQBASQsLXgfiLHioYFp9RRq+g=
-TRANSFER_TOKEN_SALT=i7rdLH9Ece751XXGUKskTV41mfOVCfmkMVHkQJ8myjk=
-JWT_SECRET=uvPGt2kO4bWCZunmWYZTBZ/fgTaSGHW0BWW2hlY8z/E=
-DATABASE_CLIENT=postgres
-DATABASE_HOST=artspot-db-dev.cpgo2ia2wuo1.ap-southeast-2.rds.amazonaws.com
-DATABASE_PORT=5432
-DATABASE_NAME=artspot-db-dev
-DATABASE_USERNAME=artspot_admin
-DATABASE_PASSWORD=EXuABqxbXCetA0NbGurd
-DATABASE_SSL=true
-DATABASE_SCHEMA=strapi
-CLOUDINARY_NAME=doqecw19f
-CLOUDINARY_KEY=288382122493568
-CLOUDINARY_SECRET=yWa5TGiauYx4HeBxTYbHGuN84CQ
-```
-
-**Create & deploy**
-
-**Save:**
-- URL: `https://zzzzz.us-east-1.awsapprunner.com`
-- ARN: `arn:aws:apprunner:us-east-1:ACCOUNT:service/artspot-cms-production/zzzzz`
-
----
-
-## Step 8: App Runner - CMS (Staging)
-
-Repeat Step 7 with:
-- Service name: `artspot-cms-staging`
-- Branch: `develop`
-
-**Save:**
-- URL: `https://wwwww.us-east-1.awsapprunner.com`
-- ARN: `arn:aws:apprunner:us-east-1:ACCOUNT:service/artspot-cms-staging/wwwww`
+> CMS (Strapi) services have been removed. Page content is now managed directly via the admin panel and API.
 
 ---
 
@@ -333,9 +270,7 @@ AWS_AMPLIFY_APP_ID=<from-step-9>
 ### Production
 ```
 AWS_APPRUNNER_API_PRODUCTION_ARN=<from-step-5>
-AWS_APPRUNNER_CMS_PRODUCTION_ARN=<from-step-7>
 PRODUCTION_API_URL=<from-step-5>
-PRODUCTION_CMS_URL=<from-step-7>
 PRODUCTION_NEXTAUTH_URL=<from-step-9>
 PRODUCTION_DATABASE_URL=postgresql://artspot_admin:EXuABqxbXCetA0NbGurd@artspot-db-dev.cpgo2ia2wuo1.ap-southeast-2.rds.amazonaws.com:5432/postgres?schema=public&sslmode=require
 ```
@@ -343,9 +278,7 @@ PRODUCTION_DATABASE_URL=postgresql://artspot_admin:EXuABqxbXCetA0NbGurd@artspot-
 ### Staging
 ```
 AWS_APPRUNNER_API_STAGING_ARN=<from-step-6>
-AWS_APPRUNNER_CMS_STAGING_ARN=<from-step-8>
 STAGING_API_URL=<from-step-6>
-STAGING_CMS_URL=<from-step-8>
 STAGING_NEXTAUTH_URL=<from-step-9>
 ```
 
@@ -364,9 +297,6 @@ CLOUDINARY_CLOUD_NAME=doqecw19f
 curl https://xxxxx.us-east-1.awsapprunner.com/health
 ```
 Should return: `{"success":true,"message":"ArtSpot API is running"}`
-
-### Test CMS
-Visit: `https://zzzzz.us-east-1.awsapprunner.com/admin`
 
 ### Test Frontend
 Visit: `https://main.xxxxx.amplifyapp.com`
@@ -409,11 +339,10 @@ Visit: `https://main.xxxxx.amplifyapp.com`
 |---------|-------------|
 | AWS Amplify | ~$15 |
 | App Runner (API) | $25-50 |
-| App Runner (CMS) | $25-50 |
 | ElastiCache Redis | $15 |
 | S3 + CloudFront | $5-10 |
 | RDS PostgreSQL | Existing |
-| **Total** | **$85-140** |
+| **Total** | **$60-90** |
 
 ---
 

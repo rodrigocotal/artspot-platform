@@ -24,9 +24,6 @@ ArtSpot believes collecting art goes beyond ownership or decoration—it is valu
 - **Email**: SendGrid
 - **Background Jobs**: Bull + Redis
 
-### CMS
-- **Platform**: Strapi (headless CMS)
-
 ## Project Structure
 
 This is a monorepo managed with pnpm workspaces and Turborepo:
@@ -36,7 +33,6 @@ artspot-platform/
 ├── apps/
 │   ├── web/                 # Next.js frontend
 │   ├── api/                 # Node.js/Express backend
-│   └── cms/                 # Strapi CMS
 ├── packages/
 │   ├── ui/                  # Shared React components
 │   ├── types/               # Shared TypeScript types

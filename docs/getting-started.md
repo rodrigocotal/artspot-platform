@@ -56,7 +56,6 @@
    This will start:
    - Frontend: http://localhost:3000
    - API: http://localhost:4000
-   - CMS: http://localhost:1337 (when configured)
 
 ## Project Structure
 
@@ -65,7 +64,6 @@ artspot-platform/
 ├── apps/
 │   ├── web/          # Next.js frontend
 │   ├── api/          # Express.js backend
-│   └── cms/          # Strapi CMS
 ├── packages/
 │   ├── ui/           # Shared UI components
 │   ├── types/        # TypeScript types

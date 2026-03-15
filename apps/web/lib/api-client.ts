@@ -218,6 +218,8 @@ export interface PageContent {
   id: string;
   slug: string;
   content: Record<string, any>;
+  draftContent?: Record<string, any> | null;
+  status?: 'DRAFT' | 'PUBLISHED';
   updatedAt: string;
   createdAt: string;
 }
@@ -294,6 +296,58 @@ export interface CheckoutResult {
   checkoutUrl: string;
   orderId: string;
   orderNumber: string;
+}
+
+// ── Artwork Management ────────────────────────────────────────────────
+
+export interface CreateArtworkInput {
+  title: string;
+  slug: string;
+  artistId: string;
+  medium: string;
+  price: number;
+  currency?: string;
+  status?: string;
+  purchaseMode?: 'DIRECT' | 'INQUIRY_ONLY';
+  featured?: boolean;
+  certificate?: boolean;
+  framed?: boolean;
+  description?: string;
+  style?: string;
+  year?: number;
+  width?: number;
+  height?: number;
+  depth?: number;
+  edition?: string;
+  materials?: string;
+  signature?: string;
+  displayOrder?: number;
+}
+
+export interface CreateArtistInput {
+  name: string;
+  slug: string;
+  bio?: string;
+  statement?: string;
+  location?: string;
+  website?: string;
+  email?: string;
+  phoneNumber?: string;
+  profileImageUrl?: string;
+  featured?: boolean;
+  verified?: boolean;
+}
+
+export interface UploadedImage {
+  publicId: string;
+  url: string;
+  width: number;
+  height: number;
+  format: string;
+  size: number;
+  thumbnailUrl?: string;
+  mediumUrl?: string;
+  largeUrl?: string;
 }
 
 // ── Admin ──────────────────────────────────────────────────────────────
@@ -423,6 +477,100 @@ class ApiClient {
     limit = 6
   ): Promise<ApiResponse<Artwork[]>> {
     return this.fetch<Artwork[]>(`/artworks/${id}/related?limit=${limit}`);
+  }
+
+  /**
+   * Create artwork (admin)
+   */
+  async createArtwork(data: CreateArtworkInput): Promise<ApiResponse<Artwork>> {
+    return this.fetch<Artwork>('/artworks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update artwork (admin)
+   */
+  async updateArtwork(id: string, data: Partial<CreateArtworkInput>): Promise<ApiResponse<Artwork>> {
+    return this.fetch<Artwork>(`/artworks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Delete artwork (admin)
+   */
+  async deleteArtwork(id: string): Promise<ApiResponse<{ message: string }>> {
+    return this.fetch<{ message: string }>(`/artworks/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Upload artwork image to Cloudinary
+   */
+  async uploadArtworkImage(file: File): Promise<{ success: boolean; image: UploadedImage }> {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const url = `${this.baseUrl}/upload/artwork`;
+    const headers: Record<string, string> = {};
+    if (this.accessToken) {
+      headers['Authorization'] = `Bearer ${this.accessToken}`;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+      throw new Error(error.message || 'Upload failed');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Add uploaded image to artwork
+   */
+  async addArtworkImage(artworkId: string, imageData: {
+    publicId: string;
+    url: string;
+    secureUrl: string;
+    width: number;
+    height: number;
+    format: string;
+    size: number;
+    type?: string;
+  }): Promise<ApiResponse<ArtworkImage>> {
+    return this.fetch<ArtworkImage>(`/artworks/${artworkId}/images`, {
+      method: 'POST',
+      body: JSON.stringify(imageData),
+    });
+  }
+
+  /**
+   * Remove image from artwork
+   */
+  async removeArtworkImage(artworkId: string, imageId: string): Promise<void> {
+    await this.fetch(`/artworks/${artworkId}/images/${imageId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Create artist (admin)
+   */
+  async createArtist(data: CreateArtistInput): Promise<ApiResponse<Artist>> {
+    return this.fetch<Artist>('/artists', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   /**
@@ -626,12 +774,28 @@ class ApiClient {
   }
 
   /**
-   * Update page content by slug (admin)
+   * Get CMS page content with draft (admin)
+   */
+  async getPageContentDraft(slug: string): Promise<ApiResponse<PageContent>> {
+    return this.fetch<PageContent>(`/pages/${slug}?draft=true`);
+  }
+
+  /**
+   * Update page content by slug (saves as draft)
    */
   async updatePageContent(slug: string, content: Record<string, any>): Promise<ApiResponse<PageContent>> {
     return this.fetch<PageContent>(`/pages/${slug}`, {
       method: 'PUT',
       body: JSON.stringify({ content }),
+    });
+  }
+
+  /**
+   * Publish page content by slug
+   */
+  async publishPageContent(slug: string): Promise<ApiResponse<PageContent>> {
+    return this.fetch<PageContent>(`/pages/${slug}/publish`, {
+      method: 'POST',
     });
   }
 

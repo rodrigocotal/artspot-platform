@@ -33,4 +33,12 @@ router.put('/:id', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artworkCon
 // DELETE /artworks/:id
 router.delete('/:id', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artworkController.deleteArtwork.bind(artworkController));
 
+// Add image to artwork
+// POST /artworks/:id/images
+router.post('/:id/images', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artworkController.addImage.bind(artworkController));
+
+// Remove image from artwork
+// DELETE /artworks/:id/images/:imageId
+router.delete('/:id/images/:imageId', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), artworkController.removeImage.bind(artworkController));
+
 export default router;

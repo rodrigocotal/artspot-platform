@@ -33,7 +33,7 @@ export const config = {
 
   // Email (AWS SES)
   email: {
-    fromEmail: process.env.FROM_EMAIL || 'noreply@artaldo.com',
+    fromEmail: process.env.FROM_EMAIL || 'contact@artaldo.com',
     staffEmail: process.env.STAFF_EMAIL || '',
     awsRegion: process.env.AWS_SES_REGION || process.env.AWS_REGION || 'ap-southeast-2',
   },

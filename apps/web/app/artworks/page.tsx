@@ -16,7 +16,8 @@ import {
 } from '@/components/ui';
 import { ArtworkGridSkeleton } from '@/components/ui/skeleton';
 import { useArtworks } from '@/hooks/use-artworks';
-import type { ArtworkFilters } from '@/lib/api-client';
+import { apiClient, type ArtworkFilters } from '@/lib/api-client';
+import { useEffect } from 'react';
 
 const sortOptions: SortOption[] = [
   { value: 'createdAt', label: 'Recently Added' },
@@ -51,8 +52,21 @@ export default function ArtworksPage() {
   );
 }
 
+const CMS_DEFAULTS = {
+  headline: 'Explore Artworks',
+  subtitle: 'Discover museum-quality art from exceptional artists',
+};
+
 function ArtworksPageContent() {
   const searchParams = useSearchParams();
+  const [cmsContent, setCmsContent] = useState(CMS_DEFAULTS);
+
+  useEffect(() => {
+    apiClient.getPageContent('artworks')
+      .then((res) => setCmsContent({ ...CMS_DEFAULTS, ...res.data.content }))
+      .catch(() => {});
+  }, []);
+
   // Filter state
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
   const [selectedMediums, setSelectedMediums] = useState<string[]>([]);
@@ -134,10 +148,10 @@ function ArtworksPageContent() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-display font-serif text-neutral-900 mb-2">
-              Explore Artworks
+              {cmsContent.headline}
             </h1>
             <p className="text-body-lg text-neutral-600">
-              Discover museum-quality art from exceptional artists
+              {cmsContent.subtitle}
             </p>
           </div>
 

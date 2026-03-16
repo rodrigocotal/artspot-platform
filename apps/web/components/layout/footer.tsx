@@ -1,8 +1,12 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Container } from './container';
 import { NewsletterForm } from './newsletter-form';
+import { apiClient } from '@/lib/api-client';
 
-const navigation = {
+const DEFAULT_NAVIGATION = {
   explore: [
     { label: 'Paintings', href: '/artworks?medium=painting' },
     { label: 'Sculpture', href: '/artworks?medium=sculpture' },
@@ -25,7 +29,25 @@ const navigation = {
   ],
 };
 
+const DEFAULTS = {
+  brandName: 'ArtAldo',
+  brandDescription: 'Elevating the experience of collecting art online. A curated marketplace for museum-quality artworks by exceptional artists.',
+  newsletterLabel: 'Stay Informed',
+  copyrightName: 'ArtAldo',
+  footerNavigation: DEFAULT_NAVIGATION,
+};
+
 export function Footer() {
+  const [content, setContent] = useState(DEFAULTS);
+
+  useEffect(() => {
+    apiClient.getPageContent('footer')
+      .then((res) => setContent({ ...DEFAULTS, ...res.data.content }))
+      .catch(() => {});
+  }, []);
+
+  const nav = content.footerNavigation || DEFAULT_NAVIGATION;
+
   return (
     <footer className="bg-neutral-900 text-neutral-300">
       {/* Main footer content */}
@@ -35,18 +57,17 @@ export function Footer() {
           <div className="lg:col-span-2 space-y-6">
             <Link href="/" className="inline-block">
               <span className="font-serif text-2xl font-light tracking-widest text-white">
-                ARTSPOT
+                {content.brandName}
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-neutral-400 max-w-xs">
-              Elevating the experience of collecting art online. A curated marketplace
-              for museum-quality artworks by exceptional artists.
+              {content.brandDescription}
             </p>
 
             {/* Newsletter */}
             <div className="space-y-3">
               <p className="text-xs font-medium tracking-widest uppercase text-neutral-400">
-                Stay Informed
+                {content.newsletterLabel}
               </p>
               <NewsletterForm />
             </div>
@@ -54,77 +75,25 @@ export function Footer() {
 
           {/* Navigation columns */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 lg:col-span-3 gap-8">
-            <div className="space-y-4">
-              <h3 className="text-xs font-medium tracking-widest uppercase text-neutral-400">
-                Explore
-              </h3>
-              <ul className="space-y-2.5">
-                {navigation.explore.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="text-sm text-neutral-400 hover:text-white transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-xs font-medium tracking-widest uppercase text-neutral-400">
-                Artists
-              </h3>
-              <ul className="space-y-2.5">
-                {navigation.artists.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="text-sm text-neutral-400 hover:text-white transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-xs font-medium tracking-widest uppercase text-neutral-400">
-                Services
-              </h3>
-              <ul className="space-y-2.5">
-                {navigation.services.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="text-sm text-neutral-400 hover:text-white transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-xs font-medium tracking-widest uppercase text-neutral-400">
-                Company
-              </h3>
-              <ul className="space-y-2.5">
-                {navigation.company.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="text-sm text-neutral-400 hover:text-white transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {Object.entries(nav).map(([key, items]) => (
+              <div key={key} className="space-y-4">
+                <h3 className="text-xs font-medium tracking-widest uppercase text-neutral-400">
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </h3>
+                <ul className="space-y-2.5">
+                  {(items as any[]).map((item: any) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className="text-sm text-neutral-400 hover:text-white transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
       </Container>
@@ -134,7 +103,7 @@ export function Footer() {
         <Container className="py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-neutral-500">
-              &copy; {new Date().getFullYear()} ArtSpot. All rights reserved.
+              &copy; {new Date().getFullYear()} {content.copyrightName}. All rights reserved.
             </p>
           </div>
         </Container>

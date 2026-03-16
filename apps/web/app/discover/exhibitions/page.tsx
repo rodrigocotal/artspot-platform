@@ -17,7 +17,13 @@ function formatDate(dateStr: string | null) {
   });
 }
 
+const CMS_DEFAULTS = {
+  headline: 'Exhibitions',
+  subtitle: 'Current and upcoming exhibitions featuring our artists',
+};
+
 export default function ExhibitionsPage() {
+  const [cmsContent, setCmsContent] = useState(CMS_DEFAULTS);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,15 +51,18 @@ export default function ExhibitionsPage() {
 
   useEffect(() => {
     fetchArticles(1);
+    apiClient.getPageContent('exhibitions')
+      .then((res) => setCmsContent({ ...CMS_DEFAULTS, ...res.data.content }))
+      .catch(() => {});
   }, []);
 
   return (
     <Section spacing="lg" background="neutral">
       <Container size="xl">
         <div className="mb-8">
-          <h1 className="text-display font-serif text-neutral-900 mb-2">Exhibitions</h1>
+          <h1 className="text-display font-serif text-neutral-900 mb-2">{cmsContent.headline}</h1>
           <p className="text-body-lg text-neutral-600">
-            Current and upcoming exhibitions featuring our artists
+            {cmsContent.subtitle}
           </p>
         </div>
 

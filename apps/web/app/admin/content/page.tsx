@@ -13,6 +13,17 @@ const SLUG_LABELS: Record<string, string> = {
   'collector-services': 'Collector Services',
   discover: 'Discover Page',
   'site-settings': 'Site Settings',
+  artists: 'Browse Artists',
+  'artists-featured': 'Featured Artists',
+  artworks: 'Browse Artworks',
+  collections: 'Browse Collections',
+  'collections-new-arrivals': 'New Arrivals',
+  'collections-museum-quality': 'Museum Quality',
+  editorial: 'Editorial',
+  inspiration: 'Inspiration',
+  exhibitions: 'Exhibitions',
+  favorites: 'Favorites',
+  footer: 'Footer',
 };
 
 function formatSlug(slug: string): string {

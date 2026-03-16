@@ -21,7 +21,13 @@ const sortOptions: SortOption[] = [
   { value: 'createdAt', label: 'Recently Added' },
 ];
 
+const CMS_DEFAULTS = {
+  headline: 'Curated Collections',
+  subtitle: 'Explore thoughtfully curated selections of exceptional artworks',
+};
+
 export default function CollectionsPage() {
+  const [cmsContent, setCmsContent] = useState(CMS_DEFAULTS);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +72,13 @@ export default function CollectionsPage() {
     }
   };
 
+  // CMS content
+  useEffect(() => {
+    apiClient.getPageContent('collections')
+      .then((res) => setCmsContent({ ...CMS_DEFAULTS, ...res.data.content }))
+      .catch(() => {});
+  }, []);
+
   // Initial load and refetch on filter changes
   useEffect(() => {
     fetchCollections(1);
@@ -88,10 +101,10 @@ export default function CollectionsPage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-display font-serif text-neutral-900 mb-2">
-              Curated Collections
+              {cmsContent.headline}
             </h1>
             <p className="text-body-lg text-neutral-600">
-              Explore thoughtfully curated selections of exceptional artworks
+              {cmsContent.subtitle}
             </p>
           </div>
 

@@ -21,7 +21,13 @@ const sortOptions: SortOption[] = [
   { value: 'displayOrder', label: 'Featured First' },
 ];
 
+const CMS_DEFAULTS = {
+  headline: 'Discover Artists',
+  subtitle: 'Meet the exceptional artists behind our curated collection',
+};
+
 export default function ArtistsPage() {
+  const [cmsContent, setCmsContent] = useState(CMS_DEFAULTS);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +74,13 @@ export default function ArtistsPage() {
     }
   };
 
+  // CMS content
+  useEffect(() => {
+    apiClient.getPageContent('artists')
+      .then((res) => setCmsContent({ ...CMS_DEFAULTS, ...res.data.content }))
+      .catch(() => {});
+  }, []);
+
   // Initial load and refetch on filter changes
   useEffect(() => {
     fetchArtists(1);
@@ -92,10 +105,10 @@ export default function ArtistsPage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-display font-serif text-neutral-900 mb-2">
-              Discover Artists
+              {cmsContent.headline}
             </h1>
             <p className="text-body-lg text-neutral-600">
-              Meet the exceptional artists behind our curated collection
+              {cmsContent.subtitle}
             </p>
           </div>
 

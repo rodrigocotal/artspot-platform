@@ -47,7 +47,13 @@ function formatDate(dateStr: string | null) {
   });
 }
 
+const CMS_DEFAULTS = {
+  headline: 'Editorial',
+  subtitle: 'Stories, spotlights, and insights from the art world',
+};
+
 export default function EditorialPage() {
+  const [cmsContent, setCmsContent] = useState(CMS_DEFAULTS);
   const [articles, setArticles] = useState<Article[]>([]);
   const [featuredArticle, setFeaturedArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +67,13 @@ export default function EditorialPage() {
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ArticleCategory | 'ALL'>('ALL');
+
+  // CMS content
+  useEffect(() => {
+    apiClient.getPageContent('editorial')
+      .then((res) => setCmsContent({ ...CMS_DEFAULTS, ...res.data.content }))
+      .catch(() => {});
+  }, []);
 
   // Fetch featured article on mount
   useEffect(() => {
@@ -170,9 +183,9 @@ export default function EditorialPage() {
         <Container size="xl">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-display font-serif text-neutral-900 mb-2">Editorial</h1>
+            <h1 className="text-display font-serif text-neutral-900 mb-2">{cmsContent.headline}</h1>
             <p className="text-body-lg text-neutral-600">
-              Stories, spotlights, and insights from the art world
+              {cmsContent.subtitle}
             </p>
           </div>
 

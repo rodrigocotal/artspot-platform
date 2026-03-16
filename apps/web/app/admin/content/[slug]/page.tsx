@@ -79,6 +79,52 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
     { key: 'logoText', label: 'Logo Text', type: 'text' },
     { key: 'navigation', label: 'Navigation', type: 'nav' },
   ],
+  artists: [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  'artists-featured': [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  artworks: [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  collections: [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  'collections-new-arrivals': [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  'collections-museum-quality': [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  editorial: [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  inspiration: [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  exhibitions: [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  favorites: [
+    { key: 'headline', label: 'Headline', type: 'text' },
+    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  ],
+  footer: [
+    { key: 'brandName', label: 'Brand Name', type: 'text' },
+    { key: 'brandDescription', label: 'Brand Description', type: 'textarea' },
+    { key: 'newsletterLabel', label: 'Newsletter Label', type: 'text' },
+    { key: 'copyrightName', label: 'Copyright Name', type: 'text' },
+  ],
 };
 
 const SLUG_LABELS: Record<string, string> = {
@@ -87,6 +133,17 @@ const SLUG_LABELS: Record<string, string> = {
   'collector-services': 'Collector Services',
   discover: 'Discover Page',
   'site-settings': 'Site Settings',
+  artists: 'Browse Artists',
+  'artists-featured': 'Featured Artists',
+  artworks: 'Browse Artworks',
+  collections: 'Browse Collections',
+  'collections-new-arrivals': 'New Arrivals',
+  'collections-museum-quality': 'Museum Quality',
+  editorial: 'Editorial',
+  inspiration: 'Inspiration',
+  exhibitions: 'Exhibitions',
+  favorites: 'Favorites',
+  footer: 'Footer',
 };
 
 export default function EditContentPage() {

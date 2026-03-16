@@ -7,11 +7,17 @@ import { Button } from '@/components/ui';
 import { apiClient, type Collection } from '@/lib/api-client';
 import { Loader2 } from 'lucide-react';
 
+const CMS_DEFAULTS = {
+  headline: 'Museum-Quality Works',
+  subtitle: 'Our finest curated collections, selected to institutional standards',
+};
+
 export default function MuseumQualityPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
+  const [cmsContent, setCmsContent] = useState(CMS_DEFAULTS);
 
   const fetchCollections = async (page = 1) => {
     setLoading(true);
@@ -35,15 +41,18 @@ export default function MuseumQualityPage() {
 
   useEffect(() => {
     fetchCollections(1);
+    apiClient.getPageContent('collections-museum-quality')
+      .then((res) => setCmsContent({ ...CMS_DEFAULTS, ...res.data.content }))
+      .catch(() => {});
   }, []);
 
   return (
     <Section spacing="lg" background="neutral">
       <Container size="xl">
         <div className="mb-8">
-          <h1 className="text-display font-serif text-neutral-900 mb-2">Museum-Quality Works</h1>
+          <h1 className="text-display font-serif text-neutral-900 mb-2">{cmsContent.headline}</h1>
           <p className="text-body-lg text-neutral-600">
-            Our finest curated collections, selected to institutional standards
+            {cmsContent.subtitle}
           </p>
         </div>
 

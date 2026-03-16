@@ -7,11 +7,17 @@ import { Button } from '@/components/ui';
 import { apiClient, type Collection } from '@/lib/api-client';
 import { Loader2 } from 'lucide-react';
 
+const CMS_DEFAULTS = {
+  headline: 'New Arrivals',
+  subtitle: 'The latest collections added to our curated selection',
+};
+
 export default function NewArrivalsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
+  const [cmsContent, setCmsContent] = useState(CMS_DEFAULTS);
 
   const fetchCollections = async (page = 1) => {
     setLoading(true);
@@ -34,15 +40,18 @@ export default function NewArrivalsPage() {
 
   useEffect(() => {
     fetchCollections(1);
+    apiClient.getPageContent('collections-new-arrivals')
+      .then((res) => setCmsContent({ ...CMS_DEFAULTS, ...res.data.content }))
+      .catch(() => {});
   }, []);
 
   return (
     <Section spacing="lg" background="neutral">
       <Container size="xl">
         <div className="mb-8">
-          <h1 className="text-display font-serif text-neutral-900 mb-2">New Arrivals</h1>
+          <h1 className="text-display font-serif text-neutral-900 mb-2">{cmsContent.headline}</h1>
           <p className="text-body-lg text-neutral-600">
-            The latest collections added to our curated selection
+            {cmsContent.subtitle}
           </p>
         </div>
 

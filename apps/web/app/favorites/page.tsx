@@ -1,15 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Container, Section } from '@/components/layout';
 import { ArtworkCard } from '@/components/artwork/artwork-card';
 import { Button } from '@/components/ui';
 import { ArtworkGridSkeleton } from '@/components/ui/skeleton';
 import { useFavoritesQuery } from '@/hooks/use-favorites-query';
+import { apiClient } from '@/lib/api-client';
 import { Heart } from 'lucide-react';
 
+const CMS_DEFAULTS = {
+  headline: 'Your Favorites',
+  subtitle: 'Artworks you\'ve saved for later',
+};
+
 export default function FavoritesPage() {
+  const [cmsContent, setCmsContent] = useState(CMS_DEFAULTS);
+
+  useEffect(() => {
+    apiClient.getPageContent('favorites')
+      .then((res) => setCmsContent({ ...CMS_DEFAULTS, ...res.data.content }))
+      .catch(() => {});
+  }, []);
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useFavoritesQuery({ page, limit: 20 });
 
@@ -22,10 +35,10 @@ export default function FavoritesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-display font-serif text-neutral-900 mb-2">
-            Your Favorites
+            {cmsContent.headline}
           </h1>
           <p className="text-body-lg text-neutral-600">
-            Artworks you&apos;ve saved for later
+            {cmsContent.subtitle}
           </p>
         </div>
 

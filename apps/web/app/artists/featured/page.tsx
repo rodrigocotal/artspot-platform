@@ -7,11 +7,17 @@ import { Button } from '@/components/ui';
 import { apiClient, type Artist } from '@/lib/api-client';
 import { Loader2 } from 'lucide-react';
 
+const CMS_DEFAULTS = {
+  headline: 'Featured Artists',
+  subtitle: 'Exceptional artists hand-selected by our curatorial team',
+};
+
 export default function FeaturedArtistsPage() {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
+  const [cmsContent, setCmsContent] = useState(CMS_DEFAULTS);
 
   const fetchArtists = async (page = 1) => {
     setLoading(true);
@@ -35,15 +41,18 @@ export default function FeaturedArtistsPage() {
 
   useEffect(() => {
     fetchArtists(1);
+    apiClient.getPageContent('artists-featured')
+      .then((res) => setCmsContent({ ...CMS_DEFAULTS, ...res.data.content }))
+      .catch(() => {});
   }, []);
 
   return (
     <Section spacing="lg" background="neutral">
       <Container size="xl">
         <div className="mb-8">
-          <h1 className="text-display font-serif text-neutral-900 mb-2">Featured Artists</h1>
+          <h1 className="text-display font-serif text-neutral-900 mb-2">{cmsContent.headline}</h1>
           <p className="text-body-lg text-neutral-600">
-            Exceptional artists hand-selected by our curatorial team
+            {cmsContent.subtitle}
           </p>
         </div>
 

@@ -5,14 +5,16 @@ const ses = new SESClient({ region: config.email.awsRegion });
 
 const isConfigured = !!config.email.fromEmail && config.nodeEnv !== 'test';
 
-async function sendEmail(to: string, subject: string, text: string, html: string) {
+async function sendEmail(to: string | string[], subject: string, text: string, html: string) {
   if (!isConfigured) return;
+
+  const recipients = Array.isArray(to) ? to : [to];
 
   try {
     await ses.send(
       new SendEmailCommand({
         Source: config.email.fromEmail,
-        Destination: { ToAddresses: [to] },
+        Destination: { ToAddresses: recipients },
         Message: {
           Subject: { Data: subject },
           Body: {
@@ -23,8 +25,15 @@ async function sendEmail(to: string, subject: string, text: string, html: string
       })
     );
   } catch (error) {
-    console.error(`Failed to send email to ${to}:`, error);
+    console.error(`Failed to send email to ${recipients.join(', ')}:`, error);
   }
+}
+
+function getStaffEmails(): string[] {
+  return config.email.staffEmail
+    .split(';')
+    .map((e) => e.trim())
+    .filter(Boolean);
 }
 
 interface InquiryEmailData {
@@ -48,7 +57,8 @@ interface OrderEmailData {
 
 export class EmailService {
   async sendNewInquiryNotification(data: InquiryEmailData) {
-    if (!config.email.staffEmail) return;
+    const staff = getStaffEmails();
+    if (staff.length === 0) return;
 
     const text = [
       `New inquiry received for "${data.artworkTitle}".`,
@@ -73,7 +83,7 @@ export class EmailService {
       <p>${data.message.replace(/\n/g, '<br />')}</p>
     `;
 
-    await sendEmail(config.email.staffEmail, `New Inquiry: ${data.artworkTitle}`, text, html);
+    await sendEmail(staff, `New Inquiry: ${data.artworkTitle}`, text, html);
   }
 
   async sendInquiryResponseNotification(data: InquiryEmailData & { response: string }) {
@@ -175,13 +185,14 @@ export class EmailService {
   }
 
   async sendNewOrderNotification(data: OrderEmailData) {
-    if (!config.email.staffEmail) return;
+    const staff = getStaffEmails();
+    if (staff.length === 0) return;
 
     const text = `New order!\nOrder: ${data.orderNumber}\nCustomer: ${data.customerName} (${data.customerEmail})\n${data.items.map(i => `- ${i.title}: ${i.currency} ${i.price}`).join('\n')}\nTotal: ${data.currency} ${data.subtotal}`;
 
     const html = `<h2>New Order: ${data.orderNumber}</h2><p><strong>Customer:</strong> ${data.customerName} &lt;${data.customerEmail}&gt;</p><ul>${data.items.map(i => `<li>${i.title} — ${i.currency} ${i.price}</li>`).join('')}</ul><p><strong>Total:</strong> ${data.currency} ${data.subtotal}</p>`;
 
-    await sendEmail(config.email.staffEmail, `New Order: ${data.orderNumber}`, text, html);
+    await sendEmail(staff, `New Order: ${data.orderNumber}`, text, html);
   }
 }
 

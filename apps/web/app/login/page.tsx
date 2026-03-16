@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { Button } from '@/components/ui';
 import { Input } from '@/components/ui';
 import { Label } from '@/components/ui';
@@ -33,6 +33,8 @@ function LoginForm() {
       if (result?.error) {
         setError('Invalid email or password');
       } else {
+        // Force session refresh to ensure cookie is synced (Safari compat)
+        await getSession();
         router.push(callbackUrl);
         router.refresh();
       }

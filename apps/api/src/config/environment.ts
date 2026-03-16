@@ -31,11 +31,11 @@ export const config = {
     apiSecret: process.env.CLOUDINARY_API_SECRET || '',
   },
 
-  // Email
+  // Email (AWS SES)
   email: {
-    sendgridApiKey: process.env.SENDGRID_API_KEY || '',
-    fromEmail: process.env.FROM_EMAIL || 'noreply@artspot.com',
+    fromEmail: process.env.FROM_EMAIL || 'noreply@artaldo.com',
     staffEmail: process.env.STAFF_EMAIL || '',
+    awsRegion: process.env.AWS_SES_REGION || process.env.AWS_REGION || 'ap-southeast-2',
   },
 
   // Stripe

@@ -306,48 +306,62 @@ export function Header({ className }: HeaderProps) {
                   </span>
                 </button>
                 {userMenuOpen && (
-                  <div
-                    role="menu"
-                    aria-label="Account menu"
-                    className="absolute right-0 top-full mt-1 w-48 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
-                  >
-                    <Link
-                      href="/account"
-                      role="menuitem"
-                      className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                  <div className="absolute right-0 top-full pt-2">
+                    <div
+                      role="menu"
+                      aria-label="Account menu"
+                      className="w-48 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
                     >
-                      My Account
-                    </Link>
-                    <Link
-                      href="/favorites"
-                      role="menuitem"
-                      className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
-                    >
-                      Favorites
-                    </Link>
-                    <Link
-                      href="/cart"
-                      role="menuitem"
-                      className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
-                    >
-                      Cart{itemCount > 0 ? ` (${itemCount})` : ''}
-                    </Link>
-                    <Link
-                      href="/account/orders"
-                      role="menuitem"
-                      className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
-                    >
-                      Orders
-                    </Link>
-                    <hr className="my-1 border-neutral-200" />
-                    <button
-                      onClick={() => signOut({ callbackUrl: '/' })}
-                      role="menuitem"
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
-                    >
-                      <LogOut className="h-4 w-4" aria-hidden="true" />
-                      Sign Out
-                    </button>
+                      <Link
+                        href="/account"
+                        role="menuitem"
+                        className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                      >
+                        My Account
+                      </Link>
+                      <Link
+                        href="/favorites"
+                        role="menuitem"
+                        className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                      >
+                        Favorites
+                      </Link>
+                      <Link
+                        href="/cart"
+                        role="menuitem"
+                        className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                      >
+                        Cart{itemCount > 0 ? ` (${itemCount})` : ''}
+                      </Link>
+                      <Link
+                        href="/account/orders"
+                        role="menuitem"
+                        className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                      >
+                        Orders
+                      </Link>
+                      {(session.user.role === 'ADMIN' || session.user.role === 'GALLERY_STAFF') && (
+                        <>
+                          <hr className="my-1 border-neutral-200" />
+                          <Link
+                            href="/admin"
+                            role="menuitem"
+                            className="block px-4 py-2.5 text-body text-primary-700 font-medium hover:bg-primary-50 transition-colors"
+                          >
+                            Admin Panel
+                          </Link>
+                        </>
+                      )}
+                      <hr className="my-1 border-neutral-200" />
+                      <button
+                        onClick={() => signOut({ callbackUrl: '/' })}
+                        role="menuitem"
+                        className="flex w-full items-center gap-2 px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                      >
+                        <LogOut className="h-4 w-4" aria-hidden="true" />
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Container, Section } from '@/components/layout';
 import { Button } from '@/components/ui';
-import { User, Heart, MessageSquare, LogIn, Package, Settings } from 'lucide-react';
+import { User, Heart, MessageSquare, LogIn, Package, Settings, ShieldCheck } from 'lucide-react';
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -133,6 +133,25 @@ export default function AccountPage() {
               </div>
             </div>
           </Link>
+
+          {(session.user.role === 'ADMIN' || session.user.role === 'GALLERY_STAFF') && (
+            <Link
+              href="/admin"
+              className="group bg-white rounded-xl p-6 hover:shadow-md transition-shadow border-2 border-primary-100"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck className="w-6 h-6 text-primary-600" />
+                </div>
+                <div>
+                  <h3 className="text-heading-4 font-serif text-neutral-900 group-hover:text-primary-600 transition-colors">
+                    Admin Panel
+                  </h3>
+                  <p className="text-sm text-neutral-600">Manage site content & settings</p>
+                </div>
+              </div>
+            </Link>
+          )}
         </div>
       </Container>
     </Section>

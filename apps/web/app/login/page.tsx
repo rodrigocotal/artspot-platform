@@ -2,20 +2,20 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn, getSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui';
 import { Input } from '@/components/ui';
 import { Label } from '@/components/ui';
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const authError = searchParams.get('error');
 
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [error, setError] = React.useState('');
+  const [error, setError] = React.useState(authError === 'CredentialsSignin' ? 'Invalid email or password' : '');
   const [loading, setLoading] = React.useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -24,23 +24,16 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      const result = await signIn('credentials', {
+      // Use redirect: true for Safari cookie compatibility.
+      // On error, NextAuth redirects back to /login?error=CredentialsSignin
+      await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        callbackUrl,
+        redirect: true,
       });
-
-      if (result?.error) {
-        setError('Invalid email or password');
-      } else {
-        // Force session refresh to ensure cookie is synced (Safari compat)
-        await getSession();
-        router.push(callbackUrl);
-        router.refresh();
-      }
     } catch {
       setError('Something went wrong. Please try again.');
-    } finally {
       setLoading(false);
     }
   }
@@ -94,12 +87,6 @@ function LoginForm() {
             autoComplete="current-password"
             aria-invalid={!!error}
           />
-        </div>
-
-        <div className="text-right">
-          <Link href="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
-            Forgot password?
-          </Link>
         </div>
 
         <Button type="submit" className="w-full" loading={loading}>

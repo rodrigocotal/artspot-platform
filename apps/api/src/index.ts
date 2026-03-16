@@ -14,7 +14,7 @@ const server = app.listen(config.port, () => {
   console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
-║   🎨 ArtSpot API Server                              ║
+║   🎨 ArtAldo API Server                              ║
 ║                                                       ║
 ║   Environment: ${config.nodeEnv.padEnd(37)}║
 ║   Port:        ${config.port.toString().padEnd(37)}║

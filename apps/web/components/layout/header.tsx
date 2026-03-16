@@ -32,7 +32,7 @@ interface NavItem {
 }
 
 // Default navigation (used as fallback when CMS is unreachable)
-const DEFAULT_LOGO_TEXT = 'ArtSpot';
+const DEFAULT_LOGO_TEXT = 'ArtAldo';
 
 const DEFAULT_NAV: NavItem[] = [
   {

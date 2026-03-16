@@ -22,7 +22,7 @@ const sans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'ArtSpot - Premium Art Marketplace',
+  title: 'ArtAldo - Premium Art Marketplace',
   description: 'Elevating the Experience of Collecting Art Online. A curated marketplace for museum-quality artworks.',
   keywords: ['art', 'marketplace', 'gallery', 'fine art', 'contemporary art', 'paintings', 'sculpture'],
 };

@@ -15,7 +15,7 @@ const DEFAULTS = {
   heroPrimaryCtaLink: '/artworks',
   heroSecondaryCta: 'Browse Artists',
   heroSecondaryCtaLink: '/artists',
-  featuresHeadline: 'Why Collectors Choose ArtSpot',
+  featuresHeadline: 'Why Collectors Choose ArtAldo',
   featuresSubtitle: 'A premium platform designed for serious art collectors',
   features: [
     {

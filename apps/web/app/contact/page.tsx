@@ -30,7 +30,7 @@ export default function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent(formData.subject || 'Inquiry from ArtSpot');
+    const subject = encodeURIComponent(formData.subject || 'Inquiry from ArtAldo');
     const body = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`);
     window.location.href = `mailto:${content.email}?subject=${subject}&body=${body}`;
   };

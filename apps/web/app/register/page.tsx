@@ -78,7 +78,7 @@ export default function RegisterPage() {
             Create Account
           </h1>
           <p className="mt-2 text-neutral-600">
-            Join ArtSpot to start collecting
+            Join ArtAldo to start collecting
           </p>
         </div>
 

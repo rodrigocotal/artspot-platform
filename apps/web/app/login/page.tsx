@@ -45,7 +45,7 @@ function LoginForm() {
           Welcome Back
         </h1>
         <p className="mt-2 text-neutral-600">
-          Sign in to your ArtSpot account
+          Sign in to your ArtAldo account
         </p>
       </div>
 

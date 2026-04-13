@@ -46,6 +46,7 @@ export default function EditArtworkPage() {
   const [existingImages, setExistingImages] = useState<ArtworkImage[]>([]);
   const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [dimUnit, setDimUnit] = useState<'cm' | 'in'>('in');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -93,9 +94,9 @@ export default function EditArtworkPage() {
           medium: a.medium,
           style: a.style || '',
           year: a.year != null ? String(a.year) : '',
-          width: a.width != null ? String(a.width) : '',
-          height: a.height != null ? String(a.height) : '',
-          depth: a.depth != null ? String(a.depth) : '',
+          width: a.width != null ? String(Math.round(Number(a.width) / 2.54 * 100) / 100) : '',
+          height: a.height != null ? String(Math.round(Number(a.height) / 2.54 * 100) / 100) : '',
+          depth: a.depth != null ? String(Math.round(Number(a.depth) / 2.54 * 100) / 100) : '',
           price: String(a.price),
           currency: a.currency,
           status: a.status,
@@ -232,9 +233,9 @@ export default function EditArtworkPage() {
         description: form.description || null,
         style: form.style || null,
         year: form.year ? parseInt(form.year, 10) : null,
-        width: form.width ? parseFloat(form.width) : null,
-        height: form.height ? parseFloat(form.height) : null,
-        depth: form.depth ? parseFloat(form.depth) : null,
+        width: form.width ? (dimUnit === 'in' ? Math.round(parseFloat(form.width) * 2.54 * 100) / 100 : parseFloat(form.width)) : null,
+        height: form.height ? (dimUnit === 'in' ? Math.round(parseFloat(form.height) * 2.54 * 100) / 100 : parseFloat(form.height)) : null,
+        depth: form.depth ? (dimUnit === 'in' ? Math.round(parseFloat(form.depth) * 2.54 * 100) / 100 : parseFloat(form.depth)) : null,
         edition: form.edition || null,
         materials: form.materials || null,
         signature: form.signature || null,
@@ -478,18 +479,65 @@ export default function EditArtworkPage() {
 
         {/* Dimensions */}
         <fieldset>
-          <legend className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">Dimensions (cm)</legend>
+          <legend className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">
+            Dimensions
+            <span className="ml-3 inline-flex items-center rounded-lg border border-neutral-300 overflow-hidden text-xs font-normal">
+              <button
+                type="button"
+                onClick={() => {
+                  // Convert current values between units
+                  const convert = (v: string, toIn: boolean) => {
+                    if (!v) return v;
+                    const n = parseFloat(v);
+                    return String(Math.round((toIn ? n / 2.54 : n * 2.54) * 100) / 100);
+                  };
+                  const toIn = dimUnit === 'cm';
+                  setForm((prev) => ({
+                    ...prev,
+                    width: convert(prev.width, toIn),
+                    height: convert(prev.height, toIn),
+                    depth: convert(prev.depth, toIn),
+                  }));
+                  setDimUnit('cm');
+                }}
+                className={`px-3 py-1 transition-colors ${dimUnit === 'cm' ? 'bg-primary-600 text-white' : 'bg-white text-neutral-600 hover:bg-neutral-50'}`}
+              >
+                cm
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const convert = (v: string, toIn: boolean) => {
+                    if (!v) return v;
+                    const n = parseFloat(v);
+                    return String(Math.round((toIn ? n / 2.54 : n * 2.54) * 100) / 100);
+                  };
+                  const toIn = dimUnit === 'cm';
+                  setForm((prev) => ({
+                    ...prev,
+                    width: convert(prev.width, toIn),
+                    height: convert(prev.height, toIn),
+                    depth: convert(prev.depth, toIn),
+                  }));
+                  setDimUnit('in');
+                }}
+                className={`px-3 py-1 transition-colors ${dimUnit === 'in' ? 'bg-primary-600 text-white' : 'bg-white text-neutral-600 hover:bg-neutral-50'}`}
+              >
+                in
+              </button>
+            </span>
+          </legend>
           <div className="grid grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Width</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Width ({dimUnit})</label>
               <Input type="number" step="0.01" value={form.width} onChange={(e) => updateField('width', e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Height</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Height ({dimUnit})</label>
               <Input type="number" step="0.01" value={form.height} onChange={(e) => updateField('height', e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Depth</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Depth ({dimUnit})</label>
               <Input type="number" step="0.01" value={form.depth} onChange={(e) => updateField('depth', e.target.value)} />
             </div>
           </div>

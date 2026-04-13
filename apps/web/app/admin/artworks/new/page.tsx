@@ -53,6 +53,8 @@ export default function NewArtworkPage() {
   const [images, setImages] = useState<StagedImage[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [dimUnit, setDimUnit] = useState<'cm' | 'in'>('in');
+
   const [form, setForm] = useState({
     title: '',
     slug: '',
@@ -162,9 +164,13 @@ export default function NewArtworkPage() {
       if (form.description) data.description = form.description;
       if (form.style) data.style = form.style;
       if (form.year) data.year = parseInt(form.year, 10);
-      if (form.width) data.width = parseFloat(form.width);
-      if (form.height) data.height = parseFloat(form.height);
-      if (form.depth) data.depth = parseFloat(form.depth);
+      const toCm = (v: string) => {
+        const n = parseFloat(v);
+        return dimUnit === 'in' ? Math.round(n * 2.54 * 100) / 100 : n;
+      };
+      if (form.width) data.width = toCm(form.width);
+      if (form.height) data.height = toCm(form.height);
+      if (form.depth) data.depth = toCm(form.depth);
       if (form.edition) data.edition = form.edition;
       if (form.materials) data.materials = form.materials;
       if (form.signature) data.signature = form.signature;
@@ -371,18 +377,36 @@ export default function NewArtworkPage() {
 
         {/* Dimensions */}
         <fieldset>
-          <legend className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">Dimensions (cm)</legend>
+          <legend className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">
+            Dimensions
+            <span className="ml-3 inline-flex items-center rounded-lg border border-neutral-300 overflow-hidden text-xs font-normal">
+              <button
+                type="button"
+                onClick={() => setDimUnit('cm')}
+                className={`px-3 py-1 transition-colors ${dimUnit === 'cm' ? 'bg-primary-600 text-white' : 'bg-white text-neutral-600 hover:bg-neutral-50'}`}
+              >
+                cm
+              </button>
+              <button
+                type="button"
+                onClick={() => setDimUnit('in')}
+                className={`px-3 py-1 transition-colors ${dimUnit === 'in' ? 'bg-primary-600 text-white' : 'bg-white text-neutral-600 hover:bg-neutral-50'}`}
+              >
+                in
+              </button>
+            </span>
+          </legend>
           <div className="grid grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Width</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Width ({dimUnit})</label>
               <Input type="number" step="0.01" value={form.width} onChange={(e) => updateField('width', e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Height</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Height ({dimUnit})</label>
               <Input type="number" step="0.01" value={form.height} onChange={(e) => updateField('height', e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Depth</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Depth ({dimUnit})</label>
               <Input type="number" step="0.01" value={form.depth} onChange={(e) => updateField('depth', e.target.value)} />
             </div>
           </div>

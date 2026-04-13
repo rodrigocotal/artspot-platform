@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';
-import { apiClient, type Artist } from '@/lib/api-client';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react';
+import { apiClient, type Artist, type ArtworkImage, type UploadedImage } from '@/lib/api-client';
+import { ArrowLeft, Save, Trash2, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
 const MEDIUMS = [
@@ -27,6 +27,13 @@ function formatLabel(s: string): string {
   return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+interface StagedImage {
+  file: File;
+  preview: string;
+  uploading?: boolean;
+  error?: string;
+}
+
 export default function EditArtworkPage() {
   const { id } = useParams<{ id: string }>();
   const { data: session } = useSession();
@@ -34,8 +41,12 @@ export default function EditArtworkPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [existingImages, setExistingImages] = useState<ArtworkImage[]>([]);
+  const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -65,12 +76,13 @@ export default function EditArtworkPage() {
 
     const fetchData = async () => {
       try {
-        apiClient.setAccessToken(session.accessToken);
+        apiClient.setAccessToken(session.accessToken as string);
         const [artworkRes, artistsRes] = await Promise.all([
           apiClient.getArtwork(id),
           apiClient.getArtists({ limit: 100 }),
         ]);
         setArtists(artistsRes.data);
+        setExistingImages(artworkRes.data.images || []);
 
         const a = artworkRes.data;
         setForm({
@@ -107,18 +119,102 @@ export default function EditArtworkPage() {
 
   const updateField = (key: string, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));
-    setSuccess(false);
+    setSuccess(null);
+  };
+
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setStagedImages((prev) => [...prev, ...newImages]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeStagedImage = (index: number) => {
+    setStagedImages((prev) => {
+      URL.revokeObjectURL(prev[index].preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleUploadImages = async () => {
+    if (stagedImages.length === 0) return;
+    setUploadingImages(true);
+    setError(null);
+
+    try {
+      if (session?.accessToken) {
+        apiClient.setAccessToken(session.accessToken as string);
+      }
+
+      for (let i = 0; i < stagedImages.length; i++) {
+        setStagedImages((prev) =>
+          prev.map((img, idx) => (idx === i ? { ...img, uploading: true } : img))
+        );
+
+        try {
+          const result = await apiClient.uploadArtworkImage(stagedImages[i].file);
+          const img = result.image;
+
+          const hasMain = existingImages.some((ei) => ei.type === 'MAIN');
+          await apiClient.addArtworkImage(id, {
+            publicId: img.publicId,
+            url: img.url,
+            secureUrl: img.url,
+            width: img.width,
+            height: img.height,
+            format: img.format,
+            size: img.size,
+            type: !hasMain && i === 0 ? 'MAIN' : 'ALTERNATE',
+          });
+        } catch (err) {
+          setStagedImages((prev) =>
+            prev.map((img, idx) =>
+              idx === i ? { ...img, uploading: false, error: err instanceof Error ? err.message : 'Upload failed' } : img
+            )
+          );
+          throw new Error(`Failed to upload image ${i + 1}`);
+        }
+      }
+
+      // Refresh images from server
+      const artworkRes = await apiClient.getArtwork(id);
+      setExistingImages(artworkRes.data.images || []);
+      setStagedImages([]);
+      setSuccess('Images uploaded successfully.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload images');
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  const handleDeleteImage = async (imageId: string) => {
+    if (!confirm('Remove this image?')) return;
+
+    try {
+      if (session?.accessToken) {
+        apiClient.setAccessToken(session.accessToken as string);
+      }
+      await apiClient.removeArtworkImage(id, imageId);
+      setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
+      setSuccess('Image removed.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove image');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
-    setSuccess(false);
+    setSuccess(null);
 
     try {
       if (session?.accessToken) {
-        apiClient.setAccessToken(session.accessToken);
+        apiClient.setAccessToken(session.accessToken as string);
       }
 
       const data: Record<string, any> = {
@@ -145,7 +241,7 @@ export default function EditArtworkPage() {
       };
 
       await apiClient.updateArtwork(id, data);
-      setSuccess(true);
+      setSuccess('Artwork updated successfully.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update artwork');
     } finally {
@@ -158,7 +254,7 @@ export default function EditArtworkPage() {
 
     try {
       if (session?.accessToken) {
-        apiClient.setAccessToken(session.accessToken);
+        apiClient.setAccessToken(session.accessToken as string);
       }
       await apiClient.deleteArtwork(id);
       router.push('/admin/artworks');
@@ -197,9 +293,112 @@ export default function EditArtworkPage() {
 
       {success && (
         <div className="bg-success-50 border border-success-200 rounded-lg p-4 text-success-700 mb-6">
-          Artwork updated successfully.
+          {success}
         </div>
       )}
+
+      {/* Images Section */}
+      <div className="bg-white rounded-lg border border-neutral-200 p-6 mb-6">
+        <h2 className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">Images</h2>
+
+        {/* Existing images */}
+        <div className="flex flex-wrap gap-4 mb-4">
+          {existingImages.length === 0 && stagedImages.length === 0 && (
+            <div className="flex items-center gap-3 text-neutral-400 py-4">
+              <ImageIcon className="w-8 h-8" />
+              <span className="text-sm">No images yet. Add images below.</span>
+            </div>
+          )}
+          {existingImages.map((img) => (
+            <div key={img.id} className="relative w-32 h-32 rounded-lg overflow-hidden border border-neutral-200 group">
+              <img
+                src={img.secureUrl || img.url}
+                alt={img.caption || 'Artwork image'}
+                className="w-full h-full object-cover"
+              />
+              {img.type === 'MAIN' && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] text-center py-0.5">
+                  Main
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => handleDeleteImage(img.id)}
+                className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+
+          {/* Staged (not yet uploaded) images */}
+          {stagedImages.map((img, i) => (
+            <div key={i} className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-dashed border-primary-300 group">
+              <img
+                src={img.preview}
+                alt={`Upload ${i + 1}`}
+                className="w-full h-full object-cover"
+              />
+              {img.uploading && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+              {img.error && (
+                <div className="absolute inset-0 bg-red-500/50 flex items-center justify-center">
+                  <span className="text-white text-xs px-1 text-center">{img.error}</span>
+                </div>
+              )}
+              <div className="absolute bottom-0 left-0 right-0 bg-primary-600/80 text-white text-[10px] text-center py-0.5">
+                New
+              </div>
+              <button
+                type="button"
+                onClick={() => removeStagedImage(i)}
+                className="absolute top-1 right-1 w-5 h-5 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+
+          {/* Add button */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-32 h-32 rounded-lg border-2 border-dashed border-neutral-300 hover:border-primary-400 flex flex-col items-center justify-center gap-2 text-neutral-400 hover:text-primary-500 transition-colors"
+          >
+            <Upload className="w-6 h-6" />
+            <span className="text-xs">Add Image</span>
+          </button>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFilesSelected}
+          className="hidden"
+        />
+
+        {stagedImages.length > 0 && (
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              onClick={handleUploadImages}
+              loading={uploadingImages}
+              size="sm"
+            >
+              <Upload className="w-4 h-4" />
+              Upload {stagedImages.length} Image{stagedImages.length > 1 ? 's' : ''}
+            </Button>
+            <p className="text-xs text-neutral-500">
+              {existingImages.length === 0 ? 'First image will be the main image.' : 'New images will be added as alternate images.'}
+            </p>
+          </div>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-neutral-200 p-6 space-y-6">
         {/* Basic Info */}

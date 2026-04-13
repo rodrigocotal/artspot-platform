@@ -41,6 +41,7 @@ const DEFAULTS = {
 
 export default function HomePage() {
   const [content, setContent] = useState(DEFAULTS);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     apiClient
@@ -50,8 +51,13 @@ export default function HomePage() {
       })
       .catch(() => {
         // CMS unreachable — keep defaults
-      });
+      })
+      .finally(() => setReady(true));
   }, []);
+
+  if (!ready) {
+    return <div className="min-h-screen" />;
+  }
 
   const rawFeatures = content.features?.items ?? content.features;
   const features = Array.isArray(rawFeatures) ? rawFeatures : DEFAULTS.features;

@@ -21,18 +21,38 @@ router.post('/artwork', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), uploa
     }
 
     const file = req.file as any;
+    const publicId = file.filename || file.path;
 
-    // Get different sizes
+    // multer-storage-cloudinary doesn't return width/height/format
+    // Fetch image info from Cloudinary to get actual dimensions
+    let width = file.width;
+    let height = file.height;
+    let format = file.format;
+
+    if ((!width || !height) && publicId) {
+      try {
+        const info = await getImageInfo(publicId);
+        width = info.width;
+        height = info.height;
+        format = info.format;
+      } catch {
+        // Default to 0 if we can't fetch info
+        width = width || 0;
+        height = height || 0;
+        format = format || 'jpg';
+      }
+    }
+
     const response: any = {
       success: true,
       message: 'Image uploaded successfully',
       image: {
-        publicId: file.filename || file.path,
+        publicId,
         url: file.path,
-        width: file.width,
-        height: file.height,
-        format: file.format,
-        size: file.size,
+        width,
+        height,
+        format: format || 'jpg',
+        size: file.size || 0,
       },
     };
 

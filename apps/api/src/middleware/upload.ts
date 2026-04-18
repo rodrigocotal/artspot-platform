@@ -58,3 +58,27 @@ export const uploadArtworkImage: RequestHandler = upload.single('image');
  * Upload multiple artwork images (up to 10)
  */
 export const uploadArtworkImages: RequestHandler = upload.array('images', 10);
+
+// ── CMS uploads ────────────────────────────────────────────────────────
+const cmsCloudinaryStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (_req, file) => {
+    return {
+      folder: 'cms',
+      allowed_formats: ALLOWED_FORMATS,
+      public_id: `${Date.now()}_${file.originalname.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_')}`,
+      resource_type: 'auto' as const,
+    };
+  },
+});
+
+const cmsUpload = multer({
+  storage: cmsCloudinaryStorage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB per spec
+});
+
+/**
+ * Upload single CMS image
+ */
+export const uploadCmsImage: RequestHandler = cmsUpload.single('image');

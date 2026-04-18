@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { uploadArtworkImage, uploadArtworkImages } from '../middleware/upload';
+import { uploadArtworkImage, uploadArtworkImages, uploadCmsImage } from '../middleware/upload';
 import { getImageUrl, getImageInfo } from '../config/cloudinary';
 import { authenticate, authorize } from '../middleware/auth';
 
@@ -123,6 +123,66 @@ router.post('/artworks', authenticate, authorize('ADMIN', 'GALLERY_STAFF'), uplo
     });
   }
 });
+
+/**
+ * @route   POST /upload/cms
+ * @desc    Upload single CMS image (folder: cms/)
+ * @access  Private (Admin/Gallery Staff)
+ */
+router.post(
+  '/cms',
+  authenticate,
+  authorize('ADMIN', 'GALLERY_STAFF'),
+  uploadCmsImage,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.file) {
+        res.status(400).json({ success: false, message: 'No file uploaded' });
+        return;
+      }
+
+      const file = req.file as any;
+      const publicId = file.filename || file.path;
+
+      let width = file.width;
+      let height = file.height;
+      let format = file.format;
+
+      if ((!width || !height) && publicId) {
+        try {
+          const info = await getImageInfo(publicId);
+          width = info.width;
+          height = info.height;
+          format = info.format;
+        } catch {
+          width = width || 0;
+          height = height || 0;
+          format = format || 'jpg';
+        }
+      }
+
+      res.status(201).json({
+        success: true,
+        message: 'Image uploaded successfully',
+        image: {
+          publicId,
+          url: file.path,
+          width,
+          height,
+          format: format || 'jpg',
+          size: file.size || 0,
+        },
+      });
+    } catch (error) {
+      console.error('CMS upload error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to upload image',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  },
+);
 
 /**
  * @route   GET /upload/info/:publicId

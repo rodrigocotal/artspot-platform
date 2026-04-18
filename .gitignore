@@ -3,6 +3,9 @@ node_modules/
 .pnp
 .pnp.js
 
+# Brainstorming companion
+.superpowers/
+
 # Testing
 coverage/
 *.log

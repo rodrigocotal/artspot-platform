@@ -1,5 +1,7 @@
 'use client';
 
+import { HeroImage } from '@/components/hero-image';
+
 interface HomePreviewProps {
   content: Record<string, any>;
 }
@@ -26,6 +28,7 @@ export function HomePreview({ content }: HomePreviewProps) {
         <p className="text-neutral-600 max-w-md mx-auto text-xs leading-relaxed">
           {content.heroSubtitle}
         </p>
+        <HeroImage image={content.heroImage} />
         <div className="flex gap-2 justify-center">
           {content.heroCtaText && (
             <span className="px-4 py-2 bg-primary-600 text-white rounded-lg text-xs font-medium">

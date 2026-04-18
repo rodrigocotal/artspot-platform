@@ -88,7 +88,8 @@ export function ImageField({
               <button
                 type="button"
                 onClick={() => onChange(null)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-neutral-300 rounded hover:bg-neutral-50 text-neutral-600"
+                disabled={uploading}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-neutral-300 rounded hover:bg-neutral-50 text-neutral-600 disabled:opacity-50"
               >
                 <Trash2 className="w-4 h-4" />
                 Remove

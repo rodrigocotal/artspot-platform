@@ -51,6 +51,7 @@ jest.mock('../config/cloudinary', () => {
 });
 
 import app from '../app';
+import cloudinary from '../config/cloudinary';
 import { createTestUser, createTestAdmin, authHeader } from './helpers/auth.helper';
 import { cleanDatabase, disconnectTestDb } from './helpers/clean';
 
@@ -86,6 +87,11 @@ describe('POST /upload/cms', () => {
     expect(res.body.image.url).toBeDefined();
     expect(res.body.image.publicId).toBeDefined();
     expect(res.body.image.publicId).toMatch(/^cms\//);
+    // Verify the storage actually requested folder: 'cms' from Cloudinary
+    expect((cloudinary as any).uploader.upload_stream).toHaveBeenCalledWith(
+      expect.objectContaining({ folder: 'cms' }),
+      expect.any(Function),
+    );
   });
 
   it('rejects when no file provided', async () => {

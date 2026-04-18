@@ -536,6 +536,33 @@ class ApiClient {
   }
 
   /**
+   * Upload a CMS image to Cloudinary (folder: cms/)
+   */
+  async uploadCmsImage(file: File): Promise<{ success: boolean; image: UploadedImage }> {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const url = `${this.baseUrl}/upload/cms`;
+    const headers: Record<string, string> = {};
+    if (this.accessToken) {
+      headers['Authorization'] = `Bearer ${this.accessToken}`;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+      throw new Error(error.message || 'Upload failed');
+    }
+
+    return response.json();
+  }
+
+  /**
    * Add uploaded image to artwork
    */
   async addArtworkImage(artworkId: string, imageData: {

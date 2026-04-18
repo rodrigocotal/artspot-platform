@@ -8,11 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { apiClient } from '@/lib/api-client';
 import { JsonArrayEditor, type FieldConfig } from '@/components/admin/json-array-editor';
 import { NavEditor } from '@/components/admin/nav-editor';
+import { ImageField } from '@/components/admin/image-field';
+import { SeoField } from '@/components/admin/seo-field';
 import { PREVIEW_COMPONENTS, DEFAULT_PREVIEW } from '@/components/admin/previews';
 import { ArrowLeft, Save, Upload, Eye, Pencil } from 'lucide-react';
 import Link from 'next/link';
 
-type FieldType = 'text' | 'textarea' | 'json-array' | 'nav';
+type FieldType = 'text' | 'textarea' | 'json-array' | 'nav' | 'image' | 'seo';
 
 interface FormField {
   key: string;
@@ -20,6 +22,7 @@ interface FormField {
   type: FieldType;
   itemFields?: FieldConfig[];
   addLabel?: string;
+  seoVariant?: 'page' | 'site-defaults';
 }
 
 const FIELD_CONFIGS: Record<string, FormField[]> = {
@@ -27,6 +30,7 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
     { key: 'heroBadgeText', label: 'Hero Badge Text', type: 'text' },
     { key: 'heroHeadline', label: 'Hero Headline', type: 'text' },
     { key: 'heroSubtitle', label: 'Hero Subtitle', type: 'textarea' },
+    { key: 'heroImage', label: 'Hero Image', type: 'image' },
     { key: 'heroCtaText', label: 'Hero CTA Text', type: 'text' },
     { key: 'heroCtaLink', label: 'Hero CTA Link', type: 'text' },
     { key: 'heroSecondaryCtaText', label: 'Secondary CTA Text', type: 'text' },
@@ -44,16 +48,19 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
       ],
       addLabel: 'Add Feature',
     },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   contact: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'contactImage', label: 'Contact Image', type: 'image' },
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'phone', label: 'Phone', type: 'text' },
     { key: 'address', label: 'Address', type: 'textarea' },
     { key: 'businessHours', label: 'Business Hours', type: 'textarea' },
     { key: 'formHeadline', label: 'Form Headline', type: 'text' },
     { key: 'formSubtitle', label: 'Form Subtitle', type: 'text' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'collector-services': [
     { key: 'headline', label: 'Headline', type: 'text' },
@@ -70,54 +77,67 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
       ],
       addLabel: 'Add Service',
     },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   discover: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'site-settings': [
     { key: 'logoText', label: 'Logo Text', type: 'text' },
     { key: 'navigation', label: 'Navigation', type: 'nav' },
+    { key: '_seo', label: 'Site-wide SEO Defaults', type: 'seo', seoVariant: 'site-defaults' },
   ],
   artists: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'artists-featured': [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   artworks: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   collections: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'collections-new-arrivals': [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'collections-museum-quality': [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   editorial: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   inspiration: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   exhibitions: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   favorites: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   footer: [
     { key: 'brandName', label: 'Brand Name', type: 'text' },
@@ -362,6 +382,21 @@ export default function EditContentPage() {
                               : []
                         }
                         onChange={(val) => updateField(field.key, { items: val })}
+                      />
+                    )}
+
+                    {field.type === 'image' && (
+                      <ImageField
+                        value={content[field.key] ?? null}
+                        onChange={(val) => updateField(field.key, val)}
+                      />
+                    )}
+
+                    {field.type === 'seo' && (
+                      <SeoField
+                        value={content[field.key] ?? null}
+                        onChange={(val) => updateField(field.key, val)}
+                        variant={field.seoVariant}
                       />
                     )}
                   </div>

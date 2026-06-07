@@ -46,6 +46,13 @@ interface InquiryEmailData {
   artworkSlug: string;
 }
 
+interface ContactMessageEmailData {
+  name: string;
+  email: string;
+  subject?: string | null;
+  message: string;
+}
+
 interface OrderEmailData {
   orderNumber: string;
   customerName: string;
@@ -84,6 +91,36 @@ export class EmailService {
     `;
 
     await sendEmail(staff, `New Inquiry: ${data.artworkTitle}`, text, html);
+  }
+
+  async sendContactMessageNotification(data: ContactMessageEmailData) {
+    const staff = getStaffEmails();
+    if (staff.length === 0) return;
+
+    const subject = data.subject?.trim() || 'General enquiry';
+
+    const text = [
+      `New contact message received.`,
+      '',
+      `From: ${data.name} (${data.email})`,
+      `Subject: ${subject}`,
+      '',
+      'Message:',
+      data.message,
+      '',
+      `Manage: ${config.apiUrl.replace(/\/api$/, '')}/admin/messages`,
+    ].join('\n');
+
+    const html = `
+      <h2>New Contact Message</h2>
+      <p><strong>From:</strong> ${data.name} &lt;${data.email}&gt;</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <hr />
+      <p><strong>Message:</strong></p>
+      <p>${data.message.replace(/\n/g, '<br />')}</p>
+    `;
+
+    await sendEmail(staff, `Contact Message: ${subject}`, text, html);
   }
 
   async sendInquiryResponseNotification(data: InquiryEmailData & { response: string }) {

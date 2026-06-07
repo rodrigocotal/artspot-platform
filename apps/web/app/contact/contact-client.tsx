@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { Container, Section } from '@/components/layout';
 import { Input, Textarea, Button } from '@/components/ui';
 import { HeroImage } from '@/components/hero-image';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
+import { Mail, Phone, MapPin, Clock, CheckCircle2 } from 'lucide-react';
 
 const DEFAULTS = {
   headline: 'Contact Us',
@@ -21,12 +22,30 @@ const DEFAULTS = {
 export function ContactPageClient({ content }: { content: Record<string, any> | null }) {
   const merged = { ...DEFAULTS, ...(content ?? {}) };
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent(formData.subject || 'Inquiry from ArtAldo');
-    const body = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`);
-    window.location.href = `mailto:${merged.email}?subject=${subject}&body=${body}`;
+    setError(null);
+    setLoading(true);
+
+    try {
+      await apiClient.submitContactMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim() || undefined,
+        message: formData.message.trim(),
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -90,8 +109,24 @@ export function ContactPageClient({ content }: { content: Record<string, any> | 
 
             {/* Contact Form */}
             <div className="bg-white rounded-xl p-8">
+              {submitted ? (
+                <div className="text-center py-8">
+                  <CheckCircle2 className="w-12 h-12 text-success-600 mx-auto mb-4" />
+                  <h2 className="text-heading-2 font-serif text-neutral-900 mb-2">Message Sent</h2>
+                  <p className="text-body text-neutral-600">
+                    Thank you for reaching out. Our team will get back to you within 24 hours.
+                  </p>
+                </div>
+              ) : (
+              <>
               <h2 className="text-heading-2 font-serif text-neutral-900 mb-2">{merged.formHeadline}</h2>
               <p className="text-body text-neutral-600 mb-6">{merged.formSubtitle}</p>
+
+              {error && (
+                <div role="alert" className="mb-4 bg-error-50 border border-error-200 rounded-lg p-3 text-sm text-error-700">
+                  {error}
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -136,8 +171,10 @@ export function ContactPageClient({ content }: { content: Record<string, any> | 
                   />
                 </div>
 
-                <Button type="submit" size="lg" className="w-full">Send Message</Button>
+                <Button type="submit" size="lg" className="w-full" loading={loading}>Send Message</Button>
               </form>
+              </>
+              )}
             </div>
           </div>
         </Container>

@@ -190,6 +190,28 @@ export interface RespondInquiryInput {
   status?: 'RESPONDED' | 'CLOSED';
 }
 
+// ── Contact Messages ──────────────────────────────────────────────────
+
+export interface CreateContactMessageInput {
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+}
+
+export type ContactMessageStatus = 'NEW' | 'READ' | 'ARCHIVED';
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string | null;
+  message: string;
+  status: ContactMessageStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Articles ──────────────────────────────────────────────────────────
 
 export type ArticleCategory =
@@ -717,6 +739,43 @@ class ApiClient {
     data: RespondInquiryInput
   ): Promise<ApiResponse<Inquiry>> {
     return this.fetch<Inquiry>(`/inquiries/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ── Contact Messages ──────────────────────────────────────────────────
+
+  /**
+   * Submit a contact message from the public contact form (no auth required)
+   */
+  async submitContactMessage(
+    data: CreateContactMessageInput
+  ): Promise<ApiResponse<ContactMessage>> {
+    return this.fetch<ContactMessage>('/contact', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * List all contact messages (admin/staff only)
+   */
+  async getAdminContactMessages(
+    params: PaginationParams & { status?: string; search?: string } = {}
+  ): Promise<ApiResponse<ContactMessage[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<ContactMessage[]>(`/contact/admin${queryString}`);
+  }
+
+  /**
+   * Update a contact message's status (admin/staff only)
+   */
+  async updateContactMessage(
+    id: string,
+    data: { status: ContactMessageStatus }
+  ): Promise<ApiResponse<ContactMessage>> {
+    return this.fetch<ContactMessage>(`/contact/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });

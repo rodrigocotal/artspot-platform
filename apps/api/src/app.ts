@@ -12,6 +12,7 @@ import collectionsRouter from './routes/collections';
 import authRouter from './routes/auth';
 import favoritesRouter from './routes/favorites';
 import inquiriesRouter from './routes/inquiries';
+import contactRouter from './routes/contact';
 import webhooksRouter from './routes/webhooks';
 import articlesRouter from './routes/articles';
 import pageContentsRouter from './routes/page-contents';
@@ -20,7 +21,7 @@ import ordersRouter from './routes/orders';
 import adminRouter from './routes/admin';
 import docsRouter from './routes/docs';
 import { initializeCloudinary } from './config/cloudinary';
-import { authLimiter, inquiryLimiter, generalLimiter } from './middleware/rate-limit';
+import { authLimiter, inquiryLimiter, contactLimiter, generalLimiter } from './middleware/rate-limit';
 
 // Initialize Cloudinary (skip in test environment)
 if (config.nodeEnv !== 'test') {
@@ -60,6 +61,7 @@ if (config.nodeEnv !== 'test') {
 if (config.nodeEnv !== 'test') {
   app.use('/auth', authLimiter);
   app.use('/inquiries', inquiryLimiter);
+  app.use('/contact', contactLimiter);
   app.use(generalLimiter);
 }
 
@@ -73,6 +75,7 @@ app.use('/artists', artistsRouter);
 app.use('/collections', collectionsRouter);
 app.use('/favorites', favoritesRouter);
 app.use('/inquiries', inquiriesRouter);
+app.use('/contact', contactRouter);
 app.use('/webhooks', webhooksRouter);
 app.use('/articles', articlesRouter);
 app.use('/pages', pageContentsRouter);

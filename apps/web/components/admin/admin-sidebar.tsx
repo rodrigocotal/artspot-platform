@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileText, Newspaper, ShoppingBag, Mail, Users, Image, Palette } from 'lucide-react';
+import { LayoutDashboard, FileText, Newspaper, ShoppingBag, Mail, MessageSquare, Users, Image, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { label: 'Articles', href: '/admin/articles', icon: Newspaper },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingBag },
   { label: 'Inquiries', href: '/admin/inquiries', icon: Mail },
+  { label: 'Messages', href: '/admin/messages', icon: MessageSquare },
   { label: 'Users', href: '/admin/users', icon: Users },
 ];
 

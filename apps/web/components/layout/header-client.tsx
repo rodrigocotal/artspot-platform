@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui';
@@ -29,6 +29,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
   const { data: session } = useSession();
   const { itemCount } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -38,7 +39,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
   // Close mobile menu when route changes
   React.useEffect(() => {
     setMobileMenuOpen(false);
-  }, []);
+  }, [pathname]);
 
   // Keyboard handler for nav dropdown
   const handleNavKeyDown = (e: React.KeyboardEvent, item: NavItem) => {

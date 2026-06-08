@@ -1,5 +1,5 @@
 /**
- * ArtSpot Layout Components
+ * ArtAldo Layout Components
  * Global layout elements like headers, footers, and navigation
  */
 

@@ -1,5 +1,5 @@
 /**
- * API client for ArtSpot backend
+ * API client for ArtAldo backend
  * Handles all HTTP requests to the Node.js API
  */
 

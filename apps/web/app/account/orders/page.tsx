@@ -20,28 +20,31 @@ export default function OrdersPage() {
   const { data: session, status: authStatus } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (!session?.accessToken) return;
 
     const fetchOrders = async () => {
       setLoading(true);
+      setError(false);
       apiClient.setAccessToken(session.accessToken ?? null);
       try {
         const res = await apiClient.getOrders({ page, limit: 10 });
         setOrders(res.data);
         setTotalPages(res.pagination?.totalPages ?? 1);
       } catch {
-        // ignore
+        setError(true);
       } finally {
         setLoading(false);
       }
     };
 
     fetchOrders();
-  }, [session?.accessToken, page]);
+  }, [session?.accessToken, page, retryCount]);
 
   if (authStatus === 'loading') {
     return (
@@ -95,6 +98,21 @@ export default function OrdersPage() {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
+              <Package className="w-8 h-8 text-red-400" />
+            </div>
+            <h2 className="text-heading-2 font-serif text-neutral-900 mb-4">
+              Couldn&apos;t Load Orders
+            </h2>
+            <p className="text-body-lg text-neutral-600 mb-6">
+              Something went wrong while loading your order history. Please try again.
+            </p>
+            <Button size="lg" onClick={() => setRetryCount((c) => c + 1)}>
+              Retry
+            </Button>
           </div>
         ) : orders.length === 0 ? (
           <div className="text-center py-20">

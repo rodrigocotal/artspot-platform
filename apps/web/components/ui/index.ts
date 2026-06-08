@@ -1,5 +1,5 @@
 /**
- * ArtSpot UI Component Library
+ * ArtAldo UI Component Library
  * Luxury-themed components for the premium art marketplace
  */
 

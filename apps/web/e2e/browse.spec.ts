@@ -9,7 +9,7 @@ test.describe('Browse & Navigation', () => {
   test('home page loads with header and logo', async ({ page }) => {
     await page.goto('/');
     // Use first() since logo link appears in both desktop and mobile nav
-    await expect(page.getByRole('link', { name: 'ArtSpot' }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'ArtAldo' }).first()).toBeVisible();
   });
 
   test('header navigation links are visible on desktop', async ({ page, browserName }) => {

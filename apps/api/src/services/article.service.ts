@@ -65,6 +65,14 @@ export class ArticleService {
     publishedDate?: string;
     featured?: boolean;
   }) {
+    // Check slug uniqueness
+    const existingArticle = await prisma.article.findUnique({
+      where: { slug: data.slug },
+    });
+    if (existingArticle) {
+      throw new Error('Slug already exists');
+    }
+
     return prisma.article.create({
       data: {
         ...data,
@@ -85,6 +93,16 @@ export class ArticleService {
     publishedDate?: string;
     featured?: boolean;
   }) {
+    // If slug is being updated, check uniqueness (allow the article's own slug)
+    if (data.slug) {
+      const existingArticle = await prisma.article.findUnique({
+        where: { slug: data.slug },
+      });
+      if (existingArticle && existingArticle.id !== id) {
+        throw new Error('Slug already exists');
+      }
+    }
+
     const updateData: any = { ...data };
     if (data.publishedDate !== undefined) {
       updateData.publishedDate = data.publishedDate ? new Date(data.publishedDate) : null;

@@ -29,7 +29,7 @@ export class ArticleController {
   async featured(req: Request, res: Response, next: NextFunction) {
     try {
       const limitParam = typeof req.query.limit === 'string' ? req.query.limit : '6';
-      const limit = parseInt(limitParam, 10);
+      const limit = Math.min(Math.max(parseInt(limitParam, 10) || 6, 1), 50);
       const articles = await articleService.getFeatured(limit);
 
       res.json({
@@ -98,6 +98,9 @@ export class ArticleController {
         data: article,
       });
     } catch (error) {
+      if (error instanceof Error && error.message === 'Slug already exists') {
+        return next(new AppError('Slug already exists', 409));
+      }
       next(error);
     }
   }
@@ -123,6 +126,9 @@ export class ArticleController {
         data: article,
       });
     } catch (error) {
+      if (error instanceof Error && error.message === 'Slug already exists') {
+        return next(new AppError('Slug already exists', 409));
+      }
       next(error);
     }
   }

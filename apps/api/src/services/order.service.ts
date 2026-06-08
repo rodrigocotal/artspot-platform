@@ -35,29 +35,30 @@ export class OrderService {
       );
     }
 
+    // Guard against mixed currencies (Stripe rejects mixed-currency sessions)
+    const currencies = new Set(
+      cart.items.map((item) => item.artwork.currency)
+    );
+    if (currencies.size > 1) {
+      throw new AppError('Cart contains mixed currencies', 400);
+    }
+
     // Atomically reserve artworks using a transaction
     const artworkIds = cart.items.map((item) => item.artworkId);
 
     const order = await prisma.$transaction(async (tx) => {
-      // Lock and check availability
+      // Atomically reserve each artwork: only flips AVAILABLE -> RESERVED.
+      // A count !== 1 means it was already reserved/sold by a concurrent
+      // checkout, so we throw to roll back the whole transaction.
       for (const artworkId of artworkIds) {
-        const artwork = await tx.artwork.findUnique({
-          where: { id: artworkId },
-          select: { id: true, status: true, title: true },
-        });
-
-        if (!artwork || artwork.status !== 'AVAILABLE') {
-          throw new AppError(
-            `"${artwork?.title || artworkId}" is no longer available`,
-            409
-          );
-        }
-
-        // Reserve the artwork
-        await tx.artwork.update({
-          where: { id: artworkId },
+        const reserved = await tx.artwork.updateMany({
+          where: { id: artworkId, status: 'AVAILABLE' },
           data: { status: 'RESERVED' },
         });
+
+        if (reserved.count !== 1) {
+          throw new AppError('Artwork no longer available', 409);
+        }
       }
 
       // Get user info
@@ -161,33 +162,39 @@ export class OrderService {
       throw new AppError('Artwork is not available', 400);
     }
 
-    // Reserve the artwork
-    await prisma.artwork.update({
-      where: { id: data.artworkId },
-      data: { status: 'RESERVED' },
-    });
+    // Atomically reserve the artwork and create the order in one transaction
+    // so a failed order create never leaves the artwork orphaned in RESERVED.
+    const order = await prisma.$transaction(async (tx) => {
+      const reserved = await tx.artwork.updateMany({
+        where: { id: data.artworkId, status: 'AVAILABLE' },
+        data: { status: 'RESERVED' },
+      });
 
-    // Create the order
-    const order = await prisma.order.create({
-      data: {
-        orderNumber: generateOrderNumber(),
-        userId: staffUserId,
-        subtotal: artwork.price,
-        currency: artwork.currency,
-        status: 'PENDING',
-        customerEmail: data.customerEmail,
-        customerName: data.customerName,
-        inquiryId: data.inquiryId,
-        items: {
-          create: {
-            artworkId: data.artworkId,
-            price: artwork.price,
-            currency: artwork.currency,
-            title: artwork.title,
-            artistName: artwork.artist.name,
+      if (reserved.count !== 1) {
+        throw new AppError('Artwork no longer available', 409);
+      }
+
+      return tx.order.create({
+        data: {
+          orderNumber: generateOrderNumber(),
+          userId: staffUserId,
+          subtotal: artwork.price,
+          currency: artwork.currency,
+          status: 'PENDING',
+          customerEmail: data.customerEmail,
+          customerName: data.customerName,
+          inquiryId: data.inquiryId,
+          items: {
+            create: {
+              artworkId: data.artworkId,
+              price: artwork.price,
+              currency: artwork.currency,
+              title: artwork.title,
+              artistName: artwork.artist.name,
+            },
           },
         },
-      },
+      });
     });
 
     // Create Stripe Checkout Session
@@ -246,6 +253,12 @@ export class OrderService {
 
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    // Only fulfill once payment has actually settled. Async payment methods
+    // can complete the session while still 'unpaid'/'no_payment_required'.
+    if (session.payment_status !== 'paid') {
+      return;
+    }
 
     await prisma.$transaction(async (tx) => {
       // Mark order as paid

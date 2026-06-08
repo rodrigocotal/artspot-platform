@@ -41,7 +41,7 @@ export const listCollectionsQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(20),
 
   // Filtering
-  featured: z.coerce.boolean().optional(),
+  featured: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
 
   // Search
   search: z.string().optional(),

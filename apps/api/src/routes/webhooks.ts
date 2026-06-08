@@ -29,10 +29,9 @@ router.post('/stripe', async (req: Request, res: Response) => {
     return;
   }
 
-  // Respond immediately
-  res.status(200).json({ received: true });
-
-  // Process in background
+  // Process the event BEFORE acknowledging. Handlers are idempotent
+  // (they early-return on already-PAID / non-PENDING orders), so if a
+  // transient failure occurs we respond 500 and Stripe retries safely.
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -51,7 +50,12 @@ router.post('/stripe', async (req: Request, res: Response) => {
     }
   } catch (err) {
     console.error(`Stripe webhook processing error [${event.type}]:`, err);
+    res.status(500).json({ received: false });
+    return;
   }
+
+  // Acknowledge only after successful processing
+  res.status(200).json({ received: true });
 });
 
 export default router;

@@ -7,7 +7,7 @@ export const listArticlesQuerySchema = z.object({
     .enum(['ARTIST_SPOTLIGHT', 'EXHIBITION', 'BEHIND_THE_SCENES', 'NEWS', 'GUIDE'])
     .optional(),
   search: z.string().optional(),
-  featured: z.coerce.boolean().optional(),
+  featured: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
   sortBy: z.enum(['publishedDate', 'createdAt', 'title']).default('publishedDate'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });

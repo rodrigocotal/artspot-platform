@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database';
 import type { ListFavoritesQuery } from '../validators/favorite.validator';
 
@@ -26,11 +27,19 @@ export class FavoriteService {
       return { favorited: false };
     }
 
-    const favorite = await prisma.favorite.create({
-      data: { userId, artworkId },
-    });
+    try {
+      const favorite = await prisma.favorite.create({
+        data: { userId, artworkId },
+      });
 
-    return { favorited: true, id: favorite.id };
+      return { favorited: true, id: favorite.id };
+    } catch (error) {
+      // Concurrent POST already created the favorite (unique constraint) — treat as favorited.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        return { favorited: true };
+      }
+      throw error;
+    }
   }
 
   /**

@@ -5,6 +5,7 @@ import {
   createArtworkSchema,
   updateArtworkSchema,
   listArtworksQuerySchema,
+  addImageSchema,
 } from '../validators/artwork.validator';
 import { AppError } from '../middleware/error-handler';
 
@@ -158,7 +159,8 @@ export class ArtworkController {
   async addImage(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
-      const image = await artworkService.addImage(id, req.body);
+      const imageData = addImageSchema.parse(req.body);
+      const image = await artworkService.addImage(id, imageData);
 
       res.status(201).json({
         success: true,
@@ -196,7 +198,7 @@ export class ArtworkController {
   async getRelatedArtworks(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 6;
+      const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 6, 1), 50);
 
       const artworks = await artworkService.getRelatedArtworks(id, limit);
 

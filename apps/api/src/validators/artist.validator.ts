@@ -43,8 +43,8 @@ export const listArtistsQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(20),
 
   // Filtering
-  featured: z.coerce.boolean().optional(),
-  verified: z.coerce.boolean().optional(),
+  featured: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
+  verified: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
 
   // Search
   search: z.string().optional(),

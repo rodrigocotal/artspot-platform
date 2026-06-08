@@ -72,7 +72,7 @@ export const listArtworksQuerySchema = z.object({
   medium: artworkMediumEnum.optional(),
   style: artworkStyleEnum.optional(),
   status: availabilityStatusEnum.optional(),
-  featured: z.coerce.boolean().optional(),
+  featured: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
   minPrice: z.coerce.number().positive().optional(),
   maxPrice: z.coerce.number().positive().optional(),
   minYear: z.coerce.number().int().optional(),
@@ -86,7 +86,25 @@ export const listArtworksQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
+// Image type enum
+const imageTypeEnum = z.enum(['MAIN', 'DETAIL', 'INSTALLATION', 'ALTERNATE', 'FRAME']);
+
+// Add image to artwork schema
+export const addImageSchema = z.object({
+  publicId: z.string().min(1, 'publicId is required'),
+  url: z.string().url('Invalid URL'),
+  secureUrl: z.string().url('Invalid URL'),
+  width: z.coerce.number().int().nonnegative(),
+  height: z.coerce.number().int().nonnegative(),
+  format: z.string().min(1, 'format is required'),
+  size: z.coerce.number().int().nonnegative(),
+  type: imageTypeEnum.optional(),
+  displayOrder: z.coerce.number().int().optional(),
+  caption: z.string().optional(),
+});
+
 // Type exports
 export type CreateArtworkInput = z.infer<typeof createArtworkSchema>;
 export type UpdateArtworkInput = z.infer<typeof updateArtworkSchema>;
 export type ListArtworksQuery = z.infer<typeof listArtworksQuerySchema>;
+export type AddImageInput = z.infer<typeof addImageSchema>;

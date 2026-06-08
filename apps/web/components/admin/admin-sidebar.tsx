@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileText, Newspaper, ShoppingBag, Mail, MessageSquare, Users, Image, Palette } from 'lucide-react';
+import { LayoutDashboard, FileText, Newspaper, ShoppingBag, Mail, MessageSquare, Users, Image, Palette, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Artworks', href: '/admin/artworks', icon: Image },
   { label: 'Artists', href: '/admin/artists', icon: Palette },
+  { label: 'Collections', href: '/admin/collections', icon: FolderOpen },
   { label: 'Content', href: '/admin/content', icon: FileText },
   { label: 'Articles', href: '/admin/articles', icon: Newspaper },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingBag },

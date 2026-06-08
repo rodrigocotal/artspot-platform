@@ -14,5 +14,5 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function OnlineProjectsAndExhibitionsPage() {
   const content = await fetchCmsPage(SLUG);
-  return <CollectionLanding content={content as any} defaults={DEFAULTS} />;
+  return <CollectionLanding content={content as any} defaults={DEFAULTS} collectionSlug="online-projects-and-exhibitions" />;
 }

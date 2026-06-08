@@ -364,6 +364,17 @@ export interface CreateArtistInput {
   verified?: boolean;
 }
 
+export interface CreateCollectionInput {
+  title: string;
+  slug: string;
+  description?: string | null;
+  coverImageUrl?: string | null;
+  featured?: boolean;
+  displayOrder?: number | null;
+}
+
+export type UpdateCollectionInput = Partial<CreateCollectionInput>;
+
 export interface UploadedImage {
   publicId: string;
   url: string;
@@ -691,6 +702,63 @@ class ApiClient {
    */
   async getFeaturedCollections(limit = 6): Promise<ApiResponse<Collection[]>> {
     return this.fetch<Collection[]>(`/collections/featured?limit=${limit}`);
+  }
+
+  /**
+   * Create a collection (admin)
+   */
+  async createCollection(data: CreateCollectionInput): Promise<ApiResponse<Collection>> {
+    return this.fetch<Collection>('/collections', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update a collection (admin)
+   */
+  async updateCollection(
+    id: string,
+    data: UpdateCollectionInput
+  ): Promise<ApiResponse<Collection>> {
+    return this.fetch<Collection>(`/collections/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Delete a collection (admin)
+   */
+  async deleteCollection(id: string): Promise<ApiResponse<{ message: string }>> {
+    return this.fetch<{ message: string }>(`/collections/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Add artworks to a collection (admin)
+   */
+  async addArtworksToCollection(
+    id: string,
+    artworkIds: string[]
+  ): Promise<ApiResponse<Collection>> {
+    return this.fetch<Collection>(`/collections/${id}/artworks`, {
+      method: 'POST',
+      body: JSON.stringify({ artworkIds }),
+    });
+  }
+
+  /**
+   * Remove an artwork from a collection (admin)
+   */
+  async removeArtworkFromCollection(
+    id: string,
+    artworkId: string
+  ): Promise<ApiResponse<Collection>> {
+    return this.fetch<Collection>(`/collections/${id}/artworks/${artworkId}`, {
+      method: 'DELETE',
+    });
   }
 
   // ── Favorites ──────────────────────────────────────────────────────────

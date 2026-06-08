@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
@@ -8,13 +8,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { apiClient } from '@/lib/api-client';
 import { JsonArrayEditor, type FieldConfig } from '@/components/admin/json-array-editor';
 import { NavEditor } from '@/components/admin/nav-editor';
+import { FooterNavEditor } from '@/components/admin/footer-nav-editor';
 import { ImageField } from '@/components/admin/image-field';
 import { SeoField } from '@/components/admin/seo-field';
 import { PREVIEW_COMPONENTS, DEFAULT_PREVIEW } from '@/components/admin/previews';
 import { ArrowLeft, Save, Upload, Eye, Pencil } from 'lucide-react';
 import Link from 'next/link';
 
-type FieldType = 'text' | 'textarea' | 'json-array' | 'nav' | 'image' | 'seo';
+type FieldType = 'text' | 'textarea' | 'json-array' | 'nav' | 'footer-nav' | 'image' | 'seo';
 
 interface FormField {
   key: string;
@@ -168,6 +169,7 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
     { key: 'brandDescription', label: 'Brand Description', type: 'textarea' },
     { key: 'newsletterLabel', label: 'Newsletter Label', type: 'text' },
     { key: 'copyrightName', label: 'Copyright Name', type: 'text' },
+    { key: 'footerNavigation', label: 'Footer Navigation Columns', type: 'footer-nav' },
   ],
 };
 
@@ -205,35 +207,57 @@ export default function EditContentPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
+  const [dirty, setDirty] = useState(false);
 
   const fields = FIELD_CONFIGS[slug] || [];
   const pageLabel = SLUG_LABELS[slug] || slug;
   const PreviewComponent = PREVIEW_COMPONENTS[slug] || DEFAULT_PREVIEW;
 
-  useEffect(() => {
+  const loadContent = useCallback(async () => {
     if (!session?.accessToken || !slug) return;
-
-    const fetchContent = async () => {
-      try {
-        apiClient.setAccessToken(session.accessToken as string);
-        const response = await apiClient.getPageContentDraft(slug);
-        const page = response.data;
-        const editContent = (page.draftContent as Record<string, any>) ?? (page.content as Record<string, any>);
-        setContent(editContent);
-        setStatus(page.status || 'PUBLISHED');
-      } catch {
-        setContent({});
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchContent();
+    try {
+      apiClient.setAccessToken(session.accessToken as string);
+      const response = await apiClient.getPageContentDraft(slug);
+      const page = response.data;
+      const editContent = (page.draftContent as Record<string, any>) ?? (page.content as Record<string, any>);
+      setContent(editContent ?? {});
+      setStatus(page.status || 'PUBLISHED');
+      setDirty(false);
+    } catch {
+      setContent({});
+    } finally {
+      setLoading(false);
+    }
   }, [session?.accessToken, slug]);
+
+  useEffect(() => {
+    loadContent();
+  }, [loadContent]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [dirty]);
 
   const updateField = (key: string, value: any) => {
     setContent((prev) => ({ ...prev, [key]: value }));
     setSuccess(null);
+    setError(null);
+    setDirty(true);
+  };
+
+  const handleDiscard = async () => {
+    if (dirty && !confirm('Discard unsaved changes and reload the last saved version?')) return;
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
+    await loadContent();
   };
 
   const handleSaveDraft = async () => {
@@ -248,6 +272,7 @@ export default function EditContentPage() {
 
       const response = await apiClient.updatePageContent(slug, content);
       setStatus(response.data.status || 'DRAFT');
+      setDirty(false);
       setSuccess('Draft saved successfully.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save draft');
@@ -271,6 +296,20 @@ export default function EditContentPage() {
       await apiClient.updatePageContent(slug, content);
       const response = await apiClient.publishPageContent(slug);
       setStatus(response.data.status || 'PUBLISHED');
+      setDirty(false);
+
+      // Purge the ISR cache so the published change is visible immediately
+      // instead of after the 60s revalidation window. Best-effort.
+      try {
+        await fetch('/api/revalidate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug }),
+        });
+      } catch {
+        // non-fatal — content still propagates within 60s
+      }
+
       setSuccess('Content published successfully.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to publish');
@@ -413,6 +452,13 @@ export default function EditContentPage() {
                       />
                     )}
 
+                    {field.type === 'footer-nav' && (
+                      <FooterNavEditor
+                        value={content[field.key] ?? null}
+                        onChange={(val) => updateField(field.key, val)}
+                      />
+                    )}
+
                     {field.type === 'image' && (
                       <ImageField
                         value={content[field.key] ?? null}
@@ -430,7 +476,7 @@ export default function EditContentPage() {
                   </div>
                 ))}
 
-                <div className="pt-4 border-t border-neutral-200 flex gap-3">
+                <div className="pt-4 border-t border-neutral-200 flex flex-wrap items-center gap-3">
                   <Button onClick={handleSaveDraft} loading={saving} variant="outline">
                     <Save className="w-4 h-4" />
                     Save Draft
@@ -439,6 +485,12 @@ export default function EditContentPage() {
                     <Upload className="w-4 h-4" />
                     Publish
                   </Button>
+                  <Button onClick={handleDiscard} variant="ghost" disabled={!dirty || saving || publishing}>
+                    Discard changes
+                  </Button>
+                  {dirty && (
+                    <span className="text-xs text-warning-700">Unsaved changes</span>
+                  )}
                 </div>
               </div>
             </div>

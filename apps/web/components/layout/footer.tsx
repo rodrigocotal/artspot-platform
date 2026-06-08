@@ -1,10 +1,7 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Container } from './container';
 import { NewsletterForm } from './newsletter-form';
-import { apiClient } from '@/lib/api-client';
+import { fetchCmsPage } from '@/lib/page-metadata';
 
 const DEFAULT_NAVIGATION = {
   explore: [
@@ -33,22 +30,22 @@ const DEFAULT_NAVIGATION = {
 
 const DEFAULTS = {
   brandName: 'ArtAldo',
-  brandDescription: 'Elevating the experience of collecting art online. A curated marketplace for museum-quality artworks by exceptional artists.',
+  brandDescription:
+    'Elevating the experience of collecting art online. A curated marketplace for museum-quality artworks by exceptional artists.',
   newsletterLabel: 'Stay Informed',
   copyrightName: 'ArtAldo',
   footerNavigation: DEFAULT_NAVIGATION,
 };
 
-export function Footer() {
-  const [content, setContent] = useState(DEFAULTS);
-
-  useEffect(() => {
-    apiClient.getPageContent('footer')
-      .then((res) => setContent({ ...DEFAULTS, ...res.data.content }))
-      .catch(() => {});
-  }, []);
-
-  const nav = content.footerNavigation || DEFAULT_NAVIGATION;
+// Server component: CMS footer content is fetched server-side (SSR + ISR with
+// on-publish revalidation via the 'cms' tag), so the footer renders in the
+// initial HTML instead of flashing defaults on the client.
+export async function Footer() {
+  const cms = (await fetchCmsPage('footer')) as Record<string, any> | null;
+  const content = { ...DEFAULTS, ...(cms ?? {}) };
+  const nav: Record<string, { label: string; href: string }[]> =
+    content.footerNavigation || DEFAULT_NAVIGATION;
+  const year = new Date().getFullYear();
 
   return (
     <footer className="bg-neutral-900 text-neutral-300">
@@ -105,7 +102,7 @@ export function Footer() {
         <Container className="py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-neutral-500">
-              &copy; {new Date().getFullYear()} {content.copyrightName}. All rights reserved.
+              &copy; {year} {content.copyrightName}. All rights reserved.
             </p>
           </div>
         </Container>

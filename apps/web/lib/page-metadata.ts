@@ -9,7 +9,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
  */
 export async function fetchCmsPage(slug: string): Promise<SeoInput | null> {
   try {
-    const res = await fetch(`${API_URL}/pages/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_URL}/pages/${slug}`, {
+      // ISR with a 60s window, plus on-demand purge via revalidateTag on publish.
+      next: { revalidate: 60, tags: ['cms', `cms:${slug}`] },
+    });
     if (!res.ok) return null;
     const data = await res.json();
     return (data.data?.content as SeoInput) ?? null;

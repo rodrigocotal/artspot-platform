@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database';
+import { isCuid } from '../lib/identifiers';
 import type {
   CreateCollectionInput,
   UpdateCollectionInput,
@@ -80,11 +81,8 @@ export class CollectionService {
    * Get collection by ID or slug
    */
   async getCollection(identifier: string) {
-    // Check if identifier is a CUID or slug
-    const isCuid = identifier.startsWith('c');
-
     const collection = await prisma.collection.findUnique({
-      where: isCuid ? { id: identifier } : { slug: identifier },
+      where: isCuid(identifier) ? { id: identifier } : { slug: identifier },
       include: {
         artworks: {
           orderBy: { displayOrder: 'asc' },

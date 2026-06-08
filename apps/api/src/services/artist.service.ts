@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database';
+import { isCuid } from '../lib/identifiers';
 import type { CreateArtistInput, UpdateArtistInput, ListArtistsQuery } from '../validators/artist.validator';
 
 /**
@@ -63,11 +64,8 @@ export class ArtistService {
    * Get artist by ID or slug
    */
   async getArtist(identifier: string) {
-    // Check if identifier is a CUID or slug
-    const isCuid = identifier.startsWith('c');
-
     const artist = await prisma.artist.findUnique({
-      where: isCuid ? { id: identifier } : { slug: identifier },
+      where: isCuid(identifier) ? { id: identifier } : { slug: identifier },
       include: {
         artworks: {
           where: { status: 'AVAILABLE' },

@@ -24,6 +24,8 @@ interface FormField {
   itemFields?: FieldConfig[];
   addLabel?: string;
   seoVariant?: 'page' | 'site-defaults';
+  /** Shown as input placeholder when empty — typically the page's current default text. */
+  placeholder?: string;
 }
 
 const FIELD_CONFIGS: Record<string, FormField[]> = {
@@ -61,9 +63,9 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
     { key: 'businessHours', label: 'Business Hours', type: 'textarea' },
     { key: 'formHeadline', label: 'Form Headline', type: 'text' },
     { key: 'formSubtitle', label: 'Form Subtitle', type: 'text' },
-    { key: 'submitButtonText', label: 'Submit Button Text', type: 'text' },
-    { key: 'successHeadline', label: 'Success Headline', type: 'text' },
-    { key: 'successMessage', label: 'Success Message', type: 'textarea' },
+    { key: 'submitButtonText', label: 'Submit Button Text', type: 'text', placeholder: 'Send Message' },
+    { key: 'successHeadline', label: 'Success Headline', type: 'text', placeholder: 'Message Sent' },
+    { key: 'successMessage', label: 'Success Message', type: 'textarea', placeholder: 'Thank you for reaching out. Our team will get back to you within 24 hours.' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'collector-services': [
@@ -81,10 +83,10 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
       ],
       addLabel: 'Add Service',
     },
-    { key: 'ctaHeadline', label: 'CTA Headline', type: 'text' },
-    { key: 'ctaSubtitle', label: 'CTA Subtitle', type: 'textarea' },
-    { key: 'ctaButtonText', label: 'CTA Button Text', type: 'text' },
-    { key: 'ctaButtonLink', label: 'CTA Button Link', type: 'text' },
+    { key: 'ctaHeadline', label: 'CTA Headline', type: 'text', placeholder: 'Ready to Start Your Collection Journey?' },
+    { key: 'ctaSubtitle', label: 'CTA Subtitle', type: 'textarea', placeholder: 'Get in touch with our team to discuss how we can help you build and manage your art collection.' },
+    { key: 'ctaButtonText', label: 'CTA Button Text', type: 'text', placeholder: 'Contact Us' },
+    { key: 'ctaButtonLink', label: 'CTA Button Link', type: 'text', placeholder: '/contact' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   discover: [
@@ -101,8 +103,8 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
       ],
       addLabel: 'Add Section',
     },
-    { key: 'featuredHeadline', label: 'Featured Stories Headline', type: 'text' },
-    { key: 'featuredSubtitle', label: 'Featured Stories Subtitle', type: 'textarea' },
+    { key: 'featuredHeadline', label: 'Featured Stories Headline', type: 'text', placeholder: 'Featured Stories' },
+    { key: 'featuredSubtitle', label: 'Featured Stories Subtitle', type: 'textarea', placeholder: 'Highlights from our editorial team' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'site-settings': [
@@ -450,6 +452,7 @@ export default function EditContentPage() {
                       <Input
                         value={content[field.key] || ''}
                         onChange={(e) => updateField(field.key, e.target.value)}
+                        placeholder={field.placeholder}
                       />
                     )}
 
@@ -458,6 +461,7 @@ export default function EditContentPage() {
                         value={content[field.key] || ''}
                         onChange={(e) => updateField(field.key, e.target.value)}
                         rows={4}
+                        placeholder={field.placeholder}
                         className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       />
                     )}

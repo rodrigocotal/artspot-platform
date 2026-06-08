@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiClient, type ArticleCategory } from '@/lib/api-client';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -204,11 +205,11 @@ export default function EditArticlePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">Cover Image URL</label>
-          <Input
+          <label className="block text-sm font-medium text-neutral-700 mb-1">Cover Image</label>
+          <ImageUploadField
             value={form.coverImageUrl}
-            onChange={(e) => updateField('coverImageUrl', e.target.value)}
-            placeholder="https://..."
+            onChange={(url) => updateField('coverImageUrl', url)}
+            previewClassName="w-32 h-20 rounded border border-dashed border-neutral-300 bg-neutral-50 flex items-center justify-center overflow-hidden flex-shrink-0"
           />
         </div>
 

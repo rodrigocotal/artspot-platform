@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { apiClient, type CreateArticleInput, type ArticleCategory } from '@/lib/api-client';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 
@@ -43,6 +44,13 @@ export default function NewArticlePage() {
     publishedDate: '',
     featured: false,
   });
+
+  // Set the access token on mount so image uploads (before submit) authenticate.
+  useEffect(() => {
+    if (session?.accessToken) {
+      apiClient.setAccessToken(session.accessToken);
+    }
+  }, [session?.accessToken]);
 
   const updateField = (key: string, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -160,11 +168,11 @@ export default function NewArticlePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">Cover Image URL</label>
-          <Input
+          <label className="block text-sm font-medium text-neutral-700 mb-1">Cover Image</label>
+          <ImageUploadField
             value={form.coverImageUrl}
-            onChange={(e) => updateField('coverImageUrl', e.target.value)}
-            placeholder="https://..."
+            onChange={(url) => updateField('coverImageUrl', url)}
+            previewClassName="w-32 h-20 rounded border border-dashed border-neutral-300 bg-neutral-50 flex items-center justify-center overflow-hidden flex-shrink-0"
           />
         </div>
 

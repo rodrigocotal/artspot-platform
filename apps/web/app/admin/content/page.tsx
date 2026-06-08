@@ -12,7 +12,7 @@ const SLUG_LABELS: Record<string, string> = {
   contact: 'Contact Page',
   'collector-services': 'Collector Services',
   discover: 'Discover Page',
-  'site-settings': 'Site Settings',
+  'site-settings': 'Header & Site Settings',
   artists: 'Browse Artists',
   'artists-featured': 'Featured Artists',
   artworks: 'Browse Artworks',
@@ -58,6 +58,8 @@ export default function AdminContentPage() {
     fetchPages();
   }, [session?.accessToken]);
 
+  const pagesBySlug = new Map(pages.map((p) => [p.slug, p]));
+
   return (
     <div>
       <div className="mb-8">
@@ -81,54 +83,60 @@ export default function AdminContentPage() {
 
       {!loading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {pages.map((page) => (
-            <Link
-              key={page.id}
-              href={`/admin/content/${page.slug}`}
-              className="bg-white rounded-lg border border-neutral-200 p-6 hover:border-primary-300 hover:shadow-sm transition-all group"
-            >
-              <div className="flex items-start gap-3">
-                <FileText className="w-5 h-5 text-neutral-400 group-hover:text-primary-500 mt-0.5" />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-neutral-900 group-hover:text-primary-700">
-                      {formatSlug(page.slug)}
-                    </h3>
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                        page.status === 'DRAFT'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          page.status === 'DRAFT' ? 'bg-yellow-500' : 'bg-green-500'
-                        }`}
-                      />
-                      {page.status === 'DRAFT' ? 'Draft' : 'Published'}
-                    </span>
+          {/* Show ALL editable slugs, not just those with a DB row. Pages without
+              a row yet are still editable — the editor creates the row on first
+              save. This is what makes Footer (and other un-seeded pages) reachable. */}
+          {Object.keys(SLUG_LABELS).map((slug) => {
+            const page = pagesBySlug.get(slug);
+            return (
+              <Link
+                key={slug}
+                href={`/admin/content/${slug}`}
+                className="bg-white rounded-lg border border-neutral-200 p-6 hover:border-primary-300 hover:shadow-sm transition-all group"
+              >
+                <div className="flex items-start gap-3">
+                  <FileText className="w-5 h-5 text-neutral-400 group-hover:text-primary-500 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium text-neutral-900 group-hover:text-primary-700">
+                        {formatSlug(slug)}
+                      </h3>
+                      {page ? (
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                            page.status === 'DRAFT'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              page.status === 'DRAFT' ? 'bg-yellow-500' : 'bg-green-500'
+                            }`}
+                          />
+                          {page.status === 'DRAFT' ? 'Draft' : 'Published'}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-100 text-neutral-600">
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
+                          Not created
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-neutral-500 mt-1">
+                      {page
+                        ? `Last updated ${new Date(page.updatedAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}`
+                        : 'Click to add content'}
+                    </p>
                   </div>
-                  <p className="text-sm text-neutral-500 mt-1">
-                    Last updated{' '}
-                    {new Date(page.updatedAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
                 </div>
-              </div>
-            </Link>
-          ))}
-
-          {pages.length === 0 && (
-            <div className="col-span-full text-center py-20">
-              <FileText className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-              <h2 className="text-heading-3 font-serif text-neutral-900 mb-2">No pages found</h2>
-              <p className="text-neutral-600">No page content has been created yet.</p>
-            </div>
-          )}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

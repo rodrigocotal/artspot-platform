@@ -31,6 +31,8 @@ export interface ArtistFilters {
   search?: string;
   sortBy?: 'name' | 'createdAt' | 'displayOrder';
   sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
 }
 
 export interface CollectionFilters {
@@ -38,6 +40,8 @@ export interface CollectionFilters {
   search?: string;
   sortBy?: 'title' | 'createdAt' | 'displayOrder';
   sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
 }
 
 export interface ApiResponse<T> {
@@ -416,8 +420,8 @@ class ApiClient {
   /**
    * Set the access token for authenticated requests
    */
-  setAccessToken(token: string | null) {
-    this.accessToken = token;
+  setAccessToken(token: string | null | undefined) {
+    this.accessToken = token ?? null;
   }
 
   /**

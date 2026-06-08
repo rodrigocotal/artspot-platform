@@ -43,8 +43,26 @@ jobs:
         continue-on-error: true
 
       - name: Type check (Web)
-        run: pnpm --filter @artspot/web type-check
-        continue-on-error: true  # React 19 JSX type compat issues; build job validates
+        # Blocking gate. Fails on REAL type errors (e.g. calling a non-existent
+        # apiClient method — the class that previously shipped silently). The
+        # React-19 @types/react JSX noise (TS2786 + the ReactNode↔React.ReactNode
+        # mismatch) and generated Next types / test files are ignored until the
+        # duplicate @types/react versions are deduped (see docs / backlog).
+        run: |
+          set +e
+          pnpm --filter @artspot/web type-check 2>&1 | tee /tmp/tsc-web.log
+          set -e
+          REAL=$(grep -E "error TS" /tmp/tsc-web.log \
+            | grep -vE "error TS2786" \
+            | grep -vE "error TS2322:.*ReactNode.*React\.ReactNode" \
+            | grep -vE "\.next/| 2\.(ts|tsx|json)" \
+            | grep -vE "__tests__|\.test\.|\.spec\.") || true
+          if [ -n "$REAL" ]; then
+            echo "::error::Real web TypeScript errors found (React-19 @types/react JSX noise is ignored):"
+            echo "$REAL"
+            exit 1
+          fi
+          echo "No real web type errors."
 
       - name: Type check (API)
         run: pnpm --filter @artspot/api type-check

@@ -40,6 +40,10 @@ const DEFAULTS = {
       description: 'Digital cataloguing, condition reporting, and strategic planning for your growing collection.',
     },
   ],
+  ctaHeadline: 'Ready to Start Your Collection Journey?',
+  ctaSubtitle: 'Get in touch with our team to discuss how we can help you build and manage your art collection.',
+  ctaButtonText: 'Contact Us',
+  ctaButtonLink: '/contact',
 };
 
 export function CollectorServicesPageClient({ content }: { content: Record<string, any> | null }) {
@@ -80,17 +84,25 @@ export function CollectorServicesPageClient({ content }: { content: Record<strin
           </div>
 
           {/* CTA */}
-          <div className="text-center bg-white rounded-xl p-12">
-            <h2 className="text-heading-2 font-serif text-neutral-900 mb-4">
-              Ready to Start Your Collection Journey?
-            </h2>
-            <p className="text-body-lg text-neutral-600 mb-6 max-w-xl mx-auto">
-              Get in touch with our team to discuss how we can help you build and manage your art collection.
-            </p>
-            <Link href="/contact">
-              <Button size="lg">Contact Us</Button>
-            </Link>
-          </div>
+          {(merged.ctaHeadline || merged.ctaSubtitle || merged.ctaButtonText) && (
+            <div className="text-center bg-white rounded-xl p-12">
+              {merged.ctaHeadline && (
+                <h2 className="text-heading-2 font-serif text-neutral-900 mb-4">
+                  {merged.ctaHeadline}
+                </h2>
+              )}
+              {merged.ctaSubtitle && (
+                <p className="text-body-lg text-neutral-600 mb-6 max-w-xl mx-auto">
+                  {merged.ctaSubtitle}
+                </p>
+              )}
+              {merged.ctaButtonText && (
+                <Link href={merged.ctaButtonLink || '/contact'}>
+                  <Button size="lg">{merged.ctaButtonText}</Button>
+                </Link>
+              )}
+            </div>
+          )}
         </Container>
       </Section>
     </>

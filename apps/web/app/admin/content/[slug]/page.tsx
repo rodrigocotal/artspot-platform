@@ -78,11 +78,28 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
       ],
       addLabel: 'Add Service',
     },
+    { key: 'ctaHeadline', label: 'CTA Headline', type: 'text' },
+    { key: 'ctaSubtitle', label: 'CTA Subtitle', type: 'textarea' },
+    { key: 'ctaButtonText', label: 'CTA Button Text', type: 'text' },
+    { key: 'ctaButtonLink', label: 'CTA Button Link', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   discover: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    {
+      key: 'sections',
+      label: 'Section Cards',
+      type: 'json-array',
+      itemFields: [
+        { key: 'title', label: 'Title', type: 'text' },
+        { key: 'description', label: 'Description', type: 'textarea' },
+        { key: 'href', label: 'Link', type: 'text' },
+      ],
+      addLabel: 'Add Section',
+    },
+    { key: 'featuredHeadline', label: 'Featured Stories Headline', type: 'text' },
+    { key: 'featuredSubtitle', label: 'Featured Stories Subtitle', type: 'textarea' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'site-settings': [

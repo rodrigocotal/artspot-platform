@@ -11,25 +11,26 @@ import { ArrowRight, Calendar, User, Loader2 } from 'lucide-react';
 const DEFAULTS = {
   headline: 'Discover',
   subtitle: 'Explore the world of art through our editorial content, exhibitions, and curated inspiration.',
+  featuredHeadline: 'Featured Stories',
+  featuredSubtitle: 'Highlights from our editorial team',
+  sections: [
+    {
+      title: 'Editorial',
+      description: 'Stories, spotlights, and insights from the art world',
+      href: '/discover/editorial',
+    },
+    {
+      title: 'Inspiration',
+      description: 'Behind-the-scenes looks at artists and their creative process',
+      href: '/discover/inspiration',
+    },
+    {
+      title: 'Exhibitions',
+      description: 'Current and upcoming exhibitions featuring our artists',
+      href: '/discover/exhibitions',
+    },
+  ],
 };
-
-const sections = [
-  {
-    title: 'Editorial',
-    description: 'Stories, spotlights, and insights from the art world',
-    href: '/discover/editorial',
-  },
-  {
-    title: 'Inspiration',
-    description: 'Behind-the-scenes looks at artists and their creative process',
-    href: '/discover/inspiration',
-  },
-  {
-    title: 'Exhibitions',
-    description: 'Current and upcoming exhibitions featuring our artists',
-    href: '/discover/exhibitions',
-  },
-];
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '';
@@ -42,6 +43,8 @@ function formatDate(dateStr: string | null) {
 
 export function DiscoverPageClient({ content }: { content: Record<string, any> | null }) {
   const merged = { ...DEFAULTS, ...(content ?? {}) };
+  const rawSections = (merged.sections as any)?.items ?? merged.sections;
+  const sections = Array.isArray(rawSections) ? rawSections : DEFAULTS.sections;
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -84,8 +87,8 @@ export function DiscoverPageClient({ content }: { content: Record<string, any> |
 
           {/* Featured Articles */}
           <div className="mb-8">
-            <h2 className="text-heading-1 font-serif text-neutral-900 mb-2">Featured Stories</h2>
-            <p className="text-body-lg text-neutral-600">Highlights from our editorial team</p>
+            <h2 className="text-heading-1 font-serif text-neutral-900 mb-2">{merged.featuredHeadline}</h2>
+            <p className="text-body-lg text-neutral-600">{merged.featuredSubtitle}</p>
           </div>
 
           {loading ? (

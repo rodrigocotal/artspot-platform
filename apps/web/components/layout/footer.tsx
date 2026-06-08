@@ -18,6 +18,8 @@ const DEFAULT_NAVIGATION = {
     { label: 'Browse All Artists', href: '/artists' },
     { label: 'Featured Artists', href: '/artists/featured' },
     { label: 'Collections', href: '/collections' },
+    { label: 'Featured Art', href: '/collections/featured-art' },
+    { label: 'Public Art', href: '/collections/public-art' },
   ],
   services: [
     { label: 'Collector Services', href: '/collector-services' },

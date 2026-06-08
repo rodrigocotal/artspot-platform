@@ -62,6 +62,10 @@ const DEFAULT_NAV: NavItem[] = [
       { label: 'Curated Selections', href: '/collections' },
       { label: 'New Arrivals', href: '/collections/new-arrivals' },
       { label: 'Museum-Quality Works', href: '/collections/museum-quality' },
+      { label: 'Online Projects & Exhibitions', href: '/collections/online-projects-and-exhibitions' },
+      { label: 'Featured Art', href: '/collections/featured-art' },
+      { label: 'Public Art', href: '/collections/public-art' },
+      { label: 'Corporate & Decorative Art', href: '/collections/corporate-decorative-art' },
     ],
   },
   {

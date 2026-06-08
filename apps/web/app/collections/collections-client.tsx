@@ -24,6 +24,7 @@ const sortOptions: SortOption[] = [
 const CMS_DEFAULTS = {
   headline: 'Curated Collections',
   subtitle: 'Explore thoughtfully curated selections of exceptional artworks',
+  emptyMessage: 'No collections found',
 };
 
 export function CollectionsPageClient({ content }: { content: Record<string, any> | null }) {
@@ -190,7 +191,7 @@ export function CollectionsPageClient({ content }: { content: Record<string, any
                 </div>
               ) : collections.length === 0 ? (
                 <div className="text-center py-20">
-                  <p className="text-neutral-600 mb-4">No collections found</p>
+                  <p className="text-neutral-600 mb-4">{merged.emptyMessage}</p>
                   {activeFilters.length > 0 && (
                     <Button variant="outline" onClick={clearAllFilters}>
                       Clear Filters

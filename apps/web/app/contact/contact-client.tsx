@@ -16,6 +16,9 @@ const DEFAULTS = {
   businessHours: 'Monday – Friday: 9am – 6pm\nSaturday: 10am – 4pm\nSunday: Closed',
   formHeadline: 'Send Us a Message',
   formSubtitle: 'Fill out the form below and we will get back to you within 24 hours.',
+  submitButtonText: 'Send Message',
+  successHeadline: 'Message Sent',
+  successMessage: 'Thank you for reaching out. Our team will get back to you within 24 hours.',
   contactImage: null as any,
 };
 
@@ -112,9 +115,9 @@ export function ContactPageClient({ content }: { content: Record<string, any> | 
               {submitted ? (
                 <div className="text-center py-8">
                   <CheckCircle2 className="w-12 h-12 text-success-600 mx-auto mb-4" />
-                  <h2 className="text-heading-2 font-serif text-neutral-900 mb-2">Message Sent</h2>
+                  <h2 className="text-heading-2 font-serif text-neutral-900 mb-2">{merged.successHeadline}</h2>
                   <p className="text-body text-neutral-600">
-                    Thank you for reaching out. Our team will get back to you within 24 hours.
+                    {merged.successMessage}
                   </p>
                 </div>
               ) : (
@@ -171,7 +174,7 @@ export function ContactPageClient({ content }: { content: Record<string, any> | 
                   />
                 </div>
 
-                <Button type="submit" size="lg" className="w-full" loading={loading}>Send Message</Button>
+                <Button type="submit" size="lg" className="w-full" loading={loading}>{merged.submitButtonText}</Button>
               </form>
               </>
               )}

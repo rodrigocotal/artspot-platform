@@ -20,6 +20,7 @@ function formatDate(dateStr: string | null) {
 const CMS_DEFAULTS = {
   headline: 'Inspiration',
   subtitle: 'Behind-the-scenes stories and creative insights from our artists',
+  emptyState: 'No inspiration articles yet. Check back soon.',
 };
 
 export function InspirationPageClient({ content }: { content: Record<string, any> | null }) {
@@ -73,7 +74,7 @@ export function InspirationPageClient({ content }: { content: Record<string, any
           </div>
         ) : articles.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-neutral-600">No inspiration articles yet. Check back soon.</p>
+            <p className="text-neutral-600">{merged.emptyState}</p>
           </div>
         ) : (
           <>

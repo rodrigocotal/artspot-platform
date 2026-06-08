@@ -24,6 +24,7 @@ const sortOptions: SortOption[] = [
 const CMS_DEFAULTS = {
   headline: 'Discover Artists',
   subtitle: 'Meet the exceptional artists behind our curated collection',
+  emptyMessage: 'No artists found',
 };
 
 export function ArtistsPageClient({ content }: { content: Record<string, any> | null }) {
@@ -201,7 +202,7 @@ export function ArtistsPageClient({ content }: { content: Record<string, any> | 
                 </div>
               ) : artists.length === 0 ? (
                 <div className="text-center py-20">
-                  <p className="text-neutral-600 mb-4">No artists found</p>
+                  <p className="text-neutral-600 mb-4">{merged.emptyMessage}</p>
                   {activeFilters.length > 0 && (
                     <Button variant="outline" onClick={clearAllFilters}>
                       Clear Filters

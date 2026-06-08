@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 const CMS_DEFAULTS = {
   headline: 'New Arrivals',
   subtitle: 'The latest collections added to our curated selection',
+  emptyMessage: 'No collections yet. Check back soon.',
 };
 
 export function CollectionsNewArrivalsPageClient({ content }: { content: Record<string, any> | null }) {
@@ -65,7 +66,7 @@ export function CollectionsNewArrivalsPageClient({ content }: { content: Record<
           </div>
         ) : collections.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-neutral-600">No collections yet. Check back soon.</p>
+            <p className="text-neutral-600">{merged.emptyMessage}</p>
           </div>
         ) : (
           <>

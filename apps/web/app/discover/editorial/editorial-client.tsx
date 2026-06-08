@@ -50,6 +50,7 @@ function formatDate(dateStr: string | null) {
 const CMS_DEFAULTS = {
   headline: 'Editorial',
   subtitle: 'Stories, spotlights, and insights from the art world',
+  emptyState: 'No articles found.',
 };
 
 export function EditorialPageClient({ content }: { content: Record<string, any> | null }) {
@@ -239,7 +240,7 @@ export function EditorialPageClient({ content }: { content: Record<string, any> 
             <>
               {articles.length === 0 ? (
                 <div className="text-center py-20">
-                  <p className="text-neutral-600">No articles found.</p>
+                  <p className="text-neutral-600">{merged.emptyState}</p>
                   {(search || selectedCategory !== 'ALL') && (
                     <Button
                       variant="outline"

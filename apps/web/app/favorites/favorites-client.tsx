@@ -12,6 +12,9 @@ import { Heart } from 'lucide-react';
 const CMS_DEFAULTS = {
   headline: 'Your Favorites',
   subtitle: 'Artworks you\'ve saved for later',
+  emptyHeadline: 'No favorites yet',
+  emptyBody: 'Start exploring our collection and save the artworks that inspire you.',
+  emptyCta: 'Discover Artworks',
 };
 
 export function FavoritesPageClient({ content }: { content: Record<string, any> | null }) {
@@ -63,13 +66,13 @@ export function FavoritesPageClient({ content }: { content: Record<string, any> 
                   <Heart className="w-8 h-8 text-neutral-400" />
                 </div>
                 <h2 className="text-heading-3 font-serif text-neutral-900 mb-2">
-                  No favorites yet
+                  {merged.emptyHeadline}
                 </h2>
                 <p className="text-neutral-600 mb-6 max-w-md mx-auto">
-                  Start exploring our collection and save the artworks that inspire you.
+                  {merged.emptyBody}
                 </p>
                 <Button asChild>
-                  <Link href="/artworks">Discover Artworks</Link>
+                  <Link href="/artworks">{merged.emptyCta}</Link>
                 </Button>
               </div>
             ) : (

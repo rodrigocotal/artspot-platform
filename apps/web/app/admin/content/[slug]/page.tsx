@@ -61,6 +61,9 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
     { key: 'businessHours', label: 'Business Hours', type: 'textarea' },
     { key: 'formHeadline', label: 'Form Headline', type: 'text' },
     { key: 'formSubtitle', label: 'Form Subtitle', type: 'text' },
+    { key: 'submitButtonText', label: 'Submit Button Text', type: 'text' },
+    { key: 'successHeadline', label: 'Success Headline', type: 'text' },
+    { key: 'successMessage', label: 'Success Message', type: 'textarea' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'collector-services': [
@@ -110,31 +113,37 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
   artists: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyMessage', label: 'Empty State Message', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'artists-featured': [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyMessage', label: 'Empty State Message', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   artworks: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyMessage', label: 'Empty State Message', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   collections: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyMessage', label: 'Empty State Message', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'collections-new-arrivals': [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyMessage', label: 'Empty State Message', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'collections-museum-quality': [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyMessage', label: 'Empty State Message', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   'collections-online-projects-and-exhibitions': [
@@ -164,21 +173,27 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
   editorial: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyState', label: 'Empty State Message', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   inspiration: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyState', label: 'Empty State Message', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   exhibitions: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyState', label: 'Empty State Message', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   favorites: [
     { key: 'headline', label: 'Headline', type: 'text' },
     { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'emptyHeadline', label: 'Empty State Heading', type: 'text' },
+    { key: 'emptyBody', label: 'Empty State Description', type: 'textarea' },
+    { key: 'emptyCta', label: 'Empty State Button Label', type: 'text' },
     { key: '_seo', label: 'SEO', type: 'seo' },
   ],
   footer: [

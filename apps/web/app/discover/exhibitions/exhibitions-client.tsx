@@ -20,6 +20,7 @@ function formatDate(dateStr: string | null) {
 const CMS_DEFAULTS = {
   headline: 'Exhibitions',
   subtitle: 'Current and upcoming exhibitions featuring our artists',
+  emptyState: 'No exhibition articles yet. Check back soon.',
 };
 
 export function ExhibitionsPageClient({ content }: { content: Record<string, any> | null }) {
@@ -73,7 +74,7 @@ export function ExhibitionsPageClient({ content }: { content: Record<string, any
           </div>
         ) : articles.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-neutral-600">No exhibition articles yet. Check back soon.</p>
+            <p className="text-neutral-600">{merged.emptyState}</p>
           </div>
         ) : (
           <>

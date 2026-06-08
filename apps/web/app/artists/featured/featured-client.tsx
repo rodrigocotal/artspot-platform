@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 const CMS_DEFAULTS = {
   headline: 'Featured Artists',
   subtitle: 'Exceptional artists hand-selected by our curatorial team',
+  emptyMessage: 'No featured artists yet. Check back soon.',
 };
 
 export function ArtistsFeaturedPageClient({ content }: { content: Record<string, any> | null }) {
@@ -66,7 +67,7 @@ export function ArtistsFeaturedPageClient({ content }: { content: Record<string,
           </div>
         ) : artists.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-neutral-600">No featured artists yet. Check back soon.</p>
+            <p className="text-neutral-600">{merged.emptyMessage}</p>
           </div>
         ) : (
           <>

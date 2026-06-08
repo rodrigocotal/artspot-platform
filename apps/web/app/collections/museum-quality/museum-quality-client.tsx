@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 const CMS_DEFAULTS = {
   headline: 'Museum-Quality Works',
   subtitle: 'Our finest curated collections, selected to institutional standards',
+  emptyMessage: 'No museum-quality collections yet. Check back soon.',
 };
 
 export function CollectionsMuseumQualityPageClient({ content }: { content: Record<string, any> | null }) {
@@ -66,7 +67,7 @@ export function CollectionsMuseumQualityPageClient({ content }: { content: Recor
           </div>
         ) : collections.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-neutral-600">No museum-quality collections yet. Check back soon.</p>
+            <p className="text-neutral-600">{merged.emptyMessage}</p>
           </div>
         ) : (
           <>

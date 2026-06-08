@@ -46,6 +46,7 @@ const styleOptions = [
 const CMS_DEFAULTS = {
   headline: 'Explore Artworks',
   subtitle: 'Discover museum-quality art from exceptional artists',
+  emptyMessage: 'No artworks found matching your filters.',
 };
 
 export function ArtworksPageClient({ content }: { content: Record<string, any> | null }) {
@@ -262,7 +263,7 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
                 <>
                   {artworks.length === 0 ? (
                     <div className="text-center py-20">
-                      <p className="text-neutral-600">No artworks found matching your filters.</p>
+                      <p className="text-neutral-600">{merged.emptyMessage}</p>
                       <Button
                         variant="outline"
                         onClick={clearAllFilters}

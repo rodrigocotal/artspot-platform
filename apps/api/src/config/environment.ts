@@ -47,14 +47,26 @@ export const config = {
   },
 } as const;
 
-// Validate required environment variables in production
-if (config.nodeEnv === 'production') {
+// Validate required env + reject placeholder secrets in any DEPLOYED environment
+// (anything that isn't local dev or tests). This protects staging and guards
+// against a deploy where NODE_ENV is unset/misconfigured — otherwise the JWT
+// secret would silently fall back to the forgeable 'change-me-in-production'.
+if (config.nodeEnv !== 'development' && config.nodeEnv !== 'test') {
   const required = ['DATABASE_URL', 'JWT_SECRET', 'JWT_REFRESH_SECRET', 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'];
   const missing = required.filter((key) => !process.env[key]);
 
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(', ')}`
+    );
+  }
+
+  if (
+    config.jwtSecret === 'change-me-in-production' ||
+    config.jwtRefreshSecret === 'change-me-refresh-secret'
+  ) {
+    throw new Error(
+      'JWT_SECRET / JWT_REFRESH_SECRET must be set to strong values (placeholder default detected).'
     );
   }
 }

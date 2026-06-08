@@ -38,11 +38,15 @@ app.set('trust proxy', 1);
 // Security middleware
 app.use(helmet());
 
-// CORS configuration — origin: true reflects the request origin (compatible with credentials)
+// CORS configuration. With an explicit allow-list we reflect the origin and
+// allow credentials. With wildcard ('*') we must NOT allow credentials —
+// reflecting any origin + credentials would let any site make credentialed
+// cross-origin requests. (The API is Bearer-token based, so this is safe.)
+const corsWildcard = config.allowedOrigins === '*';
 app.use(
   cors({
-    origin: config.allowedOrigins === '*' ? true : config.allowedOrigins,
-    credentials: true,
+    origin: corsWildcard ? true : config.allowedOrigins,
+    credentials: !corsWildcard,
   })
 );
 

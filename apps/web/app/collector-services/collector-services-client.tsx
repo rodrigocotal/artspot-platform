@@ -49,7 +49,7 @@ const DEFAULTS = {
 export function CollectorServicesPageClient({ content }: { content: Record<string, any> | null }) {
   const merged = { ...DEFAULTS, ...(content ?? {}) };
 
-  const rawServices = merged.services?.items ?? merged.services;
+  const rawServices = (merged.services as any)?.items ?? merged.services;
   const services = Array.isArray(rawServices) ? rawServices : DEFAULTS.services;
 
   return (

@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { pageContentController } from '../controllers/page-content.controller';
-import { authenticate, authorize, optionalAuth } from '../middleware/auth';
+import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
-// List all page contents (admin only)
+// List all page contents (admin/staff only)
 // GET /pages
 router.get(
   '/',
@@ -13,9 +13,18 @@ router.get(
   pageContentController.listAll.bind(pageContentController)
 );
 
-// Get page content by slug (public, optionally with draft for authenticated users)
-// GET /pages/:slug?draft=true
-router.get('/:slug', optionalAuth, pageContentController.getBySlug.bind(pageContentController));
+// Get draft content by slug (admin/staff only) — used by the editor preview
+// GET /pages/:slug/draft
+router.get(
+  '/:slug/draft',
+  authenticate,
+  authorize('ADMIN', 'GALLERY_STAFF'),
+  pageContentController.getDraftBySlug.bind(pageContentController)
+);
+
+// Get published page content by slug (public). Never returns draft content.
+// GET /pages/:slug
+router.get('/:slug', pageContentController.getBySlug.bind(pageContentController));
 
 // Update page content by slug (saves as draft)
 // PUT /pages/:slug

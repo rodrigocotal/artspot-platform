@@ -58,12 +58,12 @@ export function CollectorServicesPageClient({ content }: { content: Record<strin
             <p className="text-body-lg text-neutral-600 max-w-2xl mx-auto">{merged.subtitle}</p>
           </div>
 
-          {/* Intro content */}
+          {/* Intro content — rendered as plain text (whitespace preserved) to avoid
+              stored-XSS from the CMS textarea field. */}
           {merged.introContent && (
-            <div
-              className="prose prose-neutral mx-auto mb-12 max-w-3xl"
-              dangerouslySetInnerHTML={{ __html: merged.introContent }}
-            />
+            <div className="prose prose-neutral mx-auto mb-12 max-w-3xl whitespace-pre-line">
+              {merged.introContent}
+            </div>
           )}
 
           {/* Services Grid */}

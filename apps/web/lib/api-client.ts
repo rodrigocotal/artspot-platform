@@ -863,7 +863,7 @@ class ApiClient {
    * Get CMS page content with draft (admin)
    */
   async getPageContentDraft(slug: string): Promise<ApiResponse<PageContent>> {
-    return this.fetch<PageContent>(`/pages/${slug}?draft=true`);
+    return this.fetch<PageContent>(`/pages/${slug}/draft`);
   }
 
   /**

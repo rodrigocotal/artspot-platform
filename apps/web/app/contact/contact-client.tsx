@@ -10,7 +10,7 @@ import { Mail, Phone, MapPin, Clock, CheckCircle2 } from 'lucide-react';
 const DEFAULTS = {
   headline: 'Contact Us',
   subtitle: 'We would love to hear from you. Reach out to our team for any inquiries about artworks, services, or collaboration.',
-  email: 'hello@artspot.com',
+  email: 'hello@artaldo.com',
   phone: '+1 (555) 000-0000',
   address: '123 Gallery Street\nNew York, NY 10001',
   businessHours: 'Monday – Friday: 9am – 6pm\nSaturday: 10am – 4pm\nSunday: Closed',

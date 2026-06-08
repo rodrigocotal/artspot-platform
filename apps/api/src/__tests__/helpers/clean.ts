@@ -7,6 +7,7 @@ export async function cleanDatabase() {
   await prisma.favorite.deleteMany();
   await prisma.inquiry.deleteMany();
   await prisma.contactMessage.deleteMany();
+  await prisma.pageContent.deleteMany();
   await prisma.collectionArtwork.deleteMany();
   await prisma.artworkImage.deleteMany();
   await prisma.artwork.deleteMany();

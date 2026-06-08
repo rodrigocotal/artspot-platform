@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Container, Section } from '@/components/layout';
 import { Button } from '@/components/ui';
+import { MarkdownContent } from '@/components/markdown-content';
 import {
   apiClient,
   type Article,
@@ -173,10 +174,8 @@ export default function ArticleDetailPage() {
             </div>
           </header>
 
-          {/* Article Content — content is authored as plain text in the admin
-              editor, so render it as paragraphs (blank line = new paragraph)
-              with whitespace preserved within each. Rendering as React text
-              (not dangerouslySetInnerHTML) keeps the spacing AND avoids stored XSS. */}
+          {/* Article Content — authored as markdown in the admin editor and
+              rendered as React elements (XSS-safe: no raw HTML, URLs sanitized). */}
           <article
             className="prose prose-lg prose-neutral max-w-none mb-16
               prose-headings:font-serif prose-headings:text-neutral-900
@@ -184,15 +183,7 @@ export default function ArticleDetailPage() {
               prose-a:text-primary-600 prose-a:no-underline hover:prose-a:underline
               prose-img:rounded-lg"
           >
-            {(article.content ?? '')
-              .split(/\n\s*\n/)
-              .map((para) => para.trim())
-              .filter(Boolean)
-              .map((para, i) => (
-                <p key={i} className="whitespace-pre-line">
-                  {para}
-                </p>
-              ))}
+            <MarkdownContent content={article.content ?? ''} />
           </article>
         </Container>
       </Section>

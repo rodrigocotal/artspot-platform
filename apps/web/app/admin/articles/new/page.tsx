@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { apiClient, type CreateArticleInput, type ArticleCategory } from '@/lib/api-client';
 import { ImageUploadField } from '@/components/admin/image-upload-field';
+import { MarkdownField } from '@/components/admin/markdown-field';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 
@@ -188,13 +189,7 @@ export default function NewArticlePage() {
 
         <div>
           <label className="block text-sm font-medium text-neutral-700 mb-1">Content *</label>
-          <textarea
-            value={form.content}
-            onChange={(e) => updateField('content', e.target.value)}
-            rows={12}
-            required
-            className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          />
+          <MarkdownField value={form.content} onChange={(v) => updateField('content', v)} />
         </div>
 
         <div className="flex items-center gap-2">

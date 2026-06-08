@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { apiClient, type CreateArtistInput } from '@/lib/api-client';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 
@@ -37,6 +38,14 @@ export default function NewArtistPage() {
     featured: false,
     verified: false,
   });
+
+  // Set the access token on mount so image uploads (which happen before submit)
+  // are authenticated.
+  useEffect(() => {
+    if (session?.accessToken) {
+      apiClient.setAccessToken(session.accessToken);
+    }
+  }, [session?.accessToken]);
 
   const updateField = (key: string, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -130,11 +139,10 @@ export default function NewArtistPage() {
             <Input value={form.location} onChange={(e) => updateField('location', e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Profile Image URL</label>
-            <Input
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Profile Image</label>
+            <ImageUploadField
               value={form.profileImageUrl}
-              onChange={(e) => updateField('profileImageUrl', e.target.value)}
-              placeholder="https://..."
+              onChange={(url) => updateField('profileImageUrl', url)}
             />
           </div>
         </div>

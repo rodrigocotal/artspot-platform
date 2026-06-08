@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiClient } from '@/lib/api-client';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -168,8 +169,11 @@ export default function EditArtistPage() {
             <Input value={form.location} onChange={(e) => updateField('location', e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Profile Image URL</label>
-            <Input value={form.profileImageUrl} onChange={(e) => updateField('profileImageUrl', e.target.value)} placeholder="https://..." />
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Profile Image</label>
+            <ImageUploadField
+              value={form.profileImageUrl}
+              onChange={(url) => updateField('profileImageUrl', url)}
+            />
           </div>
         </div>
 

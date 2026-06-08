@@ -640,6 +640,25 @@ class ApiClient {
   }
 
   /**
+   * Update artist (admin)
+   */
+  async updateArtist(id: string, data: Partial<CreateArtistInput>): Promise<ApiResponse<Artist>> {
+    return this.fetch<Artist>(`/artists/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Delete artist (admin)
+   */
+  async deleteArtist(id: string): Promise<ApiResponse<{ message: string }>> {
+    return this.fetch<{ message: string }>(`/artists/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
    * Get featured artists
    */
   async getFeaturedArtists(limit = 6): Promise<ApiResponse<Artist[]>> {

@@ -30,6 +30,11 @@ if (config.nodeEnv !== 'test') {
 
 const app: Express = express();
 
+// Trust the App Runner / load-balancer proxy so req.ip is the real client IP
+// (from X-Forwarded-For), not the proxy's link-local address. Without this,
+// per-IP rate limiting buckets ALL users together. '1' = trust one proxy hop.
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 

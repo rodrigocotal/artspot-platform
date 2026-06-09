@@ -44,6 +44,29 @@ export class OrderController {
       next(error);
     }
   }
+
+  async cancelOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).userId;
+      const order = await orderService.cancelPendingOrder(String(req.params.id), userId);
+      res.json({ success: true, data: order });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getOrderBySession(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).userId;
+      const order = await orderService.getOrderByCheckoutSession(
+        String(req.params.sessionId),
+        userId
+      );
+      res.json({ success: true, data: order });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const orderController = new OrderController();

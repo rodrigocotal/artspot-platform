@@ -47,12 +47,13 @@ export function DiscoverPageClient({ content }: { content: Record<string, any> |
   const sections = Array.isArray(rawSections) ? rawSections : DEFAULTS.sections;
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     apiClient
       .getFeaturedArticles(6)
       .then((res) => setArticles(res.data))
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -94,6 +95,12 @@ export function DiscoverPageClient({ content }: { content: Record<string, any> |
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-neutral-600">
+                We couldn&apos;t load featured articles right now. Please try again later.
+              </p>
             </div>
           ) : articles.length === 0 ? (
             <div className="text-center py-12">

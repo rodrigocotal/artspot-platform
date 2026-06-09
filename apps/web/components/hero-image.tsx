@@ -6,6 +6,15 @@ interface HeroImageProps {
   image: ImageFieldValue | null | undefined;
 }
 
+/**
+ * Only allow relative paths or http(s)/mailto links. Blocks `javascript:` and
+ * other dangerous schemes from an admin-controlled free-text URL field (stored
+ * XSS sink — the hero is shown to all visitors).
+ */
+function safeLinkUrl(url: string): string | null {
+  return /^(https?:|mailto:|\/)/i.test(url.trim()) ? url : null;
+}
+
 export function HeroImage({ image }: HeroImageProps) {
   if (!image || !image.url) return null;
   if (image.visible === false) return null;
@@ -32,9 +41,10 @@ export function HeroImage({ image }: HeroImageProps) {
     </figure>
   );
 
-  if (image.linkUrl) {
+  const linkHref = image.linkUrl ? safeLinkUrl(image.linkUrl) : null;
+  if (linkHref) {
     return (
-      <Link href={image.linkUrl} className="block">
+      <Link href={linkHref} className="block">
         {body}
       </Link>
     );

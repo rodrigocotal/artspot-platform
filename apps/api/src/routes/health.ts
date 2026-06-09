@@ -35,9 +35,8 @@ router.get('/db', async (_req: Request, res: Response) => {
     // Query database to verify connection
     await prisma.$queryRaw`SELECT 1`;
 
-    // Get database stats
-    const userCount = await prisma.user.count();
-
+    // This is a public, unauthenticated endpoint — do not disclose row counts
+    // or other internal stats here.
     res.status(200).json({
       success: true,
       message: 'Database connection healthy',
@@ -45,14 +44,15 @@ router.get('/db', async (_req: Request, res: Response) => {
       database: {
         status: 'connected',
         provider: 'postgresql',
-        userCount,
       },
     });
   } catch (error) {
+    // Log the detail server-side; return a generic message so a public caller
+    // can't read raw DB errors (which may include connection-string fragments).
+    console.error('[health/db] database health check failed:', error);
     res.status(503).json({
       success: false,
       message: 'Database connection failed',
-      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });

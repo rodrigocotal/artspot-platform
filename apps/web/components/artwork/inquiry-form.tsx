@@ -47,9 +47,11 @@ export function InquiryForm({ artworkId }: InquiryFormProps) {
     setLoading(true);
 
     try {
-      if (session?.accessToken) {
-        apiClient.setAccessToken(session.accessToken);
-      }
+      // Set (or clear) the token explicitly. The apiClient is a shared
+      // singleton, so a guest must not inherit a token left by a prior
+      // authenticated call — /inquiries is optionalAuth and would otherwise
+      // attach the wrong userId.
+      apiClient.setAccessToken(session?.accessToken ?? null);
 
       await apiClient.createInquiry({
         artworkId,

@@ -247,8 +247,11 @@ export class OrderService {
       return;
     }
 
-    if (order.status === 'PAID') {
-      return; // Already processed (idempotent)
+    // Only fulfill orders still awaiting payment. PAID is idempotent; CANCELLED
+    // means the user cancelled (or the session expired) and released the
+    // reservation — never resurrect it into PAID/SOLD (would double-sell).
+    if (order.status !== 'PENDING') {
+      return;
     }
 
     const stripe = getStripe();
@@ -330,6 +333,81 @@ export class OrderService {
   }
 
   /**
+   * User cancels their own still-pending checkout (e.g. they backed out of the
+   * Stripe page). Releases the reservation immediately instead of waiting the
+   * 30-minute session-expiry window, restores their cart, and cancels the order.
+   *
+   * Race-safe: the atomic PENDING->CANCELLED flip means that if the webhook
+   * already marked the order PAID, we do nothing and never release a sold
+   * artwork. Combined with the PENDING-only guard in handleCheckoutCompleted,
+   * a late payment into a cancelled order is never fulfilled.
+   */
+  async cancelPendingOrder(orderId: string, userId: string) {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    if (!order || order.userId !== userId) {
+      throw new AppError('Order not found', 404);
+    }
+
+    // Idempotent / no-op for orders that aren't awaiting payment.
+    if (order.status !== 'PENDING') {
+      return order;
+    }
+
+    // Best-effort: expire the Stripe session so it can't be paid after cancel.
+    if (order.stripeCheckoutSessionId) {
+      try {
+        const stripe = getStripe();
+        await stripe.checkout.sessions.expire(order.stripeCheckoutSessionId);
+      } catch {
+        // Session may already be completed/expired — the atomic guard below and
+        // the PENDING-only webhook fulfillment keep us safe regardless.
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Atomic critical section: only the cancel OR the webhook can flip away
+      // from PENDING. count === 0 means the webhook won (order is PAID) — bail
+      // without releasing anything.
+      const cancelled = await tx.order.updateMany({
+        where: { id: order.id, status: 'PENDING' },
+        data: { status: 'CANCELLED' },
+      });
+
+      if (cancelled.count !== 1) {
+        return;
+      }
+
+      // Release reserved artworks (only those still RESERVED — never touch SOLD).
+      for (const item of order.items) {
+        await tx.artwork.updateMany({
+          where: { id: item.artworkId, status: 'RESERVED' },
+          data: { status: 'AVAILABLE' },
+        });
+      }
+
+      // Restore the user's cart so they can retry checkout.
+      const cart = await tx.cart.upsert({
+        where: { userId },
+        create: { userId },
+        update: {},
+      });
+      await tx.cartItem.createMany({
+        data: order.items.map((item) => ({ cartId: cart.id, artworkId: item.artworkId })),
+        skipDuplicates: true,
+      });
+    });
+
+    return prisma.order.findUnique({
+      where: { id: order.id },
+      include: { items: true },
+    });
+  }
+
+  /**
    * Get orders for a user.
    */
   async getUserOrders(userId: string, query: ListOrdersQuery) {
@@ -398,6 +476,35 @@ export class OrderService {
     }
 
     if (order.userId !== userId) {
+      throw new AppError('Order not found', 404);
+    }
+
+    return order;
+  }
+
+  /**
+   * Look up the order tied to a specific Stripe checkout session (owner-scoped).
+   * Used by the success page so it shows the exact order just paid, instead of
+   * guessing "the most recent order".
+   */
+  async getOrderByCheckoutSession(sessionId: string, userId: string) {
+    const order = await prisma.order.findUnique({
+      where: { stripeCheckoutSessionId: sessionId },
+      include: {
+        items: {
+          include: {
+            artwork: {
+              include: {
+                images: { where: { type: 'MAIN' }, take: 1 },
+                artist: { select: { id: true, name: true, slug: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!order || order.userId !== userId) {
       throw new AppError('Order not found', 404);
     }
 

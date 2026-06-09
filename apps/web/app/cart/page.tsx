@@ -69,6 +69,9 @@ export default function CartPage() {
       const res = await apiClient.createCheckout();
       if (res.data.checkoutUrl) {
         window.location.href = res.data.checkoutUrl;
+      } else {
+        setError('Could not start checkout. Please try again.');
+        setCheckingOut(false);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Checkout failed');

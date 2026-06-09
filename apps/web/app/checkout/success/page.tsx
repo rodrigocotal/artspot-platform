@@ -17,7 +17,7 @@ function CheckoutSuccessContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session?.accessToken) {
+    if (!session?.accessToken || !sessionId) {
       setLoading(false);
       return;
     }
@@ -28,18 +28,23 @@ function CheckoutSuccessContent() {
     const maxAttempts = 5;
     let cancelled = false;
 
+    // Resolve the exact order for THIS checkout session (created before the
+    // Stripe redirect, so it exists immediately but is PENDING until the
+    // webhook lands). Poll until it flips to PAID.
     const poll = async () => {
       if (cancelled) return;
       attempt++;
       try {
-        const res = await apiClient.getOrders({ limit: 1 });
-        if (res.data && res.data.length > 0 && res.data[0].status === 'PAID') {
-          setOrder(res.data[0]);
-          setLoading(false);
-          return;
+        const res = await apiClient.getOrderBySession(sessionId);
+        if (res.data) {
+          setOrder(res.data);
+          if (res.data.status === 'PAID') {
+            setLoading(false);
+            return;
+          }
         }
       } catch {
-        // ignore
+        // ignore — order may not be queryable yet; keep polling
       }
 
       if (attempt < maxAttempts && !cancelled) {

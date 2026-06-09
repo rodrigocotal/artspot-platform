@@ -1022,6 +1022,24 @@ class ApiClient {
     return this.fetch<Order>(`/orders/${id}`);
   }
 
+  /**
+   * Resolve the order tied to a Stripe checkout session (owner-scoped). Used by
+   * the success page to show the exact order just paid.
+   */
+  async getOrderBySession(sessionId: string): Promise<ApiResponse<Order>> {
+    return this.fetch<Order>(`/orders/by-session/${encodeURIComponent(sessionId)}`);
+  }
+
+  /**
+   * Cancel a still-pending checkout order (releases the artwork reservation and
+   * restores the cart). No-op for orders that are already paid/cancelled.
+   */
+  async cancelOrder(id: string): Promise<ApiResponse<Order>> {
+    return this.fetch<Order>(`/orders/${id}/cancel`, {
+      method: 'POST',
+    });
+  }
+
   // ── Admin ──────────────────────────────────────────────────────────
 
   async getAdminStats(): Promise<ApiResponse<AdminStats>> {

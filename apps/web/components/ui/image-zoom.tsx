@@ -65,12 +65,22 @@ export function ImageZoom({
   return (
     <div
       ref={containerRef}
+      role="button"
+      tabIndex={0}
+      aria-label={isZoomed ? 'Zoom out of artwork image' : 'Zoom in to artwork image'}
+      aria-pressed={isZoomed}
       className={cn(
-        'relative overflow-hidden bg-neutral-100 rounded-lg',
+        'relative overflow-hidden bg-neutral-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
         isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in',
         className
       )}
       onClick={toggleZoom}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleZoom();
+        }
+      }}
       onMouseMove={handleMouseMove}
       onTouchMove={handleTouchMove}
       style={{ aspectRatio: `${width} / ${height}` }}

@@ -13,32 +13,32 @@ const config: Config = {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
 
-        // Primary palette - Gold accents for luxury feel
+        // Primary palette - restrained gold accent (logo mark, hero italic accent)
         primary: {
-          50: '#f9f7f4',
-          100: '#f3efe8',
-          200: '#e7dfd1',
-          300: '#d4c5a9',
-          400: '#c0a87e',
-          500: '#b08d5c', // Main gold accent
-          600: '#967547',
-          700: '#7d5f3d',
-          800: '#685036',
-          900: '#58442f',
+          50: '#fbf6ec',
+          100: '#f5e9ce',
+          200: '#ead3a0',
+          300: '#ddba6e',
+          400: '#cfa248',
+          500: '#c2922e', // Main gold accent
+          600: '#a87c25',
+          700: '#87621f',
+          800: '#6e5020',
+          900: '#5c441f',
         },
 
-        // Neutral palette - Warm grays and beiges
+        // Neutral palette - warm cream -> near-black ink (matches reference)
         neutral: {
-          50: '#fafaf9',   // Off-white backgrounds
-          100: '#f5f5f4',  // Light backgrounds
-          200: '#e7e5e4',  // Borders, dividers
-          300: '#d6d3d1',  // Subtle borders
-          400: '#a8a29e',  // Disabled states
-          500: '#78716c',  // Secondary text
-          600: '#57534e',  // Body text
-          700: '#44403c',  // Headings
-          800: '#292524',  // Dark headings
-          900: '#1c1917',  // Darkest text
+          50: '#faf9f7',   // Warm cream — primary background
+          100: '#f4f2ee',  // Light warm background / alt sections
+          200: '#e8e4dd',  // Borders, dividers (thin warm lines)
+          300: '#d8d3ca',  // Subtle borders
+          400: '#aca69c',  // Disabled / faint text
+          500: '#858481',  // Muted foreground (medium, dimensions, labels)
+          600: '#5c5a55',  // Body text
+          700: '#44423d',  // Headings
+          800: '#2a2926',  // Dark headings
+          900: '#1a1a1a',  // Ink — dark sections, primary buttons, headings
         },
 
         // Semantic colors
@@ -97,10 +97,11 @@ const config: Config = {
         // 2xl: 1536px (default)
       },
 
+      // Restrained radii — the reference is near-square / lightly rounded, not pill-soft
       borderRadius: {
-        'lg': '1rem',
-        'xl': '1.5rem',
-        '2xl': '2rem',
+        'lg': '0.5rem',
+        'xl': '0.75rem',
+        '2xl': '1rem',
       },
 
       boxShadow: {

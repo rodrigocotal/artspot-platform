@@ -22,6 +22,7 @@ const sortOptions: SortOption[] = [
 ];
 
 const CMS_DEFAULTS = {
+  label: 'Curated',
   headline: 'Curated Collections',
   subtitle: 'Explore thoughtfully curated selections of exceptional artworks',
   emptyMessage: 'No collections found',
@@ -93,18 +94,21 @@ export function CollectionsPageClient({ content }: { content: Record<string, any
       <Section spacing="lg" background="neutral">
         <Container size="xl">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-display font-serif text-neutral-900 mb-2">
+          <div className="mb-10 md:mb-14 border-b border-neutral-200 pb-8">
+            <p className="mb-4 text-xs font-medium uppercase tracking-widest text-neutral-500">
+              {merged.label}
+            </p>
+            <h1 className="text-display font-serif text-neutral-900">
               {merged.headline}
             </h1>
-            <p className="text-body-lg text-neutral-600">
+            <p className="mt-4 max-w-2xl text-body-lg text-neutral-600">
               {merged.subtitle}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-x-10 gap-y-10">
             {/* Sidebar - Filters */}
-            <aside className="lg:col-span-1 space-y-6">
+            <aside className="lg:col-span-1 space-y-6 sticky top-24 self-start">
               {/* Search */}
               <div>
                 <SearchInput
@@ -117,13 +121,13 @@ export function CollectionsPageClient({ content }: { content: Record<string, any
               {/* Active filters */}
               {activeFilters.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-neutral-700">
+                  <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
+                    <span className="text-xs font-medium uppercase tracking-widest text-neutral-500">
                       Active Filters
                     </span>
                     <button
                       onClick={clearAllFilters}
-                      className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                      className="text-xs font-medium text-neutral-500 underline underline-offset-4 hover:text-neutral-900"
                     >
                       Clear All
                     </button>
@@ -156,10 +160,10 @@ export function CollectionsPageClient({ content }: { content: Record<string, any
             </aside>
 
             {/* Main content - Collections grid */}
-            <main className="lg:col-span-3 space-y-6">
+            <main className="lg:col-span-3 space-y-8">
               {/* Results header */}
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-neutral-600">
+              <div className="flex items-center justify-between border-b border-neutral-200 pb-6">
+                <p className="text-sm text-neutral-500">
                   {loading ? (
                     'Loading...'
                   ) : (
@@ -180,7 +184,7 @@ export function CollectionsPageClient({ content }: { content: Record<string, any
               {/* Collections grid */}
               {loading ? (
                 <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+                  <Loader2 className="w-8 h-8 text-neutral-400 animate-spin" />
                 </div>
               ) : error ? (
                 <div className="text-center py-20">
@@ -200,7 +204,7 @@ export function CollectionsPageClient({ content }: { content: Record<string, any
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12">
                     {collections.map((collection, index) => (
                       <CollectionCard
                         key={collection.id}
@@ -212,7 +216,7 @@ export function CollectionsPageClient({ content }: { content: Record<string, any
 
                   {/* Pagination */}
                   {pagination.totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 pt-8">
+                    <div className="flex items-center justify-center gap-2 border-t border-neutral-200 pt-10 mt-4">
                       <Button
                         variant="outline"
                         onClick={() => fetchCollections(pagination.page - 1)}

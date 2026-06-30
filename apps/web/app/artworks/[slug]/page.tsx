@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import { AddToCartButton } from '@/components/artwork/add-to-cart-button';
 import { Button } from '@/components/ui';
 import { apiClient, type Artwork } from '@/lib/api-client';
 import { useFavorite } from '@/hooks/use-favorite';
-import { ArrowLeft, Heart, Share2, Ruler, Calendar, Package, CheckCircle2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function ArtworkDetailPage() {
@@ -98,7 +98,7 @@ export default function ArtworkDetailPage() {
       <Section spacing="lg">
         <Container>
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-neutral-400 animate-spin" />
           </div>
         </Container>
       </Section>
@@ -129,12 +129,12 @@ export default function ArtworkDetailPage() {
       {/* Breadcrumb */}
       <Section spacing="sm" background="white" className="border-b border-neutral-200">
         <Container size="xl">
-          <div className="flex items-center gap-2 text-sm text-neutral-600">
-            <Link href="/" className="hover:text-neutral-900">Home</Link>
-            <span>/</span>
-            <Link href="/artworks" className="hover:text-neutral-900">Artworks</Link>
-            <span>/</span>
-            <span className="text-neutral-900">{artwork.title}</span>
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.15em] text-neutral-500">
+            <Link href="/" className="hover:text-neutral-900 transition-colors">Home</Link>
+            <span className="text-neutral-300">/</span>
+            <Link href="/artworks" className="hover:text-neutral-900 transition-colors">Artworks</Link>
+            <span className="text-neutral-300">/</span>
+            <span className="text-neutral-900 truncate">{artwork.title}</span>
           </div>
         </Container>
       </Section>
@@ -144,13 +144,13 @@ export default function ArtworkDetailPage() {
         <Container size="xl">
           <Link
             href="/artworks"
-            className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.15em] text-neutral-500 hover:text-neutral-900 transition-colors mb-12"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" />
             Back to Artworks
           </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
             {/* Left Column - Images */}
             <div className="space-y-4">
               {/* Main Image with Zoom */}
@@ -173,10 +173,10 @@ export default function ArtworkDetailPage() {
                       key={image.id}
                       onClick={() => setSelectedImageIndex(index)}
                       className={cn(
-                        'relative aspect-square rounded-lg overflow-hidden border-2 transition-all',
+                        'relative aspect-square rounded-md overflow-hidden border transition-colors',
                         selectedImageIndex === index
-                          ? 'border-primary-500'
-                          : 'border-neutral-200 hover:border-neutral-300'
+                          ? 'border-neutral-900'
+                          : 'border-neutral-200 hover:border-neutral-400'
                       )}
                     >
                       <img
@@ -191,78 +191,47 @@ export default function ArtworkDetailPage() {
             </div>
 
             {/* Right Column - Details */}
-            <div className="space-y-8">
-              {/* Status Badge */}
-              {!isAvailable && (
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-100 border border-neutral-300">
-                  <span className="text-sm font-medium text-neutral-700">
+            <div className="lg:pl-6 space-y-10">
+              {/* Availability eyebrow */}
+              <div className="flex items-center gap-2">
+                {isAvailable ? (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-600" aria-hidden="true" />
+                    <span className="text-[11px] uppercase tracking-[0.2em] font-medium text-green-700">
+                      Available
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-500">
                     {artwork.status === 'SOLD' ? 'Sold' : artwork.status.replace('_', ' ')}
                   </span>
-                </div>
-              )}
-
-              {/* Title and Artist */}
-              <div>
-                <h1 className="text-display font-serif text-neutral-900 mb-2">
-                  {artwork.title}
-                </h1>
-                <Link
-                  href={`/artists/${artwork.artist.slug}`}
-                  className="text-xl text-neutral-600 hover:text-neutral-900 transition-colors"
-                >
-                  {artwork.artist.name}
-                </Link>
-                {artwork.year && (
-                  <p className="text-lg text-neutral-500 mt-1">{artwork.year}</p>
                 )}
               </div>
 
-              {/* Price */}
-              <div className="py-6 border-y border-neutral-200">
-                <p className="text-3xl font-serif text-neutral-900 tabular-nums">
-                  {formatPrice(artwork.price, artwork.currency)}
+              {/* Title and Artist — gallery label */}
+              <div>
+                <h1 className="font-serif italic text-4xl md:text-5xl leading-[1.1] text-neutral-900">
+                  {artwork.title}
+                </h1>
+                <p className="mt-4 font-serif text-lg text-neutral-600">
+                  <Link
+                    href={`/artists/${artwork.artist.slug}`}
+                    className="text-neutral-800 hover:text-primary-600 transition-colors"
+                  >
+                    {artwork.artist.name}
+                  </Link>
+                  {artwork.year && <span className="text-neutral-500">{`, ${artwork.year}`}</span>}
                 </p>
               </div>
 
-              {/* Quick Info Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {(artwork.width || artwork.height) && (
-                  <div className="flex items-start gap-3">
-                    <Ruler className="w-5 h-5 text-neutral-400 mt-0.5" />
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Dimensions</p>
-                      <p className="text-sm text-neutral-900">{formatDimensions(artwork.width, artwork.height, artwork.depth)}</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-start gap-3">
-                  <Package className="w-5 h-5 text-neutral-400 mt-0.5" />
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Medium</p>
-                    <p className="text-sm text-neutral-900">{artwork.medium.replace('_', ' ')}</p>
-                  </div>
-                </div>
-
-                {artwork.style && (
-                  <div className="flex items-start gap-3">
-                    <Calendar className="w-5 h-5 text-neutral-400 mt-0.5" />
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Style</p>
-                      <p className="text-sm text-neutral-900">{artwork.style.replace('_', ' ')}</p>
-                    </div>
-                  </div>
-                )}
-
-                {artwork.certificate && (
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-success-600 mt-0.5" />
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Certificate</p>
-                      <p className="text-sm text-neutral-900">Included</p>
-                    </div>
-                  </div>
-                )}
+              {/* Price — gallery label */}
+              <div className="border-y border-neutral-200 py-6">
+                <p className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-500 mb-2">
+                  Price
+                </p>
+                <p className="text-3xl font-serif text-neutral-900 tabular-nums">
+                  {formatPrice(artwork.price, artwork.currency)}
+                </p>
               </div>
 
               {/* Action Buttons */}
@@ -301,43 +270,50 @@ export default function ArtworkDetailPage() {
                 <InquiryForm artworkId={artwork.id} />
               )}
 
+              {/* Details — editorial spec list */}
+              <div>
+                <h2 className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-500 mb-1">
+                  Details
+                </h2>
+                <dl className="border-t border-neutral-200">
+                  <DetailRow label="Medium" value={artwork.medium.replace('_', ' ')} />
+                  {(artwork.width || artwork.height) && (
+                    <DetailRow
+                      label="Dimensions"
+                      value={formatDimensions(artwork.width, artwork.height, artwork.depth)}
+                    />
+                  )}
+                  {artwork.style && <DetailRow label="Style" value={artwork.style.replace('_', ' ')} />}
+                  {artwork.year && <DetailRow label="Year" value={String(artwork.year)} />}
+                  {artwork.edition && <DetailRow label="Edition" value={artwork.edition} />}
+                  {artwork.materials && <DetailRow label="Materials" value={artwork.materials} />}
+                  {artwork.signature && <DetailRow label="Signature" value={artwork.signature} />}
+                  {artwork.framed && <DetailRow label="Framing" value="Framed" />}
+                  {artwork.certificate && (
+                    <DetailRow
+                      label="Certificate"
+                      value={
+                        <span className="inline-flex items-center gap-1.5 text-green-700">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Included
+                        </span>
+                      }
+                    />
+                  )}
+                </dl>
+              </div>
+
               {/* Description */}
               {artwork.description && (
-                <div className="pt-6 border-t border-neutral-200">
-                  <h2 className="text-heading-4 font-serif text-neutral-900 mb-3">About This Work</h2>
-                  <p className="text-body text-neutral-600 leading-relaxed whitespace-pre-line">
+                <div>
+                  <h2 className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-500 mb-4">
+                    About the Work
+                  </h2>
+                  <p className="text-base text-neutral-600 leading-relaxed whitespace-pre-line">
                     {artwork.description}
                   </p>
                 </div>
               )}
-
-              {/* Additional Details */}
-              <div className="pt-6 border-t border-neutral-200 space-y-3 text-sm">
-                {artwork.edition && (
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Edition</span>
-                    <span className="text-neutral-900">{artwork.edition}</span>
-                  </div>
-                )}
-                {artwork.materials && (
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Materials</span>
-                    <span className="text-neutral-900">{artwork.materials}</span>
-                  </div>
-                )}
-                {artwork.signature && (
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Signature</span>
-                    <span className="text-neutral-900">{artwork.signature}</span>
-                  </div>
-                )}
-                {artwork.framed && (
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Framing</span>
-                    <span className="text-neutral-900">Framed</span>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </Container>
@@ -347,8 +323,11 @@ export default function ArtworkDetailPage() {
       {relatedArtworks.length > 0 && (
         <Section spacing="lg" background="neutral">
           <Container size="xl">
-            <h2 className="text-heading-2 font-serif text-neutral-900 mb-8">
-              Related Artworks
+            <p className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-500 mb-3">
+              Gallery
+            </p>
+            <h2 className="text-3xl md:text-4xl font-serif text-neutral-900 mb-10">
+              Related Works
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedArtworks.map((relatedArtwork) => (
@@ -359,6 +338,15 @@ export default function ArtworkDetailPage() {
         </Section>
       )}
     </>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="flex items-baseline justify-between gap-6 py-3 border-b border-neutral-200">
+      <dt className="text-[11px] uppercase tracking-[0.18em] text-neutral-500 shrink-0">{label}</dt>
+      <dd className="text-sm text-neutral-900 text-right">{value}</dd>
+    </div>
   );
 }
 

@@ -23,7 +23,7 @@ export default function AccountPage() {
     return (
       <Section spacing="lg" background="neutral">
         <Container size="md" className="text-center py-20">
-          <div className="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center mx-auto mb-6">
             <LogIn className="w-8 h-8 text-neutral-400" />
           </div>
           <h1 className="text-heading-1 font-serif text-neutral-900 mb-4">Sign In Required</h1>
@@ -31,7 +31,7 @@ export default function AccountPage() {
             Please sign in to view your account.
           </p>
           <Link href="/login">
-            <Button size="lg">Sign In</Button>
+            <Button size="lg" variant="secondary">Sign In</Button>
           </Link>
         </Container>
       </Section>
@@ -41,10 +41,15 @@ export default function AccountPage() {
   return (
     <Section spacing="lg" background="neutral">
       <Container size="md">
-        <h1 className="text-display font-serif text-neutral-900 mb-8">My Account</h1>
+        <div className="mb-10">
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-neutral-500">
+            Account
+          </p>
+          <h1 className="text-display font-serif text-neutral-900">My Account</h1>
+        </div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-xl p-8 mb-8">
+        <div className="bg-white rounded-md border border-neutral-200 p-8 mb-8">
           <div className="flex items-center gap-6">
             <div className="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
               <User className="w-10 h-10 text-primary-600" />
@@ -68,11 +73,11 @@ export default function AccountPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <Link
             href="/favorites"
-            className="group bg-white rounded-xl p-6 hover:shadow-md transition-shadow"
+            className="group bg-white rounded-md border border-neutral-200 p-6 hover:border-neutral-300 transition-colors"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
-                <Heart className="w-6 h-6 text-red-500" />
+              <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                <Heart className="w-6 h-6 text-neutral-600" />
               </div>
               <div>
                 <h3 className="text-heading-4 font-serif text-neutral-900 group-hover:text-primary-600 transition-colors">
@@ -85,11 +90,11 @@ export default function AccountPage() {
 
           <Link
             href="/account/orders"
-            className="group bg-white rounded-xl p-6 hover:shadow-md transition-shadow"
+            className="group bg-white rounded-md border border-neutral-200 p-6 hover:border-neutral-300 transition-colors"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
-                <Package className="w-6 h-6 text-purple-500" />
+              <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                <Package className="w-6 h-6 text-neutral-600" />
               </div>
               <div>
                 <h3 className="text-heading-4 font-serif text-neutral-900 group-hover:text-primary-600 transition-colors">
@@ -102,11 +107,11 @@ export default function AccountPage() {
 
           <Link
             href="/artworks"
-            className="group bg-white rounded-xl p-6 hover:shadow-md transition-shadow"
+            className="group bg-white rounded-md border border-neutral-200 p-6 hover:border-neutral-300 transition-colors"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                <MessageSquare className="w-6 h-6 text-blue-500" />
+              <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="w-6 h-6 text-neutral-600" />
               </div>
               <div>
                 <h3 className="text-heading-4 font-serif text-neutral-900 group-hover:text-primary-600 transition-colors">
@@ -119,11 +124,11 @@ export default function AccountPage() {
 
           <Link
             href="/account/profile"
-            className="group bg-white rounded-xl p-6 hover:shadow-md transition-shadow"
+            className="group bg-white rounded-md border border-neutral-200 p-6 hover:border-neutral-300 transition-colors"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                <Settings className="w-6 h-6 text-neutral-500" />
+                <Settings className="w-6 h-6 text-neutral-600" />
               </div>
               <div>
                 <h3 className="text-heading-4 font-serif text-neutral-900 group-hover:text-primary-600 transition-colors">
@@ -137,7 +142,7 @@ export default function AccountPage() {
           {(session.user.role === 'ADMIN' || session.user.role === 'GALLERY_STAFF') && (
             <Link
               href="/admin"
-              className="group bg-white rounded-xl p-6 hover:shadow-md transition-shadow border-2 border-primary-100"
+              className="group bg-white rounded-md p-6 transition-colors border border-primary-200 hover:border-primary-300"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">

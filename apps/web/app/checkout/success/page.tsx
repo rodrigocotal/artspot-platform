@@ -73,6 +73,9 @@ function CheckoutSuccessContent() {
           <CheckCircle2 className="w-10 h-10 text-green-600" />
         </div>
 
+        <p className="mb-3 text-xs font-medium uppercase tracking-widest text-neutral-500">
+          Order Confirmed
+        </p>
         <h1 className="text-display font-serif text-neutral-900 mb-4">
           Thank You for Your Purchase!
         </h1>
@@ -86,7 +89,7 @@ function CheckoutSuccessContent() {
             <span className="text-neutral-600">Loading order details...</span>
           </div>
         ) : order ? (
-          <div className="bg-white rounded-xl p-6 text-left mb-8 max-w-md mx-auto">
+          <div className="bg-white rounded-md border border-neutral-200 p-6 text-left mb-8 max-w-md mx-auto">
             <div className="flex items-center gap-3 mb-4">
               <Package className="w-5 h-5 text-neutral-400" />
               <span className="text-sm font-medium text-neutral-500">Order {order.orderNumber}</span>
@@ -116,7 +119,7 @@ function CheckoutSuccessContent() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl p-6 mb-8 max-w-md mx-auto">
+          <div className="bg-white rounded-md border border-neutral-200 p-6 mb-8 max-w-md mx-auto">
             <p className="text-body text-neutral-600">
               Your order is being processed. Check your email for confirmation details,
               or visit your <Link href="/account/orders" className="text-primary-600 hover:text-primary-700 font-medium">order history</Link> shortly.
@@ -129,7 +132,7 @@ function CheckoutSuccessContent() {
             <Button size="lg" variant="outline">View Orders</Button>
           </Link>
           <Link href="/artworks">
-            <Button size="lg">Continue Browsing</Button>
+            <Button size="lg" variant="secondary">Continue Browsing</Button>
           </Link>
         </div>
       </Container>

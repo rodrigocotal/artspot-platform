@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --background: 250 245 244; /* neutral-50 */
-    --foreground: 28 25 23; /* neutral-900 */
+    --background: 250 249 247; /* neutral-50 — warm cream #FAF9F7 */
+    --foreground: 26 26 26; /* neutral-900 — ink #1A1A1A */
   }
 
   * {
@@ -16,8 +16,15 @@
     @apply bg-background text-foreground;
   }
 
+  /* Serif display headings (Playfair Display) with editorial tracking */
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background-color: #1a1a1a;
+    color: #faf9f7;
   }
 }
 

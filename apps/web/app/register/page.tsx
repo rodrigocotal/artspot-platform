@@ -71,20 +71,23 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
+    <div className="flex min-h-[80vh] items-center justify-center bg-neutral-50 px-4 py-16">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="font-serif text-3xl font-semibold text-neutral-900">
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-neutral-500">
+            Account
+          </p>
+          <h1 className="font-serif text-4xl font-medium text-neutral-900">
             Create Account
           </h1>
-          <p className="mt-2 text-neutral-600">
+          <p className="mt-3 text-neutral-600">
             Join ArtAldo to start collecting
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div role="alert" className="rounded-lg bg-error-50 border border-error-200 p-4 text-sm text-error-700">
+            <div role="alert" className="rounded-md bg-error-50 border border-error-200 p-4 text-sm text-error-700">
               {error}
             </div>
           )}
@@ -146,7 +149,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <Button type="submit" className="w-full" loading={loading}>
+          <Button type="submit" variant="secondary" className="w-full" loading={loading}>
             Create Account
           </Button>
         </form>

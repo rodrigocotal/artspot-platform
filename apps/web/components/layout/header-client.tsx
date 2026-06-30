@@ -41,6 +41,12 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  // Subtle active-state detection for nav links
+  const isActive = (href: string) =>
+    href === '/'
+      ? pathname === '/'
+      : pathname === href || pathname.startsWith(`${href}/`);
+
   // Keyboard handler for nav dropdown
   const handleNavKeyDown = (e: React.KeyboardEvent, item: NavItem) => {
     if (!item.dropdown) return;
@@ -97,7 +103,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90',
+        'sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80',
         className
       )}
     >
@@ -107,9 +113,26 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
           <div className="flex-shrink-0">
             <Link
               href="/"
-              className="text-2xl font-serif font-semibold text-neutral-900 hover:text-primary-600 transition-colors"
+              className="group flex items-center gap-2.5"
+              aria-label={`${logoText} — home`}
             >
-              {logoText}
+              {/* Gold monogram mark */}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6 text-primary-600"
+                aria-hidden="true"
+              >
+                <path d="M4 20 L12 4 L20 20" />
+                <path d="M7.5 14 H16.5" />
+              </svg>
+              <span className="text-2xl font-serif font-semibold tracking-tight text-neutral-900 transition-colors group-hover:text-neutral-700">
+                {logoText}
+              </span>
             </Link>
           </div>
 
@@ -125,7 +148,10 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                 <Link
                   href={item.href}
                   className={cn(
-                    'inline-flex items-center gap-1 text-body font-sans text-neutral-700 hover:text-neutral-900 transition-colors',
+                    'inline-flex items-center gap-1 text-sm font-sans transition-colors',
+                    isActive(item.href)
+                      ? 'text-neutral-900'
+                      : 'text-neutral-600 hover:text-neutral-900',
                     activeDropdown === item.label && 'text-neutral-900'
                   )}
                   aria-haspopup={item.dropdown ? 'true' : undefined}
@@ -150,14 +176,14 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                     <div
                       role="menu"
                       aria-label={`${item.label} submenu`}
-                      className="w-56 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
+                      className="w-56 rounded-md bg-white shadow-sm border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
                     >
                       {item.dropdown.map((subItem) => (
                         <Link
                           key={subItem.label}
                           href={subItem.href}
                           role="menuitem"
-                          className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                          className="block px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                           onKeyDown={handleDropdownKeyDown}
                         >
                           {subItem.label}
@@ -175,7 +201,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
             {/* Search */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+              className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
               aria-label="Search"
               aria-expanded={searchOpen}
             >
@@ -185,7 +211,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
             {/* Favorites */}
             <Link
               href="/favorites"
-              className="hidden sm:block p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+              className="hidden sm:block p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
               aria-label="Favorites"
             >
               <Heart className="h-5 w-5" aria-hidden="true" />
@@ -194,12 +220,12 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
             {/* Cart */}
             <Link
               href="/cart"
-              className="hidden sm:block relative p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+              className="hidden sm:block relative p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
               aria-label={`Cart${itemCount > 0 ? ` (${itemCount} items)` : ''}`}
             >
               <ShoppingBag className="h-5 w-5" aria-hidden="true" />
               {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white">
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-neutral-900 text-[10px] font-bold text-white">
                   {itemCount > 9 ? '9+' : itemCount}
                 </span>
               )}
@@ -213,7 +239,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                 onMouseLeave={() => setUserMenuOpen(false)}
               >
                 <button
-                  className="flex items-center gap-2 p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+                  className="flex items-center gap-2 p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
                   aria-label="Account menu"
                   aria-haspopup="true"
                   aria-expanded={userMenuOpen}
@@ -229,33 +255,33 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                     <div
                       role="menu"
                       aria-label="Account menu"
-                      className="w-48 rounded-xl bg-white shadow-soft-lg border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
+                      className="w-48 rounded-md bg-white shadow-sm border border-neutral-200 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
                     >
                       <Link
                         href="/account"
                         role="menuitem"
-                        className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                        className="block px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                       >
                         My Account
                       </Link>
                       <Link
                         href="/favorites"
                         role="menuitem"
-                        className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                        className="block px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                       >
                         Favorites
                       </Link>
                       <Link
                         href="/cart"
                         role="menuitem"
-                        className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                        className="block px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                       >
                         Cart{itemCount > 0 ? ` (${itemCount})` : ''}
                       </Link>
                       <Link
                         href="/account/orders"
                         role="menuitem"
-                        className="block px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                        className="block px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                       >
                         Orders
                       </Link>
@@ -265,7 +291,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                           <Link
                             href="/admin"
                             role="menuitem"
-                            className="block px-4 py-2.5 text-body text-primary-700 font-medium hover:bg-primary-50 transition-colors"
+                            className="block px-4 py-2.5 text-sm text-neutral-900 font-medium hover:bg-neutral-50 transition-colors"
                           >
                             Admin Panel
                           </Link>
@@ -275,7 +301,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                       <button
                         onClick={() => signOut({ callbackUrl: '/' })}
                         role="menuitem"
-                        className="flex w-full items-center gap-2 px-4 py-2.5 text-body text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+                        className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
                       >
                         <LogOut className="h-4 w-4" aria-hidden="true" />
                         Sign Out
@@ -287,17 +313,25 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
             ) : (
               <Link
                 href="/login"
-                className="hidden sm:block p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+                className="hidden sm:block p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
                 aria-label="Sign in"
               >
                 <User className="h-5 w-5" aria-hidden="true" />
               </Link>
             )}
 
+            {/* Private Viewing CTA */}
+            <Link
+              href="/contact"
+              className="hidden lg:inline-flex items-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+            >
+              Private Viewing
+            </Link>
+
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+              className="lg:hidden p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileMenuOpen}
             >
@@ -333,7 +367,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search artworks, artists, or collections..."
-                className="w-full h-12 pl-12 pr-4 rounded-lg border-2 border-neutral-300 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0"
+                className="w-full h-12 pl-12 pr-4 rounded-md border border-neutral-300 bg-white focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:ring-offset-0"
                 autoFocus
                 aria-label="Search artworks, artists, or collections"
               />
@@ -352,7 +386,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                 <div key={item.label} className="space-y-2">
                   <Link
                     href={item.href}
-                    className="block text-heading-4 font-serif text-neutral-900 hover:text-primary-600 transition-colors"
+                    className="block text-heading-4 font-serif text-neutral-900 hover:text-neutral-600 transition-colors"
                   >
                     {item.label}
                   </Link>
@@ -362,7 +396,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                         <Link
                           key={subItem.label}
                           href={subItem.href}
-                          className="block text-body text-neutral-600 hover:text-neutral-900 transition-colors"
+                          className="block text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
                         >
                           {subItem.label}
                         </Link>
@@ -372,6 +406,14 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                 </div>
               ))}
             </nav>
+
+            {/* Private Viewing CTA - Mobile */}
+            <Link
+              href="/contact"
+              className="flex h-11 items-center justify-center rounded-md bg-neutral-900 px-6 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+            >
+              Private Viewing
+            </Link>
 
             {/* Utility Navigation - Mobile */}
             <div className="flex flex-wrap gap-4 pt-4 border-t border-neutral-200">

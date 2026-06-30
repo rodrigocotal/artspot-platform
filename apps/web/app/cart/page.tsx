@@ -31,7 +31,7 @@ export default function CartPage() {
     return (
       <Section spacing="lg" background="neutral">
         <Container size="md" className="text-center py-20">
-          <div className="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center mx-auto mb-6">
             <LogIn className="w-8 h-8 text-neutral-400" />
           </div>
           <h1 className="text-heading-1 font-serif text-neutral-900 mb-4">Sign In Required</h1>
@@ -39,7 +39,7 @@ export default function CartPage() {
             Please sign in to view your cart.
           </p>
           <Link href="/login">
-            <Button size="lg">Sign In</Button>
+            <Button size="lg" variant="secondary">Sign In</Button>
           </Link>
         </Container>
       </Section>
@@ -83,15 +83,18 @@ export default function CartPage() {
     return (
       <Section spacing="lg" background="neutral">
         <Container size="md" className="text-center py-20">
-          <div className="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center mx-auto mb-6">
             <ShoppingBag className="w-8 h-8 text-neutral-400" />
           </div>
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-neutral-500">
+            Your Cart
+          </p>
           <h1 className="text-heading-1 font-serif text-neutral-900 mb-4">Your Cart is Empty</h1>
           <p className="text-body-lg text-neutral-600 mb-6">
             Discover artworks and add them to your cart.
           </p>
           <Link href="/artworks">
-            <Button size="lg">Browse Artworks</Button>
+            <Button size="lg" variant="secondary">Browse Artworks</Button>
           </Link>
         </Container>
       </Section>
@@ -101,10 +104,15 @@ export default function CartPage() {
   return (
     <Section spacing="lg" background="neutral">
       <Container size="lg">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-display font-serif text-neutral-900">
-            Cart ({itemCount})
-          </h1>
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <p className="mb-3 text-xs font-medium uppercase tracking-widest text-neutral-500">
+              Your Selection
+            </p>
+            <h1 className="text-display font-serif text-neutral-900">
+              Cart ({itemCount})
+            </h1>
+          </div>
           <Button variant="ghost" onClick={clearCart} className="text-sm text-neutral-600">
             Clear All
           </Button>
@@ -118,12 +126,12 @@ export default function CartPage() {
               return (
                 <div
                   key={item.id}
-                  className="bg-white rounded-xl p-4 flex gap-4"
+                  className="bg-white rounded-md border border-neutral-200 p-4 flex gap-4"
                 >
                   {/* Image */}
                   <Link
                     href={`/artworks/${item.artwork.slug}`}
-                    className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-neutral-100"
+                    className="flex-shrink-0 w-24 h-24 rounded-md overflow-hidden bg-neutral-100"
                   >
                     {image ? (
                       <img
@@ -167,7 +175,7 @@ export default function CartPage() {
 
           {/* Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl p-6 sticky top-24">
+            <div className="bg-white rounded-md border border-neutral-200 p-6 sticky top-24">
               <h2 className="text-heading-3 font-serif text-neutral-900 mb-4">Summary</h2>
               <div className="space-y-3 text-sm border-b border-neutral-200 pb-4 mb-4">
                 <div className="flex justify-between">
@@ -186,6 +194,7 @@ export default function CartPage() {
 
               <Button
                 size="lg"
+                variant="secondary"
                 className="w-full gap-2"
                 onClick={handleCheckout}
                 disabled={checkingOut}

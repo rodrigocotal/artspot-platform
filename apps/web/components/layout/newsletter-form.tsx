@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 
 type Status = 'idle' | 'loading' | 'done' | 'error';
@@ -35,15 +36,18 @@ export function NewsletterForm() {
 
   if (status === 'done') {
     return (
-      <p className="text-sm text-neutral-300" role="status">
+      <p className="text-sm text-neutral-400" role="status">
         Thanks — you&apos;re on the list. We&apos;ll be in touch.
       </p>
     );
   }
 
   return (
-    <form className="flex gap-2" onSubmit={handleSubmit}>
-      <div className="flex-1 min-w-0">
+    <form
+      className="flex flex-col gap-3 sm:flex-row sm:items-start"
+      onSubmit={handleSubmit}
+    >
+      <div className="min-w-0 flex-1">
         <input
           type="email"
           placeholder="Your email address"
@@ -54,10 +58,10 @@ export function NewsletterForm() {
           }}
           required
           aria-label="Email address"
-          className="w-full bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-primary-500 transition-colors"
+          className="w-full rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-neutral-500 transition-colors focus:border-primary-500 focus:outline-none"
         />
         {status === 'error' && (
-          <p className="mt-1 text-xs text-red-400" role="alert">
+          <p className="mt-2 text-xs text-red-400" role="alert">
             Something went wrong. Please try again.
           </p>
         )}
@@ -65,9 +69,16 @@ export function NewsletterForm() {
       <button
         type="submit"
         disabled={status === 'loading'}
-        className="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium rounded transition-colors whitespace-nowrap self-start"
+        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-white/20 px-6 py-3 text-sm font-medium text-white transition-colors hover:border-white hover:bg-white hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {status === 'loading' ? 'Subscribing…' : 'Subscribe'}
+        {status === 'loading' ? (
+          'Joining…'
+        ) : (
+          <>
+            Join
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </>
+        )}
       </button>
     </form>
   );

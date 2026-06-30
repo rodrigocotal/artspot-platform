@@ -59,20 +59,29 @@ export function CollectionLanding({ content, defaults, collectionSlug }: Collect
   return (
     <Section spacing="lg" background="neutral">
       <Container size="xl">
-        <div className="text-center space-y-6 max-w-3xl mx-auto">
-          <h1 className="text-display font-serif text-neutral-900">{merged.headline}</h1>
+        <div className="text-center max-w-3xl mx-auto">
+          <p className="text-xs uppercase tracking-[0.2em] font-medium text-neutral-500 mb-4">
+            Collection
+          </p>
+          <h1 className="text-4xl md:text-6xl font-serif text-neutral-900 leading-[1.05]">
+            {merged.headline}
+          </h1>
           {merged.subtitle && (
-            <p className="text-body-lg text-neutral-600 leading-relaxed">{merged.subtitle}</p>
+            <p className="mt-6 text-lg text-neutral-600 leading-relaxed max-w-2xl mx-auto">
+              {merged.subtitle}
+            </p>
           )}
-          <HeroImage image={merged.heroImage ?? null} />
+          <div className="mt-10">
+            <HeroImage image={merged.heroImage ?? null} />
+          </div>
         </div>
 
         {collectionSlug && (
-          <div className="mt-16">
+          <div className="mt-20">
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="aspect-[3/4] w-full rounded-xl" />
+                  <Skeleton key={i} className="aspect-[3/4] w-full rounded-md" />
                 ))}
               </div>
             ) : artworks.length > 0 ? (
@@ -82,8 +91,8 @@ export function CollectionLanding({ content, defaults, collectionSlug }: Collect
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 border-t border-neutral-200">
-                <p className="text-neutral-600 mb-6">
+              <div className="text-center py-16 border-t border-neutral-200">
+                <p className="text-neutral-600 mb-8">
                   Works for this collection are coming soon.
                 </p>
                 <Link href="/artworks">

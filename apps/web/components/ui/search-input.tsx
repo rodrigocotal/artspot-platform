@@ -60,10 +60,10 @@ export function SearchInput({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={cn(
-          'w-full pl-10 pr-10 py-2.5 text-sm',
-          'bg-white border-2 border-neutral-200 rounded-lg',
+          'w-full pl-10 pr-10 py-2.5 text-sm font-sans',
+          'bg-white border border-neutral-300 rounded-md',
           'text-neutral-900 placeholder:text-neutral-400',
-          'focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100',
+          'focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900',
           'transition-colors'
         )}
       />

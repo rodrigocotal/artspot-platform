@@ -3,30 +3,30 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  // Base styles - luxury aesthetic
-  'inline-flex items-center justify-center gap-2 rounded-lg font-sans font-medium transition-all duration-300 ease-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  // Base styles - warm minimalist luxury: flat surfaces, clean hovers
+  'inline-flex items-center justify-center gap-2 rounded-md font-sans font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        // Primary - Gold accent for main CTAs
+        // Primary - solid near-black, the main CTA (gold reserved as accent only)
         primary:
-          'bg-primary-500 text-white shadow-soft hover:bg-primary-600 hover:shadow-soft-lg active:scale-[0.98]',
+          'bg-neutral-900 text-white hover:bg-neutral-800',
 
-        // Secondary - Neutral elegant
+        // Secondary - warm subtle fill
         secondary:
-          'bg-neutral-800 text-white shadow-soft hover:bg-neutral-900 hover:shadow-soft-lg active:scale-[0.98]',
+          'bg-neutral-100 text-neutral-900 hover:bg-neutral-200',
 
-        // Outline - Sophisticated border
+        // Outline - thin warm border
         outline:
-          'border-2 border-neutral-300 bg-transparent text-neutral-900 hover:bg-neutral-50 hover:border-neutral-400',
+          'border border-neutral-300 bg-transparent text-neutral-900 hover:bg-neutral-100',
 
         // Ghost - Minimal, text-focused
         ghost:
-          'text-neutral-900 hover:bg-neutral-100 active:bg-neutral-200',
+          'text-neutral-900 hover:bg-neutral-100',
 
         // Link - Underlined text style
         link:
-          'text-primary-600 underline-offset-4 hover:underline',
+          'text-neutral-900 underline-offset-4 hover:underline',
       },
       size: {
         sm: 'h-9 px-4 text-sm',

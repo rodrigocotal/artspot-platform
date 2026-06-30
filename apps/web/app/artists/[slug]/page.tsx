@@ -45,7 +45,7 @@ export default function ArtistDetailPage() {
       <Section spacing="lg">
         <Container>
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-neutral-400 animate-spin" />
           </div>
         </Container>
       </Section>
@@ -75,12 +75,12 @@ export default function ArtistDetailPage() {
       {/* Breadcrumb */}
       <Section spacing="sm" background="white" className="border-b border-neutral-200">
         <Container size="xl">
-          <div className="flex items-center gap-2 text-sm text-neutral-600">
-            <Link href="/" className="hover:text-neutral-900">Home</Link>
-            <span>/</span>
-            <Link href="/artists" className="hover:text-neutral-900">Artists</Link>
-            <span>/</span>
-            <span className="text-neutral-900">{artist.name}</span>
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.15em] text-neutral-500">
+            <Link href="/" className="hover:text-neutral-900 transition-colors">Home</Link>
+            <span className="text-neutral-300">/</span>
+            <Link href="/artists" className="hover:text-neutral-900 transition-colors">Artists</Link>
+            <span className="text-neutral-300">/</span>
+            <span className="text-neutral-900 truncate">{artist.name}</span>
           </div>
         </Container>
       </Section>
@@ -90,17 +90,17 @@ export default function ArtistDetailPage() {
         <Container size="xl">
           <Link
             href="/artists"
-            className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.15em] text-neutral-500 hover:text-neutral-900 transition-colors mb-12"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" />
             Back to Artists
           </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
             {/* Left Column - Profile */}
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1 space-y-8">
               {/* Profile Image */}
-              <div className="relative overflow-hidden rounded-2xl bg-neutral-100 aspect-square">
+              <div className="relative overflow-hidden rounded-md bg-neutral-100 aspect-square border border-neutral-200">
                 <Image
                   src={profileImageUrl}
                   alt={artist.name}
@@ -115,18 +115,18 @@ export default function ArtistDetailPage() {
                   <div className="absolute top-4 right-4 flex flex-col gap-2">
                     {artist.featured && (
                       <div
-                        className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center shadow-lg"
+                        className="w-9 h-9 rounded-full bg-primary-500 flex items-center justify-center"
                         title="Featured Artist"
                       >
-                        <Star className="w-5 h-5 text-white fill-white" />
+                        <Star className="w-4 h-4 text-white fill-white" />
                       </div>
                     )}
                     {artist.verified && (
                       <div
-                        className="w-10 h-10 rounded-full bg-success-500 flex items-center justify-center shadow-lg"
+                        className="w-9 h-9 rounded-full bg-neutral-900 flex items-center justify-center"
                         title="Verified Artist"
                       >
-                        <CheckCircle2 className="w-5 h-5 text-white" />
+                        <CheckCircle2 className="w-4 h-4 text-white" />
                       </div>
                     )}
                   </div>
@@ -134,22 +134,22 @@ export default function ArtistDetailPage() {
               </div>
 
               {/* Contact Information */}
-              <div className="space-y-4 pt-4">
+              <div className="space-y-4">
                 {artist.location && (
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-neutral-400 mt-0.5" />
+                    <MapPin className="w-4 h-4 text-neutral-400 mt-0.5 shrink-0" />
                     <span className="text-sm text-neutral-700">{artist.location}</span>
                   </div>
                 )}
 
                 {artist.website && (
                   <div className="flex items-start gap-3">
-                    <Globe className="w-5 h-5 text-neutral-400 mt-0.5" />
+                    <Globe className="w-4 h-4 text-neutral-400 mt-0.5 shrink-0" />
                     <a
                       href={artist.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-primary-600 hover:text-primary-700 transition-colors"
+                      className="text-sm text-neutral-900 hover:text-primary-600 transition-colors"
                     >
                       Visit Website
                     </a>
@@ -158,10 +158,10 @@ export default function ArtistDetailPage() {
 
                 {artist.email && (
                   <div className="flex items-start gap-3">
-                    <Mail className="w-5 h-5 text-neutral-400 mt-0.5" />
+                    <Mail className="w-4 h-4 text-neutral-400 mt-0.5 shrink-0" />
                     <a
                       href={`mailto:${artist.email}`}
-                      className="text-sm text-primary-600 hover:text-primary-700 transition-colors"
+                      className="text-sm text-neutral-900 hover:text-primary-600 transition-colors"
                     >
                       Contact Artist
                     </a>
@@ -170,25 +170,30 @@ export default function ArtistDetailPage() {
               </div>
 
               {/* Artwork Count */}
-              <div className="pt-4 border-t border-neutral-200">
-                <p className="text-sm text-neutral-500">
+              <div className="pt-6 border-t border-neutral-200">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-500">
                   {artworkCount} {artworkCount === 1 ? 'artwork' : 'artworks'} available
                 </p>
               </div>
             </div>
 
             {/* Right Column - Bio and Works */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-12">
               {/* Artist Name and Bio */}
               <div>
-                <h1 className="text-display font-serif text-neutral-900 mb-6">
+                <p className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-500 mb-3">
+                  Artist
+                </p>
+                <h1 className="text-4xl md:text-5xl font-serif text-neutral-900 leading-[1.1]">
                   {artist.name}
                 </h1>
 
                 {artist.bio && (
-                  <div className="space-y-4">
-                    <h2 className="text-heading-4 font-serif text-neutral-900">Biography</h2>
-                    <p className="text-body text-neutral-600 leading-relaxed whitespace-pre-line">
+                  <div className="mt-8 space-y-4">
+                    <h2 className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-500">
+                      Biography
+                    </h2>
+                    <p className="text-base text-neutral-600 leading-relaxed whitespace-pre-line">
                       {artist.bio}
                     </p>
                   </div>
@@ -197,9 +202,11 @@ export default function ArtistDetailPage() {
 
               {/* Artist Statement */}
               {artist.statement && (
-                <div className="pt-6 border-t border-neutral-200 space-y-4">
-                  <h2 className="text-heading-4 font-serif text-neutral-900">Artist Statement</h2>
-                  <p className="text-body text-neutral-600 leading-relaxed whitespace-pre-line">
+                <div className="pt-8 border-t border-neutral-200 space-y-4">
+                  <h2 className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-500">
+                    Artist Statement
+                  </h2>
+                  <p className="text-base text-neutral-600 leading-relaxed whitespace-pre-line">
                     {artist.statement}
                   </p>
                 </div>
@@ -207,20 +214,27 @@ export default function ArtistDetailPage() {
 
               {/* Artworks */}
               {artist.artworks && artist.artworks.length > 0 && (
-                <div className="pt-6 border-t border-neutral-200 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-heading-3 font-serif text-neutral-900">Artworks</h2>
+                <div className="pt-8 border-t border-neutral-200 space-y-8">
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-500 mb-2">
+                        Gallery
+                      </p>
+                      <h2 className="text-2xl md:text-3xl font-serif text-neutral-900">
+                        Selected Works
+                      </h2>
+                    </div>
                     {artworkCount > artist.artworks.length && (
                       <Link
                         href={`/artworks?artistId=${artist.id}`}
-                        className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                        className="text-[11px] uppercase tracking-[0.15em] text-neutral-500 hover:text-neutral-900 font-medium transition-colors whitespace-nowrap"
                       >
                         View All ({artworkCount})
                       </Link>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                     {artist.artworks.map((artwork) => (
                       <ArtworkCard key={artwork.id} artwork={artwork} />
                     ))}

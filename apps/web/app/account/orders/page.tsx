@@ -60,7 +60,7 @@ export default function OrdersPage() {
     return (
       <Section spacing="lg" background="neutral">
         <Container size="md" className="text-center py-20">
-          <div className="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center mx-auto mb-6">
             <LogIn className="w-8 h-8 text-neutral-400" />
           </div>
           <h1 className="text-heading-1 font-serif text-neutral-900 mb-4">Sign In Required</h1>
@@ -68,7 +68,7 @@ export default function OrdersPage() {
             Please sign in to view your orders.
           </p>
           <Link href="/login">
-            <Button size="lg">Sign In</Button>
+            <Button size="lg" variant="secondary">Sign In</Button>
           </Link>
         </Container>
       </Section>
@@ -93,7 +93,12 @@ export default function OrdersPage() {
   return (
     <Section spacing="lg" background="neutral">
       <Container size="lg">
-        <h1 className="text-display font-serif text-neutral-900 mb-8">Order History</h1>
+        <div className="mb-10">
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-neutral-500">
+            Account
+          </p>
+          <h1 className="text-display font-serif text-neutral-900">Order History</h1>
+        </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -110,13 +115,13 @@ export default function OrdersPage() {
             <p className="text-body-lg text-neutral-600 mb-6">
               Something went wrong while loading your order history. Please try again.
             </p>
-            <Button size="lg" onClick={() => setRetryCount((c) => c + 1)}>
+            <Button size="lg" variant="secondary" onClick={() => setRetryCount((c) => c + 1)}>
               Retry
             </Button>
           </div>
         ) : orders.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center mx-auto mb-6">
               <Package className="w-8 h-8 text-neutral-400" />
             </div>
             <h2 className="text-heading-2 font-serif text-neutral-900 mb-4">No Orders Yet</h2>
@@ -124,7 +129,7 @@ export default function OrdersPage() {
               Your order history will appear here.
             </p>
             <Link href="/artworks">
-              <Button size="lg">Browse Artworks</Button>
+              <Button size="lg" variant="secondary">Browse Artworks</Button>
             </Link>
           </div>
         ) : (
@@ -135,7 +140,7 @@ export default function OrdersPage() {
                 <Link
                   key={order.id}
                   href={`/account/orders/${order.id}`}
-                  className="block bg-white rounded-xl p-6 hover:shadow-md transition-shadow"
+                  className="block bg-white rounded-md border border-neutral-200 p-6 hover:border-neutral-300 transition-colors"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Cormorant_Garamond, Inter } from 'next/font/google';
+import { Playfair_Display, Inter } from 'next/font/google';
 import { Header, Footer } from '@/components/layout';
 import { SkipToContent } from '@/components/layout/skip-to-content';
 import { SessionProvider } from '@/components/providers/session-provider';
@@ -8,15 +8,17 @@ import { CartProvider } from '@/components/providers/cart-provider';
 import { ToastProvider } from '@/components/ui/toast';
 import './globals.css';
 
-const serif = Cormorant_Garamond({
+const serif = Playfair_Display({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
   variable: '--font-serif',
   display: 'swap',
 });
 
 const sans = Inter({
   subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
   variable: '--font-sans',
   display: 'swap',
 });

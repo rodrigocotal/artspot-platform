@@ -44,6 +44,7 @@ const styleOptions = [
 ];
 
 const CMS_DEFAULTS = {
+  label: 'Gallery',
   headline: 'Explore Artworks',
   subtitle: 'Discover museum-quality art from exceptional artists',
   emptyMessage: 'No artworks found matching your filters.',
@@ -140,26 +141,31 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
       <Section spacing="lg" background="neutral">
         <Container size="xl">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-display font-serif text-neutral-900 mb-2">
+          <div className="mb-10 md:mb-14 border-b border-neutral-200 pb-8">
+            <p className="mb-4 text-xs font-medium uppercase tracking-widest text-neutral-500">
+              {merged.label}
+            </p>
+            <h1 className="text-display font-serif text-neutral-900">
               {merged.headline}
             </h1>
-            <p className="text-body-lg text-neutral-600">
+            <p className="mt-4 max-w-2xl text-body-lg text-neutral-600">
               {merged.subtitle}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-x-10 gap-y-10">
             {/* Sidebar Filters */}
             <aside className="lg:col-span-1">
-              <div className="bg-white rounded-lg p-6 space-y-6 sticky top-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-heading-4 font-serif text-neutral-900">Filters</h2>
+              <div className="space-y-6 sticky top-24">
+                <div className="flex items-center justify-between border-b border-neutral-200 pb-4">
+                  <h2 className="text-xs font-medium uppercase tracking-widest text-neutral-500">
+                    Filters
+                  </h2>
                   {activeFilters.length > 0 && (
                     <button
                       type="button"
                       onClick={clearAllFilters}
-                      className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                      className="text-xs font-medium text-neutral-500 underline underline-offset-4 hover:text-neutral-900"
                     >
                       Clear all
                     </button>
@@ -193,9 +199,9 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
             </aside>
 
             {/* Main Content */}
-            <div className="lg:col-span-3 space-y-6">
+            <div className="lg:col-span-3 space-y-8">
               {/* Search and Sort Bar */}
-              <div className="bg-white rounded-lg p-4 space-y-4">
+              <div className="space-y-4 border-b border-neutral-200 pb-6">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <SearchInput
                     value={search}
@@ -229,7 +235,7 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
               </div>
 
               {/* Results Summary */}
-              <div className="flex items-center justify-between text-sm text-neutral-600">
+              <div className="flex items-center justify-between text-sm text-neutral-500">
                 <p>
                   {isLoading ? (
                     'Loading...'
@@ -273,7 +279,7 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
                       </Button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
                       {artworks.map((artwork, index) => (
                         <ArtworkCard
                           key={artwork.id}
@@ -286,7 +292,7 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
 
                   {/* Pagination */}
                   {pagination.totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 pt-8">
+                    <div className="flex items-center justify-center gap-2 border-t border-neutral-200 pt-10 mt-4">
                       <Button
                         variant="outline"
                         onClick={() => setPage((p) => Math.max(1, p - 1))}

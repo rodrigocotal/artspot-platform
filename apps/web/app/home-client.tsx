@@ -245,18 +245,33 @@ function SectionImage({
 export function HomePageClient({ content }: { content: HomeContent | null }) {
   const c = content ?? {};
 
-  // Accept both new (admin-facing) and legacy (pre-existing in DB) CTA keys
-  const primaryText = c.heroCtaText ?? c.heroPrimaryCta ?? DEFAULTS.heroCtaText;
-  const primaryLink = c.heroCtaLink ?? c.heroPrimaryCtaLink ?? DEFAULTS.heroCtaLink;
-  const secondaryText =
-    c.heroSecondaryCtaText ?? c.heroSecondaryCta ?? DEFAULTS.heroSecondaryCtaText;
-  const secondaryLink = c.heroSecondaryCtaLink ?? DEFAULTS.heroSecondaryCtaLink;
+  // CMS values authored for the prior design may be empty strings (treat as
+  // unset) or hold long descriptive copy in CTA fields (never render a
+  // paragraph as a button). pick() = first non-blank; ctaLabel() also caps
+  // length so a misconfigured CTA falls back to the default.
+  const pick = (...vals: (string | undefined)[]) => {
+    for (const v of vals) {
+      const t = typeof v === 'string' ? v.trim() : '';
+      if (t) return t;
+    }
+    return '';
+  };
+  const ctaLabel = (...vals: (string | undefined)[]) => {
+    const t = pick(...vals);
+    return t.length > 0 && t.length <= 40 ? t : '';
+  };
 
-  const eyebrow = c.heroBadgeText ?? DEFAULTS.heroBadgeText;
-  const headline = c.heroHeadline ?? DEFAULTS.heroHeadline;
-  const accent = c.heroAccent ?? DEFAULTS.heroAccent;
-  const byline = c.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const trustCopy = c.heroTrustCopy ?? DEFAULTS.heroTrustCopy;
+  const primaryText = ctaLabel(c.heroCtaText, c.heroPrimaryCta) || DEFAULTS.heroCtaText;
+  const primaryLink = pick(c.heroCtaLink, c.heroPrimaryCtaLink) || DEFAULTS.heroCtaLink;
+  const secondaryText =
+    ctaLabel(c.heroSecondaryCtaText, c.heroSecondaryCta) || DEFAULTS.heroSecondaryCtaText;
+  const secondaryLink = pick(c.heroSecondaryCtaLink) || DEFAULTS.heroSecondaryCtaLink;
+
+  const eyebrow = pick(c.heroBadgeText) || DEFAULTS.heroBadgeText;
+  const headline = pick(c.heroHeadline) || DEFAULTS.heroHeadline;
+  const accent = pick(c.heroAccent) || DEFAULTS.heroAccent;
+  const byline = pick(c.heroSubtitle) || DEFAULTS.heroSubtitle;
+  const trustCopy = pick(c.heroTrustCopy) || DEFAULTS.heroTrustCopy;
 
   const worksLabel = c.worksLabel ?? DEFAULTS.worksLabel;
   const worksHeadline = c.worksHeadline ?? DEFAULTS.worksHeadline;
@@ -506,9 +521,11 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
               </ArrowLink>
             </div>
 
-            <div className="flex aspect-[4/5] w-full items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-gradient-to-br from-neutral-200 via-neutral-100 to-neutral-50">
-              <span className="font-serif text-2xl italic text-neutral-400">{aboutHeadline}</span>
-            </div>
+            <SectionImage
+              artwork={artworks[2]}
+              fallbackLabel={aboutHeadline}
+              className="aspect-[4/5] w-full"
+            />
           </div>
         </Container>
       </Section>

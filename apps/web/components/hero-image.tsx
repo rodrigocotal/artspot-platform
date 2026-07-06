@@ -1,9 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ImageFieldValue } from '@/lib/seo';
+import { cn } from '@/lib/utils';
 
 interface HeroImageProps {
   image: ImageFieldValue | null | undefined;
+  className?: string;
 }
 
 /**
@@ -15,7 +17,7 @@ function safeLinkUrl(url: string): string | null {
   return /^(https?:|mailto:|\/)/i.test(url.trim()) ? url : null;
 }
 
-export function HeroImage({ image }: HeroImageProps) {
+export function HeroImage({ image, className }: HeroImageProps) {
   if (!image || !image.url) return null;
   if (image.visible === false) return null;
 
@@ -31,7 +33,7 @@ export function HeroImage({ image }: HeroImageProps) {
   );
 
   const body = (
-    <figure className="mx-auto w-[78%] max-w-4xl">
+    <figure className={cn('mx-auto w-[78%] max-w-4xl', className)}>
       <div className="aspect-video overflow-hidden">{img}</div>
       {image.caption && (
         <figcaption className="mt-3 text-center text-sm font-serif text-neutral-500">

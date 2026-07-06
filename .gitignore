@@ -45,6 +45,9 @@ yarn-error.log*
 # Turborepo
 .turbo
 
+# Local dependency backups
+.dependency-backups/
+
 # IDEs
 .idea/
 .vscode/

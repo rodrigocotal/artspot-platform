@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
@@ -21,11 +22,15 @@ import type { NavItem } from './header-nav';
 
 interface HeaderClientProps {
   logoText: string;
+  logoImage?: {
+    url: string;
+    alt?: string;
+  } | null;
   navItems: NavItem[];
   className?: string;
 }
 
-export function HeaderClient({ logoText, navItems, className }: HeaderClientProps) {
+export function HeaderClient({ logoText, logoImage, navItems, className }: HeaderClientProps) {
   const { data: session } = useSession();
   const { itemCount } = useCart();
   const router = useRouter();
@@ -103,7 +108,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80',
+        'sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90',
         className
       )}
     >
@@ -113,26 +118,23 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
           <div className="flex-shrink-0">
             <Link
               href="/"
-              className="group flex items-center gap-2.5"
+              className="group flex items-center"
               aria-label={`${logoText} — home`}
             >
-              {/* Gold monogram mark */}
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6 text-primary-600"
-                aria-hidden="true"
-              >
-                <path d="M4 20 L12 4 L20 20" />
-                <path d="M7.5 14 H16.5" />
-              </svg>
-              <span className="text-2xl font-serif font-semibold tracking-tight text-neutral-900 transition-colors group-hover:text-neutral-700">
-                {logoText}
-              </span>
+              {logoImage?.url ? (
+                <Image
+                  src={logoImage.url}
+                  alt={logoImage.alt || logoText}
+                  width={132}
+                  height={50}
+                  priority
+                  className="h-auto w-[126px] object-contain"
+                />
+              ) : (
+                <span className="text-2xl font-serif font-semibold tracking-tight text-neutral-900 transition-colors group-hover:text-neutral-700">
+                  {logoText}
+                </span>
+              )}
             </Link>
           </div>
 
@@ -148,10 +150,10 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
                 <Link
                   href={item.href}
                   className={cn(
-                    'inline-flex items-center gap-1 text-sm font-sans transition-colors',
+                    'inline-flex items-center gap-1 text-sm font-medium text-neutral-900 transition-colors hover:text-neutral-500',
                     isActive(item.href)
                       ? 'text-neutral-900'
-                      : 'text-neutral-600 hover:text-neutral-900',
+                      : 'text-neutral-700 hover:text-neutral-900',
                     activeDropdown === item.label && 'text-neutral-900'
                   )}
                   aria-haspopup={item.dropdown ? 'true' : undefined}
@@ -323,7 +325,7 @@ export function HeaderClient({ logoText, navItems, className }: HeaderClientProp
             {/* Private Viewing CTA */}
             <Link
               href="/contact"
-              className="hidden lg:inline-flex items-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+              className="hidden lg:inline-flex h-11 items-center bg-neutral-950 px-6 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
             >
               Private Viewing
             </Link>

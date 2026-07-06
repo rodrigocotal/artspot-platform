@@ -1,16 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, CircleCheck } from 'lucide-react';
-import { Button, ArtworkGridSkeleton } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { Container, Section } from '@/components/layout';
-import { ArtworkCard } from '@/components/artwork';
 import { HeroImage } from '@/components/hero-image';
-import { apiClient, type Artwork } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import type { ImageFieldValue } from '@/lib/seo';
+import {
+  ARTALDO_HOME_DEFAULTS,
+  ARTALDO_HOME_IMAGES,
+  ARTALDO_WORKS,
+  type ArtAldoReferenceWork,
+} from '@/lib/artaldo-reference';
 
 interface Feature {
   icon: string;
@@ -22,6 +25,8 @@ interface FeatureCard {
   title: string;
   description: string;
 }
+
+type EditableBullet = string | { value?: string };
 
 export interface HomeContent {
   // Hero
@@ -52,7 +57,7 @@ export interface HomeContent {
   advisoryLabel?: string;
   advisoryHeadline?: string;
   advisoryBody?: string;
-  advisoryBullets?: string[];
+  advisoryBullets?: EditableBullet[];
   advisoryCtaText?: string;
   advisoryCtaLink?: string;
 
@@ -78,69 +83,7 @@ export interface HomeContent {
 }
 
 const DEFAULTS = {
-  heroBadgeText: 'Contemporary & Latin American Art',
-  heroHeadline: 'Modern & Contemporary Art —',
-  heroAccent: 'Now Online',
-  heroSubtitle: 'Aldo Castillo | Art Dealer & Curatorial Director',
-  heroTrustCopy: 'Secure art acquisition. Trusted provenance. Guaranteed authenticity.',
-  heroCtaText: 'Explore Artworks',
-  heroCtaLink: '/artworks',
-  heroSecondaryCtaText: 'Schedule a Private Consultation',
-  heroSecondaryCtaLink: '/contact',
-
-  worksLabel: 'Gallery',
-  worksHeadline: 'Available Works',
-
-  highlightsLabel: 'Highlights',
-  highlightsHeadline: 'Latin American Art',
-  highlightsBody:
-    'A focused selection of modern and contemporary works by leading Latin American artists — each piece chosen for its presence, provenance, and lasting cultural significance.',
-
-  advisoryLabel: 'Advisory Services',
-  advisoryHeadline: 'Personal Art Advisory Services',
-  advisoryBody:
-    "Whether you're building your first collection or expanding an established one, Aldo provides personalized guidance to help you acquire works that align with your vision, space, and investment goals.",
-  advisoryBullets: [
-    'Private collecting guidance',
-    'Collection development strategy',
-    'Artwork sourcing and acquisition',
-    'Virtual and in-person consultations',
-  ],
-  advisoryCtaText: 'Request Art Advisory',
-  advisoryCtaLink: '/collector-services',
-
-  designLabel: 'Design Professionals',
-  designHeadline: 'Art Sourcing for Design Professionals',
-  designBody:
-    'Interior designers, architects, and hospitality professionals trust ArtAldo for curated artwork recommendations, project-specific sourcing, and seamless coordination.',
-  designFeatures: [
-    {
-      title: 'Curated Recommendations',
-      description: 'Works selected for your specific project requirements',
-    },
-    {
-      title: 'Scale & Color Matching',
-      description: 'Technical specifications for seamless design integration',
-    },
-    {
-      title: 'Installation Support',
-      description: 'Professional handling and placement coordination',
-    },
-    {
-      title: 'Project Consultation',
-      description: 'Dedicated support from brief to installation',
-    },
-  ],
-  designCtaText: 'Start a Design Project',
-  designCtaLink: '/contact',
-
-  aboutLabel: 'About',
-  aboutHeadline: 'Aldo Castillo',
-  aboutBody:
-    'For over three decades, Aldo Castillo has championed modern and contemporary art with a particular devotion to Latin American masters. As a dealer and curatorial director, he brings museum-level expertise and a deeply personal approach to every acquisition — guiding collectors with honesty, scholarship, and trust.',
-  aboutCtaText: 'Learn About Aldo',
-  aboutCtaLink: '/about',
-
+  ...ARTALDO_HOME_DEFAULTS,
   // Legacy defaults (preserved for CMS/admin compatibility)
   featuresHeadline: 'Why Collectors Choose ArtAldo',
   featuresSubtitle: 'A premium platform designed for serious art collectors',
@@ -168,7 +111,7 @@ const DEFAULTS = {
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-xs font-medium uppercase tracking-widest text-neutral-500">{children}</p>
+    <p className="text-xs font-medium uppercase tracking-[0.22em] text-neutral-500">{children}</p>
   );
 }
 
@@ -198,30 +141,23 @@ function ArrowLink({
   );
 }
 
-/** Section visual: a real artwork image when available, else a tasteful neutral block. */
 function SectionImage({
-  artwork,
+  src,
+  alt,
   fallbackLabel,
   className,
 }: {
-  artwork?: Artwork;
+  src?: string;
+  alt?: string;
   fallbackLabel: string;
   className?: string;
 }) {
-  const image = artwork?.images?.[0];
-  const url = image?.secureUrl || image?.url;
-
-  if (url) {
+  if (src) {
     return (
-      <div
-        className={cn(
-          'relative overflow-hidden rounded-md border border-neutral-200 bg-neutral-100',
-          className
-        )}
-      >
+      <div className={cn('relative overflow-hidden bg-neutral-100', className)}>
         <Image
-          src={url}
-          alt={artwork?.title ?? ''}
+          src={src}
+          alt={alt || fallbackLabel}
           fill
           sizes="(max-width: 1024px) 100vw, 50vw"
           className="object-cover"
@@ -233,12 +169,72 @@ function SectionImage({
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-md border border-neutral-200 bg-gradient-to-br from-neutral-200 via-neutral-100 to-neutral-50',
+        'flex items-center justify-center border border-neutral-200 bg-neutral-50',
         className
       )}
     >
       <span className="font-serif text-xl italic text-neutral-400">{fallbackLabel}</span>
     </div>
+  );
+}
+
+function ReferenceArtworkCard({
+  work,
+  priority = false,
+}: {
+  work: ArtAldoReferenceWork;
+  priority?: boolean;
+}) {
+  return (
+    <article className="group">
+      <Link href={work.href} className="block">
+        <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100">
+          <Image
+            src={work.imageUrl}
+            alt={work.imageAlt}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03]"
+            priority={priority}
+          />
+        </div>
+        <div className="mt-5 space-y-1.5">
+          <div className="flex items-start justify-between gap-4">
+            <h3 className="font-sans text-sm font-semibold text-neutral-950">{work.artistName}</h3>
+            <span className="mt-1 flex shrink-0 items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#153d0b]" aria-hidden="true" />
+              {work.status}
+            </span>
+          </div>
+          <p className="font-serif text-sm italic text-neutral-600">
+            {work.title}, {work.year}
+          </p>
+          <p className="text-xs text-neutral-600">{work.medium}</p>
+          <p className="text-xs text-neutral-500">{work.dimensions}</p>
+          <p className="pt-1 text-sm font-semibold text-neutral-950">{work.price}</p>
+        </div>
+      </Link>
+      <div className="mt-4 flex flex-wrap gap-2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+        <Link
+          href={work.href}
+          className="border border-neutral-300 px-3 py-2 text-xs font-medium text-neutral-950 hover:bg-neutral-950 hover:text-white"
+        >
+          View Details
+        </Link>
+        <Link
+          href="/contact"
+          className="border border-neutral-300 px-3 py-2 text-xs font-medium text-neutral-950 hover:bg-neutral-950 hover:text-white"
+        >
+          Inquire
+        </Link>
+        <Link
+          href="/contact"
+          className="border border-neutral-300 px-3 py-2 text-xs font-medium text-neutral-950 hover:bg-neutral-950 hover:text-white"
+        >
+          Request Photos
+        </Link>
+      </div>
+    </article>
   );
 }
 
@@ -260,6 +256,13 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
     const t = pick(...vals);
     return t.length > 0 && t.length <= 40 ? t : '';
   };
+  const bulletList = (value: EditableBullet[] | undefined, fallback: string[]) => {
+    const source = Array.isArray(value) && value.length > 0 ? value : fallback;
+    return source
+      .map((item) => (typeof item === 'string' ? item : item.value || ''))
+      .map((item) => item.trim())
+      .filter(Boolean);
+  };
 
   const primaryText = ctaLabel(c.heroCtaText, c.heroPrimaryCta) || DEFAULTS.heroCtaText;
   const primaryLink = pick(c.heroCtaLink, c.heroPrimaryCtaLink) || DEFAULTS.heroCtaLink;
@@ -273,86 +276,78 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
   const byline = pick(c.heroSubtitle) || DEFAULTS.heroSubtitle;
   const trustCopy = pick(c.heroTrustCopy) || DEFAULTS.heroTrustCopy;
 
-  const worksLabel = c.worksLabel ?? DEFAULTS.worksLabel;
-  const worksHeadline = c.worksHeadline ?? DEFAULTS.worksHeadline;
+  const worksLabel = pick(c.worksLabel) || DEFAULTS.worksLabel;
+  const worksHeadline = pick(c.worksHeadline) || DEFAULTS.worksHeadline;
 
-  const highlightsLabel = c.highlightsLabel ?? DEFAULTS.highlightsLabel;
-  const highlightsHeadline = c.highlightsHeadline ?? DEFAULTS.highlightsHeadline;
-  const highlightsBody = c.highlightsBody ?? DEFAULTS.highlightsBody;
+  const highlightsLabel = pick(c.highlightsLabel) || DEFAULTS.highlightsLabel;
+  const highlightsHeadline = pick(c.highlightsHeadline) || DEFAULTS.highlightsHeadline;
+  const highlightsBody = pick(c.highlightsBody) || DEFAULTS.highlightsBody;
 
-  const advisoryLabel = c.advisoryLabel ?? DEFAULTS.advisoryLabel;
-  const advisoryHeadline = c.advisoryHeadline ?? DEFAULTS.advisoryHeadline;
-  const advisoryBody = c.advisoryBody ?? DEFAULTS.advisoryBody;
-  const advisoryBullets = c.advisoryBullets ?? DEFAULTS.advisoryBullets;
-  const advisoryCtaText = c.advisoryCtaText ?? DEFAULTS.advisoryCtaText;
-  const advisoryCtaLink = c.advisoryCtaLink ?? DEFAULTS.advisoryCtaLink;
+  const advisoryLabel = pick(c.advisoryLabel) || DEFAULTS.advisoryLabel;
+  const advisoryHeadline = pick(c.advisoryHeadline) || DEFAULTS.advisoryHeadline;
+  const advisoryBody = pick(c.advisoryBody) || DEFAULTS.advisoryBody;
+  const advisoryBullets = bulletList(c.advisoryBullets, DEFAULTS.advisoryBullets);
+  const advisoryCtaText = pick(c.advisoryCtaText) || DEFAULTS.advisoryCtaText;
+  const advisoryCtaLink = pick(c.advisoryCtaLink) || DEFAULTS.advisoryCtaLink;
 
-  const designLabel = c.designLabel ?? DEFAULTS.designLabel;
-  const designHeadline = c.designHeadline ?? DEFAULTS.designHeadline;
-  const designBody = c.designBody ?? DEFAULTS.designBody;
-  const designFeatures = c.designFeatures ?? DEFAULTS.designFeatures;
-  const designCtaText = c.designCtaText ?? DEFAULTS.designCtaText;
-  const designCtaLink = c.designCtaLink ?? DEFAULTS.designCtaLink;
+  const designLabel = pick(c.designLabel) || DEFAULTS.designLabel;
+  const designHeadline = pick(c.designHeadline) || DEFAULTS.designHeadline;
+  const designBody = pick(c.designBody) || DEFAULTS.designBody;
+  const designFeatures =
+    Array.isArray(c.designFeatures) && c.designFeatures.length > 0
+      ? c.designFeatures
+      : DEFAULTS.designFeatures;
+  const designCtaText = pick(c.designCtaText) || DEFAULTS.designCtaText;
+  const designCtaLink = pick(c.designCtaLink) || DEFAULTS.designCtaLink;
 
-  const aboutLabel = c.aboutLabel ?? DEFAULTS.aboutLabel;
-  const aboutHeadline = c.aboutHeadline ?? DEFAULTS.aboutHeadline;
-  const aboutBody = c.aboutBody ?? DEFAULTS.aboutBody;
-  const aboutCtaText = c.aboutCtaText ?? DEFAULTS.aboutCtaText;
-  const aboutCtaLink = c.aboutCtaLink ?? DEFAULTS.aboutCtaLink;
-
-  const [artworks, setArtworks] = useState<Artwork[]>([]);
-  const [loadingArtworks, setLoadingArtworks] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    apiClient
-      .getArtworks({ status: 'AVAILABLE', limit: 6, sortBy: 'createdAt', sortOrder: 'desc' })
-      .then((res) => {
-        if (active) setArtworks(res.data ?? []);
-      })
-      .catch(() => {
-        if (active) setArtworks([]);
-      })
-      .finally(() => {
-        if (active) setLoadingArtworks(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const highlightWorks = artworks.slice(0, 3);
+  const aboutLabel = pick(c.aboutLabel) || DEFAULTS.aboutLabel;
+  const aboutHeadline = pick(c.aboutHeadline) || DEFAULTS.aboutHeadline;
+  const aboutBody = pick(c.aboutBody) || DEFAULTS.aboutBody;
+  const aboutCtaText = pick(c.aboutCtaText) || DEFAULTS.aboutCtaText;
+  const aboutCtaLink = pick(c.aboutCtaLink) || DEFAULTS.aboutCtaLink;
+  const heroImage = c.heroImage?.url ? c.heroImage : DEFAULTS.heroImage;
+  const highlightWorks = [
+    ...ARTALDO_WORKS.slice(0, 3),
+    {
+      artistName: 'Fredy Villamil',
+      title: 'The Second Heartbeat of the Sun',
+      year: '2025',
+      status: 'AVAILABLE' as const,
+      medium: 'Painting',
+      dimensions: '48 × 60 in.',
+      price: '$18,000',
+      imageUrl: '/artaldo/fredy-villamil-second-heartbeat.png',
+      imageAlt: 'The Second Heartbeat of the Sun by Fredy Villamil',
+      href: '/artworks',
+    },
+  ];
 
   return (
     <>
-      {/* 1. Hero */}
-      <Section spacing="xl" background="neutral">
+      <Section spacing="xl" background="white" className="border-b border-neutral-100">
         <Container>
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          <div className="grid items-center gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
             <div className="max-w-xl">
-              <Eyebrow>{eyebrow}</Eyebrow>
-              <h1 className="mt-6 font-serif text-5xl leading-[1.05] text-neutral-900 sm:text-6xl">
-                {headline}
+              <span className="sr-only">{eyebrow}</span>
+              <h1 className="font-serif text-6xl font-medium leading-[0.98] text-neutral-950 sm:text-7xl lg:text-[5.25rem]">
+                {headline}{' '}
                 {accent && (
-                  <>
-                    {' '}
-                    <span className="italic text-primary-600">{accent}</span>
-                  </>
+                  <span className="block italic text-[#d6aa35]">{accent}</span>
                 )}
               </h1>
-              <p className="mt-6 text-lg text-neutral-700">{byline}</p>
+              <p className="mt-8 text-lg text-neutral-700">{byline}</p>
               <p className="mt-3 text-sm text-neutral-500">{trustCopy}</p>
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-8 flex max-w-xs flex-col gap-4 sm:max-w-none sm:flex-row lg:flex-col lg:items-start">
                 {primaryText && primaryLink && (
                   <Link href={primaryLink}>
-                    <Button size="lg" variant="secondary">
+                    <Button size="lg" variant="primary" className="rounded-none px-9 text-base">
                       {primaryText}
                     </Button>
                   </Link>
                 )}
                 {secondaryText && secondaryLink && (
                   <Link href={secondaryLink}>
-                    <Button size="lg" variant="outline">
+                    <Button size="lg" variant="outline" className="rounded-none px-9 text-base">
                       {secondaryText}
                     </Button>
                   </Link>
@@ -361,10 +356,10 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
             </div>
 
             <div>
-              {c.heroImage?.url ? (
-                <HeroImage image={c.heroImage} />
+              {heroImage?.url ? (
+                <HeroImage image={heroImage} className="rounded-none border-0" />
               ) : (
-                <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-gradient-to-br from-neutral-200 via-neutral-100 to-neutral-50">
+                <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden border border-neutral-200 bg-neutral-50">
                   <span className="font-serif text-2xl italic text-neutral-400">ArtAldo</span>
                 </div>
               )}
@@ -373,13 +368,12 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
         </Container>
       </Section>
 
-      {/* 2. Available Works */}
-      <Section background="white">
+      <Section background="neutral" className="bg-[#faf9f7]">
         <Container>
           <div className="flex items-end justify-between gap-4">
             <div>
               <Eyebrow>{worksLabel}</Eyebrow>
-              <h2 className="mt-3 font-serif text-4xl text-neutral-900 sm:text-5xl">
+              <h2 className="mt-3 font-serif text-4xl font-medium text-neutral-950 sm:text-5xl">
                 {worksHeadline}
               </h2>
             </div>
@@ -388,26 +382,23 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
             </ArrowLink>
           </div>
 
-          <div className="mt-12">
-            {loadingArtworks ? (
-              <ArtworkGridSkeleton count={6} />
-            ) : artworks.length > 0 ? (
-              <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-                {artworks.map((art, i) => (
-                  <ArtworkCard key={art.id} artwork={art} priority={i < 3} />
-                ))}
-              </div>
-            ) : null}
+          <div className="mt-14 grid grid-cols-1 gap-x-9 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+            {ARTALDO_WORKS.map((work, index) => (
+              <ReferenceArtworkCard
+                key={`${work.artistName}-${work.title}`}
+                work={work}
+                priority={index < 3}
+              />
+            ))}
           </div>
         </Container>
       </Section>
 
-      {/* 3. Highlights — Latin American Art */}
-      <Section background="neutral">
+      <Section background="white">
         <Container>
           <div className="max-w-2xl">
             <Eyebrow>{highlightsLabel}</Eyebrow>
-            <h2 className="mt-3 font-serif text-4xl text-neutral-900 sm:text-5xl">
+            <h2 className="mt-3 font-serif text-4xl font-medium text-neutral-950 sm:text-5xl">
               {highlightsHeadline}
             </h2>
             <p className="mt-5 leading-relaxed text-neutral-600">{highlightsBody}</p>
@@ -416,32 +407,30 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
             </ArrowLink>
           </div>
 
-          <div className="mt-12">
-            {loadingArtworks ? (
-              <ArtworkGridSkeleton count={3} />
-            ) : highlightWorks.length > 0 ? (
-              <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-                {highlightWorks.map((art) => (
-                  <ArtworkCard key={art.id} artwork={art} />
-                ))}
-              </div>
-            ) : null}
+          <div className="mt-12 grid grid-cols-1 gap-x-9 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
+            {highlightWorks.map((work, index) => (
+              <ReferenceArtworkCard
+                key={`${work.artistName}-${work.title}`}
+                work={work}
+                priority={index < 2}
+              />
+            ))}
           </div>
         </Container>
       </Section>
 
-      {/* 4. Personal Art Advisory Services */}
-      <Section background="white">
+      <Section background="neutral" className="bg-[#faf9f7]">
         <Container>
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <SectionImage
-              artwork={artworks[0]}
+              src={ARTALDO_HOME_IMAGES.advisory}
+              alt="Private gallery viewing"
               fallbackLabel="Personal Advisory"
               className="aspect-[4/5] w-full"
             />
             <div>
               <Eyebrow>{advisoryLabel}</Eyebrow>
-              <h2 className="mt-3 font-serif text-4xl text-neutral-900 sm:text-5xl">
+              <h2 className="mt-3 font-serif text-4xl font-medium text-neutral-950 sm:text-5xl">
                 {advisoryHeadline}
               </h2>
               <p className="mt-5 leading-relaxed text-neutral-600">{advisoryBody}</p>
@@ -467,13 +456,12 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
         </Container>
       </Section>
 
-      {/* 5. Art Sourcing for Design Professionals */}
-      <Section background="neutral">
+      <Section background="white">
         <Container>
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
               <Eyebrow>{designLabel}</Eyebrow>
-              <h2 className="mt-3 font-serif text-4xl text-neutral-900 sm:text-5xl">
+              <h2 className="mt-3 font-serif text-4xl font-medium text-neutral-950 sm:text-5xl">
                 {designHeadline}
               </h2>
               <p className="mt-5 leading-relaxed text-neutral-600">{designBody}</p>
@@ -498,7 +486,8 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
             </div>
 
             <SectionImage
-              artwork={artworks[1]}
+              src={ARTALDO_HOME_IMAGES.design}
+              alt="Enrique Machado, Clouds — Art for luxury interiors"
               fallbackLabel="Design Projects"
               className="aspect-[4/5] w-full"
             />
@@ -506,23 +495,27 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
         </Container>
       </Section>
 
-      {/* 6. About Aldo */}
-      <Section background="white">
+      <Section background="neutral" className="bg-[#faf9f7]">
         <Container>
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div className="max-w-xl">
               <Eyebrow>{aboutLabel}</Eyebrow>
-              <h2 className="mt-3 font-serif text-4xl text-neutral-900 sm:text-5xl">
+              <h2 className="mt-3 font-serif text-4xl font-medium text-neutral-950 sm:text-5xl">
                 {aboutHeadline}
               </h2>
-              <p className="mt-5 leading-relaxed text-neutral-600">{aboutBody}</p>
+              <div className="mt-5 space-y-5 leading-relaxed text-neutral-600">
+                {aboutBody.split('\n\n').map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
               <ArrowLink href={aboutCtaLink} className="mt-8">
                 {aboutCtaText}
               </ArrowLink>
             </div>
 
             <SectionImage
-              artwork={artworks[2]}
+              src={ARTALDO_HOME_IMAGES.about}
+              alt="Aldo Castillo at gallery opening"
               fallbackLabel={aboutHeadline}
               className="aspect-[4/5] w-full"
             />

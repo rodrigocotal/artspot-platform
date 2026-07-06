@@ -1,39 +1,40 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Instagram, Linkedin } from 'lucide-react';
 import { Container } from './container';
 import { NewsletterForm } from './newsletter-form';
 import { fetchCmsPage } from '@/lib/page-metadata';
+import { ARTALDO_SITE_SETTINGS } from '@/lib/artaldo-reference';
 
 const DEFAULT_NAVIGATION = {
   explore: [
-    { label: 'Paintings', href: '/artworks?medium=painting' },
-    { label: 'Sculpture', href: '/artworks?medium=sculpture' },
-    { label: 'Photography', href: '/artworks?medium=photography' },
-    { label: 'Works on Paper', href: '/artworks?medium=works-on-paper' },
+    { label: 'All Artworks', href: '/artworks' },
     { label: 'New Arrivals', href: '/collections/new-arrivals' },
+    { label: 'Sculpture', href: '/artworks?medium=sculpture' },
+    { label: 'Paintings', href: '/artworks?medium=painting' },
+    { label: 'Photography', href: '/artworks?medium=photography' },
   ],
   artists: [
-    { label: 'Browse All Artists', href: '/artists' },
+    { label: 'Browse Artists', href: '/artists' },
     { label: 'Featured Artists', href: '/artists/featured' },
-    { label: 'Collections', href: '/collections' },
-    { label: 'Featured Art', href: '/collections/featured-art' },
-    { label: 'Public Art', href: '/collections/public-art' },
+    { label: 'Latin American Art', href: '/collections' },
   ],
   services: [
-    { label: 'Collector Services', href: '/collector-services' },
-    { label: 'Contact Us', href: '/contact' },
+    { label: 'Advisory', href: '/collector-services' },
+    { label: 'Private Viewing', href: '/contact' },
+    { label: 'Design Professionals', href: '/contact' },
   ],
   company: [
-    { label: 'Discover', href: '/discover' },
-    { label: 'Editorial', href: '/discover/editorial' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' },
   ],
 };
 
 const DEFAULTS = {
   brandName: 'ArtAldo',
-  brandDescription:
-    'Elevating the experience of collecting art online. A curated marketplace for museum-quality artworks by exceptional artists.',
-  newsletterLabel: 'Stay Informed',
+  brandDescription: ARTALDO_SITE_SETTINGS.footerBrandDescription,
+  logoImage: ARTALDO_SITE_SETTINGS.logoImage,
+  newsletterLabel: 'Join the Collector List',
   copyrightName: 'ArtAldo',
   footerNavigation: DEFAULT_NAVIGATION,
 };
@@ -49,7 +50,7 @@ export async function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-neutral-900 text-neutral-300">
+    <footer className="bg-neutral-950 text-neutral-300">
       {/* Newsletter band */}
       <Container className="py-16 lg:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 lg:items-center">
@@ -58,8 +59,8 @@ export async function Footer() {
               {content.newsletterLabel}
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-neutral-400">
-              Receive early access to new arrivals, private viewing invitations,
-              and curated selections.
+              Receive early access to new arrivals, private viewing invitations, and Aldo&apos;s
+              curated selections.
             </p>
           </div>
           <div className="lg:pl-8">
@@ -75,13 +76,17 @@ export async function Footer() {
             {/* Brand column */}
             <div className="lg:col-span-2 space-y-6">
               <Link href="/" className="inline-flex items-center gap-2.5">
-                <span
-                  aria-hidden="true"
-                  className="inline-block h-2 w-2 rounded-sm bg-primary-500"
-                />
-                <span className="font-serif text-2xl text-white">
-                  {content.brandName}
-                </span>
+                {content.logoImage?.url ? (
+                  <Image
+                    src={content.logoImage.url}
+                    alt={content.logoImage.alt || content.brandName}
+                    width={132}
+                    height={50}
+                    className="h-auto w-[126px] brightness-0 invert"
+                  />
+                ) : (
+                  <span className="font-serif text-2xl text-white">{content.brandName}</span>
+                )}
               </Link>
               <p className="max-w-xs text-sm leading-relaxed text-neutral-400">
                 {content.brandDescription}

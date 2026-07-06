@@ -1,34 +1,25 @@
-import express, { Express } from 'express';
+import express, { Express, RequestHandler } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { config } from './config/environment';
 import { errorHandler } from './middleware/error-handler';
 import healthRouter from './routes/health';
-import uploadRouter from './routes/upload';
-import artworksRouter from './routes/artworks';
-import artistsRouter from './routes/artists';
-import collectionsRouter from './routes/collections';
-import authRouter from './routes/auth';
-import favoritesRouter from './routes/favorites';
-import inquiriesRouter from './routes/inquiries';
-import contactRouter from './routes/contact';
-import webhooksRouter from './routes/webhooks';
-import articlesRouter from './routes/articles';
-import pageContentsRouter from './routes/page-contents';
-import cartRouter from './routes/cart';
-import ordersRouter from './routes/orders';
-import adminRouter from './routes/admin';
-import docsRouter from './routes/docs';
-import { initializeCloudinary } from './config/cloudinary';
+import pagePublicRouter from './routes/page-public';
 import { authLimiter, inquiryLimiter, contactLimiter, generalLimiter } from './middleware/rate-limit';
 
-// Initialize Cloudinary (skip in test environment)
-if (config.nodeEnv !== 'test') {
-  initializeCloudinary();
-}
-
 const app: Express = express();
+
+const lazyRoute = (loadRouter: () => Promise<{ default: RequestHandler }>): RequestHandler => {
+  return async (req, res, next) => {
+    try {
+      const router = await loadRouter();
+      return router.default(req, res, next);
+    } catch (error) {
+      return next(error);
+    }
+  };
+};
 
 // Trust the App Runner / load-balancer proxy so req.ip is the real client IP
 // (from X-Forwarded-For), not the proxy's link-local address. Without this,
@@ -75,22 +66,23 @@ if (config.nodeEnv !== 'test') {
 }
 
 // Routes
-app.use('/docs', docsRouter);
+app.use('/docs', lazyRoute(() => import('./routes/docs')));
 app.use('/health', healthRouter);
-app.use('/auth', authRouter);
-app.use('/upload', uploadRouter);
-app.use('/artworks', artworksRouter);
-app.use('/artists', artistsRouter);
-app.use('/collections', collectionsRouter);
-app.use('/favorites', favoritesRouter);
-app.use('/inquiries', inquiriesRouter);
-app.use('/contact', contactRouter);
-app.use('/webhooks', webhooksRouter);
-app.use('/articles', articlesRouter);
-app.use('/pages', pageContentsRouter);
-app.use('/cart', cartRouter);
-app.use('/orders', ordersRouter);
-app.use('/admin', adminRouter);
+app.use('/auth', lazyRoute(() => import('./routes/auth')));
+app.use('/upload', lazyRoute(() => import('./routes/upload')));
+app.use('/artworks', lazyRoute(() => import('./routes/artworks')));
+app.use('/artists', lazyRoute(() => import('./routes/artists')));
+app.use('/collections', lazyRoute(() => import('./routes/collections')));
+app.use('/favorites', lazyRoute(() => import('./routes/favorites')));
+app.use('/inquiries', lazyRoute(() => import('./routes/inquiries')));
+app.use('/contact', lazyRoute(() => import('./routes/contact')));
+app.use('/webhooks', lazyRoute(() => import('./routes/webhooks')));
+app.use('/articles', lazyRoute(() => import('./routes/articles')));
+app.use('/pages', pagePublicRouter);
+app.use('/pages', lazyRoute(() => import('./routes/page-contents')));
+app.use('/cart', lazyRoute(() => import('./routes/cart')));
+app.use('/orders', lazyRoute(() => import('./routes/orders')));
+app.use('/admin', lazyRoute(() => import('./routes/admin')));
 
 // 404 handler
 app.use('*', (req, res) => {

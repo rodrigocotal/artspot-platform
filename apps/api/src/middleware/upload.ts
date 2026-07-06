@@ -1,13 +1,15 @@
 import multer from 'multer';
 import type { RequestHandler } from 'express';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import cloudinary from '../config/cloudinary';
+import cloudinary, { initializeCloudinary } from '../config/cloudinary';
 
 // Allowed file types for artwork images
 const ALLOWED_FORMATS = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'tiff'];
 
 // Maximum file size (50MB for high-res art)
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+initializeCloudinary();
 
 /**
  * Cloudinary storage configuration for artwork images

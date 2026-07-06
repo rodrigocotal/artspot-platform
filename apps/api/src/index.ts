@@ -1,10 +1,3 @@
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Load environment variables FIRST before any other imports
-// Use process.cwd() which is the directory where the command was run
-dotenv.config({ path: path.join(process.cwd(), '.env') });
-
 import app from './app';
 import { config } from './config/environment';
 import { disconnectDatabase } from './config/database';

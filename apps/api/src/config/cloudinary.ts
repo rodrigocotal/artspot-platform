@@ -77,6 +77,7 @@ export function getImageUrl(
   publicId: string,
   transformation: keyof typeof ARTWORK_TRANSFORMATIONS = 'medium'
 ): string {
+  initializeCloudinary();
   return cloudinary.url(publicId, ARTWORK_TRANSFORMATIONS[transformation]);
 }
 
@@ -91,6 +92,7 @@ export async function uploadArtworkImage(
     tags?: string[];
   } = {}
 ) {
+  initializeCloudinary();
   try {
     const result = await cloudinary.uploader.upload(file as string, {
       folder: options.folder || 'artworks',
@@ -135,6 +137,7 @@ export async function uploadArtworkImage(
  * Helper to delete image
  */
 export async function deleteImage(publicId: string): Promise<boolean> {
+  initializeCloudinary();
   try {
     const result = await cloudinary.uploader.destroy(publicId);
     return result.result === 'ok';
@@ -148,6 +151,7 @@ export async function deleteImage(publicId: string): Promise<boolean> {
  * Helper to get image info
  */
 export async function getImageInfo(publicId: string) {
+  initializeCloudinary();
   try {
     const result = await cloudinary.api.resource(publicId, {
       colors: true,

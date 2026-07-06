@@ -4,18 +4,20 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "DEBUG_FD=1 tsx src/index.ts",
+    "dev:watch": "DEBUG_FD=1 tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "DEBUG_FD=1 node dist/index.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "seed:collections": "tsx prisma/seed-collections.ts",
     "seed:sample-data": "tsx prisma/add-sample-data.ts",
+    "seed:page-content": "tsx scripts/seed-page-content.ts",
     "seed:admin": "tsx prisma/seed-admin.ts",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
-    "test": "jest --runInBand --forceExit"
+    "test": "DEBUG_FD=1 jest --runInBand --forceExit"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.1009.0",

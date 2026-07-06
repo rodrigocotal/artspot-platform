@@ -1,4 +1,4 @@
-import { pageMetadata } from '../page-metadata';
+import { fetchCmsPage, pageMetadata } from '../page-metadata';
 
 describe('pageMetadata', () => {
   afterEach(() => {
@@ -30,6 +30,21 @@ describe('pageMetadata', () => {
     expect(meta.description).toBe('S');
     expect(meta.openGraph?.siteName).toBe('ArtAldo');
     expect(meta.twitter && 'card' in meta.twitter && meta.twitter.card).toBe('summary_large_image');
+  });
+
+  it('bypasses the Next data cache for CMS page content', async () => {
+    const mock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { content: { heroHeadline: 'Fresh CMS' } } }),
+    });
+    global.fetch = mock as any;
+
+    await fetchCmsPage('home');
+
+    expect(mock).toHaveBeenCalledWith(
+      'http://localhost:4000/pages/home',
+      expect.objectContaining({ cache: 'no-store' })
+    );
   });
 
   it('falls back to hardcoded ArtAldo when everything is missing', async () => {

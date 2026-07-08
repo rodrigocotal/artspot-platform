@@ -52,6 +52,44 @@ describe('Artworks API', () => {
       expect(res.body.data[0].style).toBe('ABSTRACT');
     });
 
+    it('should filter by artwork category', async () => {
+      const { accessToken } = await createTestAdmin();
+      const artist = await createTestArtist();
+
+      await request(app)
+        .post('/artworks')
+        .set(authHeader(accessToken))
+        .send({
+          title: 'Latin American Work',
+          slug: 'latin-american-work',
+          artistId: artist.id,
+          medium: 'PAINTING',
+          category: 'LATIN_AMERICAN_ART',
+          price: 2500,
+        });
+
+      await request(app)
+        .post('/artworks')
+        .set(authHeader(accessToken))
+        .send({
+          title: 'Kinetic Work',
+          slug: 'kinetic-work',
+          artistId: artist.id,
+          medium: 'SCULPTURE',
+          category: 'KINETIC_ART',
+          price: 4200,
+        });
+
+      const res = await request(app).get('/artworks?category=KINETIC_ART');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toHaveLength(1);
+      expect(res.body.data[0]).toMatchObject({
+        title: 'Kinetic Work',
+        category: 'KINETIC_ART',
+      });
+    });
+
     it('should sort by price ascending', async () => {
       const artist = await createTestArtist();
       await createTestArtwork(artist.id, { price: 5000, title: 'Expensive' });
@@ -164,6 +202,26 @@ describe('Artworks API', () => {
       expect(res.body.data.title).toBe('New Artwork');
     });
 
+    it('should create artwork with a category as admin', async () => {
+      const { accessToken } = await createTestAdmin();
+      const artist = await createTestArtist();
+
+      const res = await request(app)
+        .post('/artworks')
+        .set(authHeader(accessToken))
+        .send({
+          title: 'Category Artwork',
+          slug: 'category-artwork',
+          artistId: artist.id,
+          medium: 'PAINTING',
+          category: 'LATIN_AMERICAN_ART',
+          price: 2500,
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.category).toBe('LATIN_AMERICAN_ART');
+    });
+
     it('should reject creation by regular user', async () => {
       const { accessToken } = await createTestUser();
       const artist = await createTestArtist();
@@ -210,6 +268,20 @@ describe('Artworks API', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data.title).toBe('Updated Title');
+    });
+
+    it('should update artwork category as admin', async () => {
+      const { accessToken } = await createTestAdmin();
+      const artist = await createTestArtist();
+      const artwork = await createTestArtwork(artist.id);
+
+      const res = await request(app)
+        .put(`/artworks/${artwork.id}`)
+        .set(authHeader(accessToken))
+        .send({ category: 'KINETIC_ART' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.category).toBe('KINETIC_ART');
     });
 
     it('should return 404 for non-existent artwork', async () => {

@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiClient, type Artist, type ArtworkImage, type UploadedImage } from '@/lib/api-client';
+import { ARTWORK_CATEGORIES } from '@/lib/artwork-taxonomy';
 import { ArrowLeft, Save, Trash2, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
@@ -56,6 +57,7 @@ export default function EditArtworkPage() {
     artistId: '',
     medium: 'PAINTING',
     style: '',
+    category: '',
     year: '',
     width: '',
     height: '',
@@ -93,6 +95,7 @@ export default function EditArtworkPage() {
           artistId: a.artist?.id || '',
           medium: a.medium,
           style: a.style || '',
+          category: a.category || '',
           year: a.year != null ? String(a.year) : '',
           width: a.width != null ? String(Math.round(Number(a.width) / 2.54 * 100) / 100) : '',
           height: a.height != null ? String(Math.round(Number(a.height) / 2.54 * 100) / 100) : '',
@@ -223,6 +226,7 @@ export default function EditArtworkPage() {
         slug: form.slug,
         artistId: form.artistId,
         medium: form.medium,
+        category: form.category || null,
         price: parseFloat(form.price),
         currency: form.currency,
         status: form.status,
@@ -443,7 +447,7 @@ export default function EditArtworkPage() {
         {/* Classification */}
         <fieldset>
           <legend className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">Classification</legend>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Medium *</label>
               <select
@@ -467,6 +471,19 @@ export default function EditArtworkPage() {
                 <option value="">None</option>
                 {STYLES.map((s) => (
                   <option key={s} value={s}>{formatLabel(s)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Category</label>
+              <select
+                value={form.category}
+                onChange={(e) => updateField('category', e.target.value)}
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="">None</option>
+                {ARTWORK_CATEGORIES.map((category) => (
+                  <option key={category.id} value={category.id}>{category.label}</option>
                 ))}
               </select>
             </div>

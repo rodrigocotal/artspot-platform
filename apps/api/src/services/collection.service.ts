@@ -25,6 +25,7 @@ export class CollectionService {
 
     // Apply filters
     if (filters.featured !== undefined) where.featured = filters.featured;
+    if (filters.slugs?.length) where.slug = { in: filters.slugs };
 
     // Text search (title, description)
     if (search) {

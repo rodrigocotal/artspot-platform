@@ -29,10 +29,15 @@ const homePage = {
   heroImage: image('/artaldo/art-basel-booth.jpeg', 'Aldo Castillo at Art Basel Miami'),
   worksLabel: 'Gallery',
   worksHeadline: 'Available Works',
+  worksArtworkSlugs: [],
   highlightsLabel: 'Latin American Art',
   highlightsHeadline: 'Highlights',
   highlightsBody:
     'Latin American art holds a unique place in the global art world for its rich blend of Indigenous, European, African, and contemporary influences. Shaped by diverse histories, cultures, and social experiences, it often reflects themes of identity, resilience, spirituality, and transformation.',
+  highlightsCtaText: 'Gallery Picks',
+  highlightsCtaLink: '/collections',
+  highlightArtworkSlugs: [],
+  highlightCollectionSlugs: [],
   advisoryLabel: 'Advisory Services',
   advisoryHeadline: 'Personal Art Advisory Services',
   advisoryBody:

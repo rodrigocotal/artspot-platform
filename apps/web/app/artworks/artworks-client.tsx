@@ -17,6 +17,7 @@ import {
 import { ArtworkGridSkeleton } from '@/components/ui/skeleton';
 import { useArtworks } from '@/hooks/use-artworks';
 import { type ArtworkFilters } from '@/lib/api-client';
+import { ARTWORK_CATEGORIES } from '@/lib/artwork-taxonomy';
 
 const sortOptions: SortOption[] = [
   { value: 'createdAt', label: 'Recently Added' },
@@ -66,6 +67,7 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
   const [selectedMediums, setSelectedMediums] = useState<string[]>([]);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState('createdAt');
   const [page, setPage] = useState(1);
 
@@ -80,6 +82,7 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
     if (search) f.search = search;
     if (selectedMediums.length > 0) f.medium = selectedMediums[0];
     if (selectedStyles.length > 0) f.style = selectedStyles[0];
+    if (selectedCategories.length > 0) f.category = selectedCategories[0];
 
     if (sortValue.includes('-')) {
       const [field, order] = sortValue.split('-');
@@ -91,7 +94,7 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
     }
 
     return f;
-  }, [search, selectedMediums, selectedStyles, sortValue, page]);
+  }, [search, selectedMediums, selectedStyles, selectedCategories, sortValue, page]);
 
   const { data, isLoading, error } = useArtworks(filters);
 
@@ -114,11 +117,19 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
     setPage(1);
   };
 
+  const handleCategoryChange = (id: string, checked: boolean) => {
+    setSelectedCategories((prev) =>
+      checked ? [...prev, id] : prev.filter((category) => category !== id)
+    );
+    setPage(1);
+  };
+
   // Clear all filters
   const clearAllFilters = () => {
     setSearch('');
     setSelectedMediums([]);
     setSelectedStyles([]);
+    setSelectedCategories([]);
     setPage(1);
   };
 
@@ -133,6 +144,11 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
       type: 'style' as const,
       id,
       label: styleOptions.find((s) => s.id === id)?.label ?? id,
+    })),
+    ...selectedCategories.map((id) => ({
+      type: 'category' as const,
+      id,
+      label: ARTWORK_CATEGORIES.find((category) => category.id === id)?.label ?? id,
     })),
   ];
 
@@ -195,6 +211,18 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
                     />
                   ))}
                 </FilterGroup>
+
+                <FilterGroup title="Category" defaultOpen>
+                  {ARTWORK_CATEGORIES.map((option) => (
+                    <FilterCheckbox
+                      key={option.id}
+                      id={option.id}
+                      label={option.label}
+                      checked={selectedCategories.includes(option.id)}
+                      onChange={(checked) => handleCategoryChange(option.id, checked)}
+                    />
+                  ))}
+                </FilterGroup>
               </div>
             </aside>
 
@@ -226,7 +254,9 @@ function ArtworksPageContent({ content }: { content: Record<string, any> | null 
                         onRemove={() =>
                           filter.type === 'medium'
                             ? handleMediumChange(filter.id, false)
-                            : handleStyleChange(filter.id, false)
+                            : filter.type === 'style'
+                              ? handleStyleChange(filter.id, false)
+                              : handleCategoryChange(filter.id, false)
                         }
                       />
                     ))}

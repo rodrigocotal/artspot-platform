@@ -47,6 +47,14 @@ describe('ArtAldo reference content', () => {
     );
   });
 
+  it('exposes CMS-editable homepage selection defaults', () => {
+    expect(ARTALDO_HOME_DEFAULTS.worksArtworkSlugs).toEqual([]);
+    expect(ARTALDO_HOME_DEFAULTS.highlightArtworkSlugs).toEqual([]);
+    expect(ARTALDO_HOME_DEFAULTS.highlightCollectionSlugs).toEqual([]);
+    expect(ARTALDO_HOME_DEFAULTS.highlightsCtaText).toBe('Gallery Picks');
+    expect(ARTALDO_HOME_DEFAULTS.highlightsCtaLink).toBe('/collections');
+  });
+
   it('uses local asset paths for reference imagery', () => {
     expect(ARTALDO_HOME_IMAGES.logo).toBe('/artaldo/artaldo-logo.png');
     expect(ARTALDO_HOME_IMAGES.hero).toBe('/artaldo/art-basel-booth.jpeg');

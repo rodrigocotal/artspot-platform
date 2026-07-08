@@ -22,8 +22,10 @@ export class ArtworkService {
     if (filters.artistId) where.artistId = filters.artistId;
     if (filters.medium) where.medium = filters.medium;
     if (filters.style) where.style = filters.style;
+    if (filters.category) where.category = filters.category;
     if (filters.status) where.status = filters.status;
     if (filters.featured !== undefined) where.featured = filters.featured;
+    if (filters.slugs?.length) where.slug = { in: filters.slugs };
 
     // Price range
     if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {

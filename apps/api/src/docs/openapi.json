@@ -160,10 +160,12 @@
           { "name": "artistId", "in": "query", "schema": { "type": "string" } },
           { "name": "medium", "in": "query", "schema": { "type": "string", "enum": ["PAINTING","SCULPTURE","PHOTOGRAPHY","PRINT","DRAWING","MIXED_MEDIA","DIGITAL","INSTALLATION","TEXTILE","CERAMICS","GLASS","METAL","WOOD","OTHER"] } },
           { "name": "style", "in": "query", "schema": { "type": "string", "enum": ["ABSTRACT","CONTEMPORARY","FIGURATIVE","IMPRESSIONIST","MINIMALIST","REALISM","EXPRESSIONISM","SURREALISM","POP_ART","CONCEPTUAL","LANDSCAPE","PORTRAIT","STILL_LIFE","OTHER"] } },
+          { "name": "category", "in": "query", "schema": { "type": "string", "enum": ["LATIN_AMERICAN_ART","KINETIC_ART","OTHER"] } },
           { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["AVAILABLE","SOLD","RESERVED","NOT_FOR_SALE","ON_LOAN"] } },
           { "name": "featured", "in": "query", "schema": { "type": "boolean" } },
           { "name": "minPrice", "in": "query", "schema": { "type": "number" } },
           { "name": "maxPrice", "in": "query", "schema": { "type": "number" } },
+          { "name": "slugs", "in": "query", "description": "Comma-separated artwork slugs for CMS-selected homepage sections", "schema": { "type": "string" } },
           { "name": "search", "in": "query", "schema": { "type": "string" } },
           { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["createdAt","price","year","title","views"], "default": "createdAt" } },
           { "name": "sortOrder", "in": "query", "schema": { "type": "string", "enum": ["asc","desc"], "default": "desc" } }
@@ -190,6 +192,7 @@
                   "artistId": { "type": "string" },
                   "medium": { "type": "string" },
                   "style": { "type": "string" },
+                  "category": { "type": "string", "enum": ["LATIN_AMERICAN_ART","KINETIC_ART","OTHER"] },
                   "year": { "type": "integer" },
                   "price": { "type": "number" },
                   "currency": { "type": "string", "default": "USD" },
@@ -305,6 +308,7 @@
           { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
           { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
           { "name": "featured", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "slugs", "in": "query", "description": "Comma-separated collection slugs for CMS-selected homepage sections", "schema": { "type": "string" } },
           { "name": "search", "in": "query", "schema": { "type": "string" } }
         ],
         "responses": {

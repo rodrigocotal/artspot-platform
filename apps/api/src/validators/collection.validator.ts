@@ -3,6 +3,15 @@ import { z } from 'zod';
 /**
  * Validation schemas for collection endpoints
  */
+const commaSeparatedSlugs = z
+  .string()
+  .transform((value) =>
+    value
+      .split(',')
+      .map((slug) => slug.trim())
+      .filter(Boolean)
+  )
+  .optional();
 
 // Create collection schema
 export const createCollectionSchema = z.object({
@@ -42,6 +51,7 @@ export const listCollectionsQuerySchema = z.object({
 
   // Filtering
   featured: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
+  slugs: commaSeparatedSlugs,
 
   // Search
   search: z.string().optional(),

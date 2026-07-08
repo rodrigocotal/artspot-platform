@@ -10,6 +10,7 @@ import { ArtworkCard, InquiryForm } from '@/components/artwork';
 import { AddToCartButton } from '@/components/artwork/add-to-cart-button';
 import { Button } from '@/components/ui';
 import { apiClient, type Artwork } from '@/lib/api-client';
+import { formatTaxonomyLabel } from '@/lib/artwork-taxonomy';
 import { useFavorite } from '@/hooks/use-favorite';
 import { ArrowLeft, Heart, Share2, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -277,6 +278,9 @@ export default function ArtworkDetailPage() {
                 </h2>
                 <dl className="border-t border-neutral-200">
                   <DetailRow label="Medium" value={artwork.medium.replace('_', ' ')} />
+                  {artwork.category && (
+                    <DetailRow label="Category" value={formatTaxonomyLabel(artwork.category)} />
+                  )}
                   {(artwork.width || artwork.height) && (
                     <DetailRow
                       label="Dimensions"

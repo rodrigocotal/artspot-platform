@@ -42,9 +42,38 @@ const FIELD_CONFIGS: Record<string, FormField[]> = {
     { key: 'heroSecondaryCtaLink', label: 'Secondary CTA Link', type: 'text' },
     { key: 'worksLabel', label: 'Works Label', type: 'text' },
     { key: 'worksHeadline', label: 'Works Headline', type: 'text' },
+    {
+      key: 'worksArtworkSlugs',
+      label: 'Available Works Artwork Slugs',
+      type: 'json-array',
+      itemFields: [
+        { key: 'slug', label: 'Artwork Slug', type: 'text' },
+      ],
+      addLabel: 'Add Artwork Slug',
+    },
     { key: 'highlightsLabel', label: 'Highlights Label', type: 'text' },
     { key: 'highlightsHeadline', label: 'Highlights Headline', type: 'text' },
     { key: 'highlightsBody', label: 'Highlights Body', type: 'textarea' },
+    { key: 'highlightsCtaText', label: 'Highlights CTA Text', type: 'text' },
+    { key: 'highlightsCtaLink', label: 'Highlights CTA Link', type: 'text' },
+    {
+      key: 'highlightArtworkSlugs',
+      label: 'Highlight Artwork Slugs',
+      type: 'json-array',
+      itemFields: [
+        { key: 'slug', label: 'Artwork Slug', type: 'text' },
+      ],
+      addLabel: 'Add Highlight Artwork',
+    },
+    {
+      key: 'highlightCollectionSlugs',
+      label: 'Highlight Collection Slugs',
+      type: 'json-array',
+      itemFields: [
+        { key: 'slug', label: 'Collection Slug', type: 'text' },
+      ],
+      addLabel: 'Add Highlight Collection',
+    },
     { key: 'advisoryLabel', label: 'Advisory Label', type: 'text' },
     { key: 'advisoryHeadline', label: 'Advisory Headline', type: 'text' },
     { key: 'advisoryBody', label: 'Advisory Body', type: 'textarea' },

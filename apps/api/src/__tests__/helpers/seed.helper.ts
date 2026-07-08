@@ -35,6 +35,7 @@ export async function createTestArtwork(
     description: string;
     medium: string;
     style: string;
+    category: string;
     price: number;
     status: string;
     featured: boolean;
@@ -49,6 +50,7 @@ export async function createTestArtwork(
       artistId,
       medium: (overrides.medium as any) || 'PAINTING',
       style: (overrides.style as any) || 'ABSTRACT',
+      category: (overrides.category as any) || undefined,
       price: overrides.price || 1000,
       status: (overrides.status as any) || 'AVAILABLE',
       featured: overrides.featured ?? false,

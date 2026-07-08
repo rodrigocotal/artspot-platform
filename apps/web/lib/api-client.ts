@@ -14,8 +14,10 @@ export interface ArtworkFilters {
   artistId?: string;
   medium?: string;
   style?: string;
+  category?: string;
   status?: string;
   featured?: boolean;
+  slugs?: string | string[];
   minPrice?: number;
   maxPrice?: number;
   minYear?: number;
@@ -37,6 +39,7 @@ export interface ArtistFilters {
 
 export interface CollectionFilters {
   featured?: boolean;
+  slugs?: string | string[];
   search?: string;
   sortBy?: 'title' | 'createdAt' | 'displayOrder';
   sortOrder?: 'asc' | 'desc';
@@ -116,6 +119,7 @@ export interface Artwork {
   description: string | null;
   medium: string;
   style: string | null;
+  category: string | null;
   year: number | null;
   width: string | null;
   height: string | null;
@@ -331,6 +335,7 @@ export interface CreateArtworkInput {
   slug: string;
   artistId: string;
   medium: string;
+  category?: string;
   price: number;
   currency?: string;
   status?: string;

@@ -42,9 +42,9 @@ async function main() {
 
   // Create test artworks
   const artworks = [
-    { title: 'Sunset Over Mountains', slug: 'sunset-over-mountains', medium: 'PAINTING', style: 'LANDSCAPE', price: 2500 },
-    { title: 'Abstract Composition No. 7', slug: 'abstract-composition-no-7', medium: 'PAINTING', style: 'ABSTRACT', price: 3200 },
-    { title: 'Urban Reflections', slug: 'urban-reflections', medium: 'PHOTOGRAPHY', style: 'CONTEMPORARY', price: 1800 },
+    { title: 'Sunset Over Mountains', slug: 'sunset-over-mountains', medium: 'PAINTING', style: 'LANDSCAPE', category: 'LATIN_AMERICAN_ART', price: 2500 },
+    { title: 'Abstract Composition No. 7', slug: 'abstract-composition-no-7', medium: 'PAINTING', style: 'ABSTRACT', category: 'KINETIC_ART', price: 3200 },
+    { title: 'Urban Reflections', slug: 'urban-reflections', medium: 'PHOTOGRAPHY', style: 'CONTEMPORARY', category: 'OTHER', price: 1800 },
   ];
 
   for (const aw of artworks) {
@@ -57,6 +57,7 @@ async function main() {
         description: `A beautiful ${aw.medium.toLowerCase()} for E2E testing.`,
         medium: aw.medium as any,
         style: aw.style as any,
+        category: aw.category as any,
         price: aw.price,
         currency: 'USD',
         year: 2024,

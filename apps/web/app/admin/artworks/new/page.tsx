@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import { apiClient, type Artist, type UploadedImage } from '@/lib/api-client';
+import { ARTWORK_CATEGORIES } from '@/lib/artwork-taxonomy';
 import { ArrowLeft, Save, Upload, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
@@ -62,6 +63,7 @@ export default function NewArtworkPage() {
     artistId: '',
     medium: 'PAINTING',
     style: '',
+    category: '',
     year: '',
     width: '',
     height: '',
@@ -163,6 +165,7 @@ export default function NewArtworkPage() {
       };
       if (form.description) data.description = form.description;
       if (form.style) data.style = form.style;
+      if (form.category) data.category = form.category;
       if (form.year) data.year = parseInt(form.year, 10);
       const toCm = (v: string) => {
         const n = parseFloat(v);
@@ -335,7 +338,7 @@ export default function NewArtworkPage() {
         {/* Classification */}
         <fieldset>
           <legend className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">Classification</legend>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Medium *</label>
               <select
@@ -359,6 +362,19 @@ export default function NewArtworkPage() {
                 <option value="">None</option>
                 {STYLES.map((s) => (
                   <option key={s} value={s}>{formatLabel(s)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Category</label>
+              <select
+                value={form.category}
+                onChange={(e) => updateField('category', e.target.value)}
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="">None</option>
+                {ARTWORK_CATEGORIES.map((category) => (
+                  <option key={category.id} value={category.id}>{category.label}</option>
                 ))}
               </select>
             </div>

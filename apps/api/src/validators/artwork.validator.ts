@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { ArtworkMedium, ArtworkStyle, AvailabilityStatus, PurchaseMode } from '@prisma/client';
+import {
+  ArtworkCategory,
+  ArtworkMedium,
+  ArtworkStyle,
+  AvailabilityStatus,
+  PurchaseMode,
+} from '@prisma/client';
 
 /**
  * Validation schemas for artwork endpoints
@@ -8,8 +14,18 @@ import { ArtworkMedium, ArtworkStyle, AvailabilityStatus, PurchaseMode } from '@
 // Enums as Zod enums
 const artworkMediumEnum = z.nativeEnum(ArtworkMedium);
 const artworkStyleEnum = z.nativeEnum(ArtworkStyle);
+const artworkCategoryEnum = z.nativeEnum(ArtworkCategory);
 const availabilityStatusEnum = z.nativeEnum(AvailabilityStatus);
 const purchaseModeEnum = z.nativeEnum(PurchaseMode);
+const commaSeparatedSlugs = z
+  .string()
+  .transform((value) =>
+    value
+      .split(',')
+      .map((slug) => slug.trim())
+      .filter(Boolean)
+  )
+  .optional();
 
 // Create artwork schema
 export const createArtworkSchema = z.object({
@@ -19,6 +35,7 @@ export const createArtworkSchema = z.object({
   artistId: z.string().cuid('Invalid artist ID'),
   medium: artworkMediumEnum,
   style: artworkStyleEnum.optional(),
+  category: artworkCategoryEnum.optional(),
   year: z.number().int().min(1000).max(new Date().getFullYear() + 1).optional(),
   width: z.number().positive().optional(),
   height: z.number().positive().optional(),
@@ -44,6 +61,7 @@ export const updateArtworkSchema = z.object({
   artistId: z.string().cuid().optional(),
   medium: artworkMediumEnum.optional(),
   style: artworkStyleEnum.optional().nullable(),
+  category: artworkCategoryEnum.optional().nullable(),
   year: z.number().int().min(1000).max(new Date().getFullYear() + 1).optional().nullable(),
   width: z.number().positive().optional().nullable(),
   height: z.number().positive().optional().nullable(),
@@ -71,8 +89,10 @@ export const listArtworksQuerySchema = z.object({
   artistId: z.string().cuid().optional(),
   medium: artworkMediumEnum.optional(),
   style: artworkStyleEnum.optional(),
+  category: artworkCategoryEnum.optional(),
   status: availabilityStatusEnum.optional(),
   featured: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
+  slugs: commaSeparatedSlugs,
   minPrice: z.coerce.number().positive().optional(),
   maxPrice: z.coerce.number().positive().optional(),
   minYear: z.coerce.number().int().optional(),

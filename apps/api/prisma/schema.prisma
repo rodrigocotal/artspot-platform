@@ -103,9 +103,10 @@ model Artwork {
   artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
 
   // Artwork details
-  medium ArtworkMedium
-  style  ArtworkStyle?
-  year   Int?
+  medium   ArtworkMedium
+  style    ArtworkStyle?
+  category ArtworkCategory?
+  year     Int?
 
   // Dimensions (in centimeters)
   width  Decimal? @db.Decimal(10, 2)
@@ -145,6 +146,7 @@ model Artwork {
 
   @@index([artistId])
   @@index([medium])
+  @@index([category])
   @@index([status])
   @@index([featured])
   @@map("artworks")
@@ -209,6 +211,12 @@ enum ArtworkStyle {
   LANDSCAPE
   PORTRAIT
   STILL_LIFE
+  OTHER
+}
+
+enum ArtworkCategory {
+  LATIN_AMERICAN_ART
+  KINETIC_ART
   OTHER
 }
 

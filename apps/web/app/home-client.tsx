@@ -1,12 +1,17 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, CircleCheck } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { Container, Section } from '@/components/layout';
+import { ArtworkCard } from '@/components/artwork/artwork-card';
+import { CollectionCard } from '@/components/collection/collection-card';
 import { HeroImage } from '@/components/hero-image';
 import { cn } from '@/lib/utils';
+import { apiClient, type Artwork, type Collection } from '@/lib/api-client';
+import { editableSlugList, orderBySlug, type EditableSlugItem } from '@/lib/homepage-selections';
 import type { ImageFieldValue } from '@/lib/seo';
 import {
   ARTALDO_HOME_DEFAULTS,
@@ -47,11 +52,16 @@ export interface HomeContent {
   // Available Works
   worksLabel?: string;
   worksHeadline?: string;
+  worksArtworkSlugs?: EditableSlugItem[];
 
   // Highlights
   highlightsLabel?: string;
   highlightsHeadline?: string;
   highlightsBody?: string;
+  highlightsCtaText?: string;
+  highlightsCtaLink?: string;
+  highlightArtworkSlugs?: EditableSlugItem[];
+  highlightCollectionSlugs?: EditableSlugItem[];
 
   // Advisory services
   advisoryLabel?: string;
@@ -238,8 +248,30 @@ function ReferenceArtworkCard({
   );
 }
 
+async function fetchArtworkSelections(slugs: string[]) {
+  if (slugs.length === 0) return [];
+  const res = await apiClient.getArtworks({
+    slugs,
+    limit: Math.max(slugs.length, 1),
+    status: 'AVAILABLE',
+  });
+  return orderBySlug(res.data, slugs);
+}
+
+async function fetchCollectionSelections(slugs: string[]) {
+  if (slugs.length === 0) return [];
+  const res = await apiClient.getCollections({
+    slugs,
+    limit: Math.max(slugs.length, 1),
+  });
+  return orderBySlug(res.data, slugs);
+}
+
 export function HomePageClient({ content }: { content: HomeContent | null }) {
   const c = content ?? {};
+  const [selectedWorks, setSelectedWorks] = useState<Artwork[]>([]);
+  const [selectedHighlightWorks, setSelectedHighlightWorks] = useState<Artwork[]>([]);
+  const [selectedHighlightCollections, setSelectedHighlightCollections] = useState<Collection[]>([]);
 
   // CMS values authored for the prior design may be empty strings (treat as
   // unset) or hold long descriptive copy in CTA fields (never render a
@@ -278,10 +310,18 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
 
   const worksLabel = pick(c.worksLabel) || DEFAULTS.worksLabel;
   const worksHeadline = pick(c.worksHeadline) || DEFAULTS.worksHeadline;
+  const worksArtworkSlugs = editableSlugList(c.worksArtworkSlugs);
+  const worksArtworkSlugKey = worksArtworkSlugs.join(',');
 
   const highlightsLabel = pick(c.highlightsLabel) || DEFAULTS.highlightsLabel;
   const highlightsHeadline = pick(c.highlightsHeadline) || DEFAULTS.highlightsHeadline;
   const highlightsBody = pick(c.highlightsBody) || DEFAULTS.highlightsBody;
+  const highlightsCtaText = pick(c.highlightsCtaText) || 'Gallery Picks';
+  const highlightsCtaLink = pick(c.highlightsCtaLink) || '/collections';
+  const highlightArtworkSlugs = editableSlugList(c.highlightArtworkSlugs);
+  const highlightCollectionSlugs = editableSlugList(c.highlightCollectionSlugs);
+  const highlightArtworkSlugKey = highlightArtworkSlugs.join(',');
+  const highlightCollectionSlugKey = highlightCollectionSlugs.join(',');
 
   const advisoryLabel = pick(c.advisoryLabel) || DEFAULTS.advisoryLabel;
   const advisoryHeadline = pick(c.advisoryHeadline) || DEFAULTS.advisoryHeadline;
@@ -321,6 +361,48 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
       href: '/artworks',
     },
   ];
+
+  useEffect(() => {
+    let active = true;
+    const slugs = worksArtworkSlugKey ? worksArtworkSlugKey.split(',') : [];
+
+    fetchArtworkSelections(slugs)
+      .then((artworks) => {
+        if (active) setSelectedWorks(artworks);
+      })
+      .catch(() => {
+        if (active) setSelectedWorks([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [worksArtworkSlugKey]);
+
+  useEffect(() => {
+    let active = true;
+    const artworkSlugs = highlightArtworkSlugKey ? highlightArtworkSlugKey.split(',') : [];
+    const collectionSlugs = highlightCollectionSlugKey ? highlightCollectionSlugKey.split(',') : [];
+
+    Promise.all([
+      fetchArtworkSelections(artworkSlugs),
+      fetchCollectionSelections(collectionSlugs),
+    ])
+      .then(([artworks, collections]) => {
+        if (!active) return;
+        setSelectedHighlightWorks(artworks);
+        setSelectedHighlightCollections(collections);
+      })
+      .catch(() => {
+        if (!active) return;
+        setSelectedHighlightWorks([]);
+        setSelectedHighlightCollections([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [highlightArtworkSlugKey, highlightCollectionSlugKey]);
 
   return (
     <>
@@ -382,15 +464,23 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
             </ArrowLink>
           </div>
 
-          <div className="mt-14 grid grid-cols-1 gap-x-9 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
-            {ARTALDO_WORKS.map((work, index) => (
-              <ReferenceArtworkCard
-                key={`${work.artistName}-${work.title}`}
-                work={work}
-                priority={index < 3}
-              />
-            ))}
-          </div>
+          {selectedWorks.length > 0 ? (
+            <div className="mt-14 grid grid-cols-1 gap-x-9 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+              {selectedWorks.map((artwork, index) => (
+                <ArtworkCard key={artwork.id} artwork={artwork} priority={index < 3} />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-14 grid grid-cols-1 gap-x-9 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+              {ARTALDO_WORKS.map((work, index) => (
+                <ReferenceArtworkCard
+                  key={`${work.artistName}-${work.title}`}
+                  work={work}
+                  priority={index < 3}
+                />
+              ))}
+            </div>
+          )}
         </Container>
       </Section>
 
@@ -402,20 +492,36 @@ export function HomePageClient({ content }: { content: HomeContent | null }) {
               {highlightsHeadline}
             </h2>
             <p className="mt-5 leading-relaxed text-neutral-600">{highlightsBody}</p>
-            <ArrowLink href="/collections" className="mt-6">
-              Gallery Picks
+            <ArrowLink href={highlightsCtaLink} className="mt-6">
+              {highlightsCtaText}
             </ArrowLink>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-x-9 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
-            {highlightWorks.map((work, index) => (
-              <ReferenceArtworkCard
-                key={`${work.artistName}-${work.title}`}
-                work={work}
-                priority={index < 2}
-              />
-            ))}
-          </div>
+          {selectedHighlightWorks.length > 0 ? (
+            <div className="mt-12 grid grid-cols-1 gap-x-9 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
+              {selectedHighlightWorks.map((artwork, index) => (
+                <ArtworkCard key={artwork.id} artwork={artwork} priority={index < 2} />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-12 grid grid-cols-1 gap-x-9 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
+              {highlightWorks.map((work, index) => (
+                <ReferenceArtworkCard
+                  key={`${work.artistName}-${work.title}`}
+                  work={work}
+                  priority={index < 2}
+                />
+              ))}
+            </div>
+          )}
+
+          {selectedHighlightCollections.length > 0 && (
+            <div className="mt-16 grid grid-cols-1 gap-x-9 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              {selectedHighlightCollections.map((collection, index) => (
+                <CollectionCard key={collection.id} collection={collection} priority={index < 3} />
+              ))}
+            </div>
+          )}
         </Container>
       </Section>
 

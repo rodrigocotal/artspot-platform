@@ -78,6 +78,7 @@ app.use('/inquiries', lazyRoute(() => import('./routes/inquiries')));
 app.use('/contact', lazyRoute(() => import('./routes/contact')));
 app.use('/webhooks', lazyRoute(() => import('./routes/webhooks')));
 app.use('/articles', lazyRoute(() => import('./routes/articles')));
+app.use('/activity', lazyRoute(() => import('./routes/activity')));
 app.use('/pages', pagePublicRouter);
 app.use('/pages', lazyRoute(() => import('./routes/page-contents')));
 app.use('/cart', lazyRoute(() => import('./routes/cart')));

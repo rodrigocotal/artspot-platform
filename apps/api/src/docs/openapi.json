@@ -647,6 +647,67 @@
         }
       }
     },
+    "/activity": {
+      "post": {
+        "tags": ["Activity"],
+        "summary": "Record a visitor activity event",
+        "description": "Used by the web app to track page views, engagement, and exits. Authentication is optional; authenticated events are linked to the user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["eventType", "sessionId", "path"],
+                "properties": {
+                  "eventType": { "type": "string", "enum": ["page_view","page_exit","engagement","click","artwork_view","collection_view","form_start","form_submit"] },
+                  "sessionId": { "type": "string" },
+                  "visitorId": { "type": "string" },
+                  "path": { "type": "string" },
+                  "title": { "type": "string" },
+                  "referrer": { "type": "string" },
+                  "metadata": { "type": "object", "additionalProperties": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Activity event recorded" },
+          "400": { "description": "Invalid activity payload" }
+        }
+      },
+      "get": {
+        "tags": ["Activity"],
+        "summary": "List activity events (admin/staff)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 25, "maximum": 100 } },
+          { "name": "eventType", "in": "query", "schema": { "type": "string" } },
+          { "name": "path", "in": "query", "schema": { "type": "string" } },
+          { "name": "sessionId", "in": "query", "schema": { "type": "string" } },
+          { "name": "visitorId", "in": "query", "schema": { "type": "string" } },
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date-time" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns paginated activity events" },
+          "403": { "description": "Forbidden — admin/staff only" }
+        }
+      }
+    },
+    "/activity/summary": {
+      "get": {
+        "tags": ["Activity"],
+        "summary": "Get 30-day activity summary (admin/staff)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns totals, top pages, and event breakdowns" },
+          "403": { "description": "Forbidden — admin/staff only" }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": ["System"],

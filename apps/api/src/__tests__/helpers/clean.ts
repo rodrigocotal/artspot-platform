@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 
 /** Delete all rows from every table in FK-safe order */
 export async function cleanDatabase() {
+  await prisma.activityEvent.deleteMany();
   await prisma.favorite.deleteMany();
   await prisma.inquiry.deleteMany();
   await prisma.contactMessage.deleteMany();

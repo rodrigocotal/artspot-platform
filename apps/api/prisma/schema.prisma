@@ -30,6 +30,7 @@ model User {
   inquiries     Inquiry[]
   favorites     Favorite[]
   refreshTokens RefreshToken[]
+  activityEvents ActivityEvent[]
   cart          Cart?
   orders        Order[]
 
@@ -417,6 +418,36 @@ model PageContent {
 enum PageContentStatus {
   DRAFT
   PUBLISHED
+}
+
+// ============================================================================
+// USER ACTIVITY
+// ============================================================================
+
+model ActivityEvent {
+  id        String  @id @default(cuid())
+  userId    String?
+  sessionId String
+  visitorId String?
+
+  eventType String
+  path      String
+  title     String?
+  referrer  String?
+  userAgent String?
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([visitorId])
+  @@index([eventType])
+  @@index([path])
+  @@index([createdAt])
+  @@map("activity_events")
 }
 
 // ============================================================================

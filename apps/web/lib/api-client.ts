@@ -425,6 +425,54 @@ export interface AdminUser {
   };
 }
 
+export type ActivityEventType =
+  | 'page_view'
+  | 'page_exit'
+  | 'engagement'
+  | 'click'
+  | 'artwork_view'
+  | 'collection_view'
+  | 'form_start'
+  | 'form_submit';
+
+export interface ActivityEvent {
+  id: string;
+  userId: string | null;
+  sessionId: string;
+  visitorId: string | null;
+  eventType: ActivityEventType;
+  path: string;
+  title: string | null;
+  referrer: string | null;
+  userAgent: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  user?: {
+    id: string;
+    email: string;
+    name: string | null;
+  } | null;
+}
+
+export interface ActivitySummary {
+  windowDays: number;
+  totalEvents: number;
+  pageViews: number;
+  uniqueSessions: number;
+  topPages: Array<{ path: string; count: number }>;
+  topEvents: Array<{ eventType: ActivityEventType; count: number }>;
+}
+
+export interface CreateActivityEventInput {
+  eventType: ActivityEventType;
+  sessionId: string;
+  visitorId?: string;
+  path: string;
+  title?: string;
+  referrer?: string;
+  metadata?: Record<string, unknown>;
+}
+
 class ApiClient {
   private baseUrl: string;
   private accessToken: string | null = null;
@@ -1083,6 +1131,32 @@ class ApiClient {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
+  }
+
+  async trackActivity(data: CreateActivityEventInput): Promise<ApiResponse<{ id: string; eventType: string; path: string; createdAt: string }>> {
+    return this.fetch<{ id: string; eventType: string; path: string; createdAt: string }>('/activity', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getActivityEvents(
+    params: PaginationParams & {
+      eventType?: ActivityEventType;
+      path?: string;
+      userId?: string;
+      sessionId?: string;
+      visitorId?: string;
+      from?: string;
+      to?: string;
+    } = {}
+  ): Promise<ApiResponse<ActivityEvent[]>> {
+    const queryString = this.buildQueryString(params);
+    return this.fetch<ActivityEvent[]>(`/activity${queryString}`);
+  }
+
+  async getActivitySummary(): Promise<ApiResponse<ActivitySummary>> {
+    return this.fetch<ActivitySummary>('/activity/summary');
   }
 }
 

@@ -12,7 +12,7 @@ import { FooterNavEditor } from '@/components/admin/footer-nav-editor';
 import { ImageField } from '@/components/admin/image-field';
 import { SeoField } from '@/components/admin/seo-field';
 import { PREVIEW_COMPONENTS, DEFAULT_PREVIEW } from '@/components/admin/previews';
-import { ArrowLeft, Save, Upload, Eye, Pencil } from 'lucide-react';
+import { ArrowLeft, Save, Upload, Eye, Pencil, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 type FieldType = 'text' | 'textarea' | 'json-array' | 'nav' | 'footer-nav' | 'image' | 'seo';
@@ -289,6 +289,46 @@ const SLUG_LABELS: Record<string, string> = {
   footer: 'Footer',
 };
 
+const GROUP_LABELS: Record<string, string> = {
+  hero: 'Hero',
+  works: 'Available Works',
+  highlights: 'Highlights',
+  advisory: 'Advisory',
+  design: 'Design Services',
+  about: 'About',
+  contact: 'Contact Details',
+  form: 'Form Copy',
+  success: 'Success State',
+  services: 'Services',
+  cta: 'Call To Action',
+  sections: 'Sections',
+  featured: 'Featured Content',
+  site: 'Site Identity',
+  navigation: 'Navigation',
+  footer: 'Footer',
+  seo: 'SEO',
+  content: 'Content',
+};
+
+function fieldGroup(field: FormField) {
+  if (field.key === '_seo') return 'seo';
+  if (field.key === 'navigation') return 'navigation';
+  if (field.key === 'footerNavigation') return 'footer';
+  if (field.key.includes('Image')) return 'content';
+  const match = field.key.match(/^[a-z]+/);
+  return match?.[0] || 'content';
+}
+
+function groupId(label: string) {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+}
+
+function hasValue(value: any) {
+  if (Array.isArray(value)) return value.length > 0;
+  if (value && typeof value === 'object') return Object.keys(value).length > 0;
+  return value !== undefined && value !== null && value !== '';
+}
+
 export default function EditContentPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: session } = useSession();
@@ -305,6 +345,22 @@ export default function EditContentPage() {
   const fields = FIELD_CONFIGS[slug] || [];
   const pageLabel = SLUG_LABELS[slug] || slug;
   const PreviewComponent = PREVIEW_COMPONENTS[slug] || DEFAULT_PREVIEW;
+  const groupedFields = fields.reduce<Array<{ key: string; label: string; fields: FormField[] }>>(
+    (groups, field) => {
+      const key = fieldGroup(field);
+      const label = GROUP_LABELS[key] || GROUP_LABELS.content;
+      const group = groups.find((item) => item.key === key);
+      if (group) {
+        group.fields.push(field);
+      } else {
+        groups.push({ key, label, fields: [field] });
+      }
+      return groups;
+    },
+    []
+  );
+  const completedFields = fields.filter((field) => hasValue(content[field.key])).length;
+  const completion = fields.length > 0 ? Math.round((completedFields / fields.length) * 100) : 0;
 
   const loadContent = useCallback(async () => {
     if (!session?.accessToken || !slug) return;
@@ -430,22 +486,46 @@ export default function EditContentPage() {
           <ArrowLeft className="w-4 h-4" />
           Back to Content
         </Link>
-        <div className="flex items-center gap-3">
-          <h1 className="text-display font-serif text-neutral-900">Edit {pageLabel}</h1>
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-              status === 'DRAFT'
-                ? 'bg-yellow-100 text-yellow-800'
-                : 'bg-green-100 text-green-800'
-            }`}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                status === 'DRAFT' ? 'bg-yellow-500' : 'bg-green-500'
-              }`}
-            />
-            {status === 'DRAFT' ? 'Draft' : 'Published'}
-          </span>
+        <div className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-display font-serif text-neutral-900">Edit {pageLabel}</h1>
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                  status === 'DRAFT'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-green-100 text-green-800'
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    status === 'DRAFT' ? 'bg-yellow-500' : 'bg-green-500'
+                  }`}
+                />
+                {status === 'DRAFT' ? 'Draft' : 'Published'}
+              </span>
+              {dirty && (
+                <span className="rounded-full bg-warning-100 px-2.5 py-1 text-xs font-medium text-warning-800">
+                  Unsaved changes
+                </span>
+              )}
+            </div>
+            <p className="mt-2 text-sm text-neutral-500">
+              {completedFields} of {fields.length} editable fields populated.
+            </p>
+          </div>
+          <div className="min-w-[180px]">
+            <div className="flex items-center justify-between text-xs text-neutral-500">
+              <span>Completion</span>
+              <span>{completion}%</span>
+            </div>
+            <div className="mt-2 h-2 rounded-full bg-neutral-100">
+              <div
+                className="h-2 rounded-full bg-primary-500 transition-all"
+                style={{ width: `${completion}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -493,85 +573,122 @@ export default function EditContentPage() {
             </button>
           </div>
 
-          <div className="lg:flex lg:gap-6">
+          <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)_minmax(360px,0.9fr)] lg:gap-6">
+            <aside className="hidden lg:block">
+              <div className="sticky top-4 rounded-xl border border-neutral-200 bg-white p-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                  Sections
+                </p>
+                <nav className="space-y-1">
+                  {groupedFields.map((group) => (
+                    <a
+                      key={group.key}
+                      href={`#${groupId(group.label)}`}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    >
+                      <span>{group.label}</span>
+                      <span className="text-xs text-neutral-400">{group.fields.length}</span>
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </aside>
+
             {/* Form (left panel) */}
             <div
-              className={`lg:w-1/2 ${
+              className={`${
                 mobileTab === 'edit' ? 'block' : 'hidden lg:block'
               }`}
             >
-              <div className="bg-white rounded-lg border border-neutral-200 p-6 space-y-6">
-                {fields.map((field) => (
-                  <div key={field.key}>
-                    <label className="block text-sm font-medium text-neutral-700 mb-2">
-                      {field.label}
-                    </label>
+              <div className="space-y-5">
+                {groupedFields.map((group) => (
+                  <section
+                    key={group.key}
+                    id={groupId(group.label)}
+                    className="scroll-mt-6 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
+                  >
+                    <div className="mb-5 flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-neutral-900">{group.label}</h2>
+                      <span className="text-xs text-neutral-400">{group.fields.length} fields</span>
+                    </div>
+                    <div className="space-y-5">
+                      {group.fields.map((field) => (
+                        <div key={field.key}>
+                          <label className="mb-2 flex items-center gap-2 text-sm font-medium text-neutral-700">
+                            {hasValue(content[field.key]) && (
+                              <CheckCircle2 className="h-4 w-4 text-success-600" />
+                            )}
+                            {field.label}
+                          </label>
 
-                    {field.type === 'text' && (
-                      <Input
-                        value={content[field.key] || ''}
-                        onChange={(e) => updateField(field.key, e.target.value)}
-                        placeholder={field.placeholder}
-                      />
-                    )}
+                          {field.type === 'text' && (
+                            <Input
+                              value={content[field.key] || ''}
+                              onChange={(e) => updateField(field.key, e.target.value)}
+                              placeholder={field.placeholder}
+                            />
+                          )}
 
-                    {field.type === 'textarea' && (
-                      <textarea
-                        value={content[field.key] || ''}
-                        onChange={(e) => updateField(field.key, e.target.value)}
-                        rows={4}
-                        placeholder={field.placeholder}
-                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      />
-                    )}
+                          {field.type === 'textarea' && (
+                            <textarea
+                              value={content[field.key] || ''}
+                              onChange={(e) => updateField(field.key, e.target.value)}
+                              rows={4}
+                              placeholder={field.placeholder}
+                              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            />
+                          )}
 
-                    {field.type === 'json-array' && (
-                      <JsonArrayEditor
-                        value={content[field.key] || []}
-                        onChange={(val) => updateField(field.key, val)}
-                        itemFields={field.itemFields || []}
-                        addLabel={field.addLabel}
-                      />
-                    )}
+                          {field.type === 'json-array' && (
+                            <JsonArrayEditor
+                              value={content[field.key] || []}
+                              onChange={(val) => updateField(field.key, val)}
+                              itemFields={field.itemFields || []}
+                              addLabel={field.addLabel}
+                            />
+                          )}
 
-                    {field.type === 'nav' && (
-                      <NavEditor
-                        value={
-                          content[field.key]?.items
-                            ? content[field.key].items
-                            : Array.isArray(content[field.key])
-                              ? content[field.key]
-                              : []
-                        }
-                        onChange={(val) => updateField(field.key, { items: val })}
-                      />
-                    )}
+                          {field.type === 'nav' && (
+                            <NavEditor
+                              value={
+                                content[field.key]?.items
+                                  ? content[field.key].items
+                                  : Array.isArray(content[field.key])
+                                    ? content[field.key]
+                                    : []
+                              }
+                              onChange={(val) => updateField(field.key, { items: val })}
+                            />
+                          )}
 
-                    {field.type === 'footer-nav' && (
-                      <FooterNavEditor
-                        value={content[field.key] ?? null}
-                        onChange={(val) => updateField(field.key, val)}
-                      />
-                    )}
+                          {field.type === 'footer-nav' && (
+                            <FooterNavEditor
+                              value={content[field.key] ?? null}
+                              onChange={(val) => updateField(field.key, val)}
+                            />
+                          )}
 
-                    {field.type === 'image' && (
-                      <ImageField
-                        value={content[field.key] ?? null}
-                        onChange={(val) => updateField(field.key, val)}
-                      />
-                    )}
+                          {field.type === 'image' && (
+                            <ImageField
+                              value={content[field.key] ?? null}
+                              onChange={(val) => updateField(field.key, val)}
+                            />
+                          )}
 
-                    {field.type === 'seo' && (
-                      <SeoField
-                        value={content[field.key] ?? null}
-                        onChange={(val) => updateField(field.key, val)}
-                        variant={field.seoVariant}
-                      />
-                    )}
-                  </div>
+                          {field.type === 'seo' && (
+                            <SeoField
+                              value={content[field.key] ?? null}
+                              onChange={(val) => updateField(field.key, val)}
+                              variant={field.seoVariant}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </section>
                 ))}
 
-                <div className="pt-4 border-t border-neutral-200 flex flex-wrap items-center gap-3">
+                <div className="sticky bottom-4 z-10 rounded-xl border border-neutral-200 bg-white/95 p-4 shadow-lg backdrop-blur flex flex-wrap items-center gap-3">
                   <Button onClick={handleSaveDraft} loading={saving} variant="outline">
                     <Save className="w-4 h-4" />
                     Save Draft
@@ -583,16 +700,16 @@ export default function EditContentPage() {
                   <Button onClick={handleDiscard} variant="ghost" disabled={!dirty || saving || publishing}>
                     Discard changes
                   </Button>
-                  {dirty && (
-                    <span className="text-xs text-warning-700">Unsaved changes</span>
-                  )}
+                  <span className="text-xs text-neutral-500">
+                    {dirty ? 'Draft has unsaved changes.' : 'All changes are saved.'}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Preview (right panel) */}
             <div
-              className={`lg:w-1/2 ${
+              className={`${
                 mobileTab === 'preview' ? 'block' : 'hidden lg:block'
               }`}
             >

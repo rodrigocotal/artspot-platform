@@ -109,6 +109,95 @@ jobs:
             exit 1
           fi
 
+      - name: Update App Runner environment variables
+        env:
+          CONSTANT_CONTACT_ENABLED: ${{ secrets.CONSTANT_CONTACT_ENABLED }}
+          CONSTANT_CONTACT_CLIENT_ID: ${{ secrets.CONSTANT_CONTACT_CLIENT_ID }}
+          CONSTANT_CONTACT_CLIENT_SECRET: ${{ secrets.CONSTANT_CONTACT_CLIENT_SECRET }}
+          CONSTANT_CONTACT_REDIRECT_URI: ${{ secrets.CONSTANT_CONTACT_REDIRECT_URI }}
+          CONSTANT_CONTACT_REFRESH_TOKEN: ${{ secrets.CONSTANT_CONTACT_REFRESH_TOKEN }}
+          CONSTANT_CONTACT_NEWSLETTER_LIST_ID: ${{ secrets.CONSTANT_CONTACT_NEWSLETTER_LIST_ID }}
+        run: |
+          set -euo pipefail
+
+          for key in \
+            CONSTANT_CONTACT_ENABLED \
+            CONSTANT_CONTACT_CLIENT_ID \
+            CONSTANT_CONTACT_CLIENT_SECRET \
+            CONSTANT_CONTACT_REDIRECT_URI \
+            CONSTANT_CONTACT_REFRESH_TOKEN \
+            CONSTANT_CONTACT_NEWSLETTER_LIST_ID
+          do
+            if [ -z "${!key:-}" ]; then
+              echo "❌ Missing required GitHub secret: $key"
+              exit 1
+            fi
+          done
+
+          aws apprunner describe-service \
+            --service-arn ${{ secrets.AWS_APPRUNNER_API_PRODUCTION_ARN }} \
+            --query 'Service.SourceConfiguration' \
+            --output json > source-configuration.json
+
+          node <<'NODE'
+          const fs = require('fs');
+          const source = JSON.parse(fs.readFileSync('source-configuration.json', 'utf8'));
+          const constantContactEnv = {
+            CONSTANT_CONTACT_ENABLED: process.env.CONSTANT_CONTACT_ENABLED,
+            CONSTANT_CONTACT_CLIENT_ID: process.env.CONSTANT_CONTACT_CLIENT_ID,
+            CONSTANT_CONTACT_CLIENT_SECRET: process.env.CONSTANT_CONTACT_CLIENT_SECRET,
+            CONSTANT_CONTACT_REDIRECT_URI: process.env.CONSTANT_CONTACT_REDIRECT_URI,
+            CONSTANT_CONTACT_REFRESH_TOKEN: process.env.CONSTANT_CONTACT_REFRESH_TOKEN,
+            CONSTANT_CONTACT_NEWSLETTER_LIST_ID: process.env.CONSTANT_CONTACT_NEWSLETTER_LIST_ID,
+          };
+
+          const codeValues = source.CodeRepository?.CodeConfiguration?.CodeConfigurationValues;
+          const imageConfig = source.ImageRepository?.ImageConfiguration;
+
+          if (codeValues) {
+            codeValues.RuntimeEnvironmentVariables = {
+              ...(codeValues.RuntimeEnvironmentVariables || {}),
+              ...constantContactEnv,
+            };
+          } else if (imageConfig) {
+            imageConfig.RuntimeEnvironmentVariables = {
+              ...(imageConfig.RuntimeEnvironmentVariables || {}),
+              ...constantContactEnv,
+            };
+          } else {
+            throw new Error('Unsupported App Runner source configuration');
+          }
+
+          fs.writeFileSync('source-configuration.json', JSON.stringify(source));
+          NODE
+
+          aws apprunner update-service \
+            --service-arn ${{ secrets.AWS_APPRUNNER_API_PRODUCTION_ARN }} \
+            --source-configuration file://source-configuration.json > /tmp/apprunner-update.json
+
+      - name: Wait for environment update to complete
+        run: |
+          echo "Waiting for App Runner environment update..."
+          for i in $(seq 1 45); do
+            STATUS=$(aws apprunner describe-service \
+              --service-arn ${{ secrets.AWS_APPRUNNER_API_PRODUCTION_ARN }} \
+              --query 'Service.Status' --output text)
+
+            echo "  [$i/45] Service status: $STATUS"
+
+            if [ "$STATUS" == "RUNNING" ]; then
+              echo "✅ Environment update complete"
+              exit 0
+            elif [ "$STATUS" == "CREATE_FAILED" ] || [ "$STATUS" == "DELETE_FAILED" ]; then
+              echo "❌ Environment update failed with status: $STATUS"
+              exit 1
+            fi
+
+            sleep 20
+          done
+          echo "❌ Environment update timed out after 15 minutes"
+          exit 1
+
       - name: Trigger App Runner deployment
         run: |
           aws apprunner start-deployment \

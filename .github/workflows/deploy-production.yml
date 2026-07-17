@@ -260,7 +260,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Prisma migrations
-        run: pnpm --filter @artspot/api prisma migrate deploy
+        run: pnpm --filter @artspot/api exec prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
 

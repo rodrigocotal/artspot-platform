@@ -1,8 +1,10 @@
 import { config } from '../config/environment';
+import { prisma } from '../config/database';
 
 const TOKEN_URL = 'https://authz.constantcontact.com/oauth2/default/v1/token';
 const SIGNUP_FORM_URL = 'https://api.cc.email/v3/contacts/sign_up_form';
 const TOKEN_EXPIRY_BUFFER_MS = 60_000;
+const REFRESH_TOKEN_CREDENTIAL_KEY = 'constant_contact_refresh_token';
 
 export type ConstantContactSubscribeResult =
   | { skipped: true; reason: 'disabled' | 'not_configured' }
@@ -20,7 +22,7 @@ interface AccessTokenState {
 
 export class ConstantContactService {
   private accessToken: AccessTokenState | null = null;
-  private refreshToken = config.constantContact.refreshToken;
+  private refreshToken: string | null = null;
 
   async subscribeNewsletter(
     subscriber: NewsletterSubscriber
@@ -29,7 +31,7 @@ export class ConstantContactService {
       return { skipped: true, reason: 'disabled' };
     }
 
-    if (!this.isConfigured()) {
+    if (!(await this.isConfigured())) {
       return { skipped: true, reason: 'not_configured' };
     }
 
@@ -59,11 +61,11 @@ export class ConstantContactService {
     return { skipped: false, contactId: data.contact_id ?? null };
   }
 
-  private isConfigured() {
+  private async isConfigured() {
     return Boolean(
       config.constantContact.clientId &&
         config.constantContact.clientSecret &&
-        this.refreshToken &&
+        (await this.getRefreshToken()) &&
         config.constantContact.newsletterListId
     );
   }
@@ -76,10 +78,15 @@ export class ConstantContactService {
     const credentials = Buffer.from(
       `${config.constantContact.clientId}:${config.constantContact.clientSecret}`
     ).toString('base64');
+    const refreshToken = await this.getRefreshToken();
+
+    if (!refreshToken) {
+      throw new Error('Constant Contact refresh token is not configured');
+    }
 
     const body = new URLSearchParams({
       grant_type: 'refresh_token',
-      refresh_token: this.refreshToken,
+      refresh_token: refreshToken,
     });
 
     const response = await fetch(TOKEN_URL, {
@@ -111,9 +118,46 @@ export class ConstantContactService {
     };
     if (data.refresh_token) {
       this.refreshToken = data.refresh_token;
+      await this.persistRefreshToken(data.refresh_token);
     }
 
     return data.access_token;
+  }
+
+  private async getRefreshToken() {
+    if (this.refreshToken) {
+      return this.refreshToken;
+    }
+
+    try {
+      const credential = await prisma.integrationCredential.findUnique({
+        where: { key: REFRESH_TOKEN_CREDENTIAL_KEY },
+      });
+      if (credential?.value) {
+        this.refreshToken = credential.value;
+        return credential.value;
+      }
+    } catch (err) {
+      console.error('Constant Contact credential lookup failed:', err);
+    }
+
+    this.refreshToken = config.constantContact.refreshToken || null;
+    return this.refreshToken;
+  }
+
+  private async persistRefreshToken(refreshToken: string) {
+    try {
+      await prisma.integrationCredential.upsert({
+        where: { key: REFRESH_TOKEN_CREDENTIAL_KEY },
+        update: { value: refreshToken },
+        create: {
+          key: REFRESH_TOKEN_CREDENTIAL_KEY,
+          value: refreshToken,
+        },
+      });
+    } catch (err) {
+      console.error('Constant Contact credential update failed:', err);
+    }
   }
 
   private splitName(name?: string) {

@@ -2,8 +2,18 @@ import request from 'supertest';
 import app from '../app';
 import { createTestUser, createTestAdmin, createTestStaff, authHeader } from './helpers/auth.helper';
 import { cleanDatabase, disconnectTestDb } from './helpers/clean';
+import { constantContactService } from '../services/constant-contact.service';
 
-beforeEach(cleanDatabase);
+jest.mock('../services/constant-contact.service', () => ({
+  constantContactService: {
+    subscribeNewsletter: jest.fn().mockResolvedValue({ skipped: true, reason: 'not_configured' }),
+  },
+}));
+
+beforeEach(async () => {
+  jest.clearAllMocks();
+  await cleanDatabase();
+});
 afterAll(disconnectTestDb);
 
 describe('Contact API', () => {
@@ -23,6 +33,7 @@ describe('Contact API', () => {
       expect(res.body.data.name).toBe('Jane Visitor');
       expect(res.body.data.email).toBe('jane@example.com');
       expect(res.body.data.status).toBe('NEW');
+      expect(constantContactService.subscribeNewsletter).not.toHaveBeenCalled();
     });
 
     it('should create a contact message without an optional subject', async () => {
@@ -56,6 +67,24 @@ describe('Contact API', () => {
         });
 
       expect(res.status).toBe(400);
+    });
+
+    it('should sync newsletter signups to Constant Contact without blocking contact storage', async () => {
+      const res = await request(app)
+        .post('/contact')
+        .send({
+          name: 'Newsletter signup',
+          email: 'collector@example.com',
+          subject: 'Newsletter signup',
+          message: 'Newsletter subscription request from collector@example.com',
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(constantContactService.subscribeNewsletter).toHaveBeenCalledWith({
+        email: 'collector@example.com',
+        name: undefined,
+      });
     });
   });
 

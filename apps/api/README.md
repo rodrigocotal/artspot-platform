@@ -92,6 +92,14 @@ Required variables:
 - `PORT` - Server port (default: 4000)
 - `ALLOWED_ORIGINS` - CORS allowed origins
 
+Optional Constant Contact newsletter sync:
+- `CONSTANT_CONTACT_ENABLED` - Set to `true` to enable newsletter sync
+- `CONSTANT_CONTACT_CLIENT_ID` - Constant Contact app client ID
+- `CONSTANT_CONTACT_CLIENT_SECRET` - Constant Contact app client secret
+- `CONSTANT_CONTACT_REDIRECT_URI` - OAuth redirect URI configured in Constant Contact
+- `CONSTANT_CONTACT_REFRESH_TOKEN` - OAuth refresh token for API access
+- `CONSTANT_CONTACT_NEWSLETTER_LIST_ID` - Target Constant Contact list ID
+
 ## Database Schema
 
 Current schema includes:

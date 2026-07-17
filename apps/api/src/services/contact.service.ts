@@ -6,6 +6,7 @@ import type {
   ListContactMessagesQuery,
 } from '../validators/contact.validator';
 import { emailService } from './email.service';
+import { constantContactService } from './constant-contact.service';
 
 export class ContactService {
   /**
@@ -33,7 +34,20 @@ export class ContactService {
       })
       .catch((err) => console.error('Contact notification failed:', err));
 
+    if (this.isNewsletterSignup(data)) {
+      void constantContactService
+        .subscribeNewsletter({
+          email: data.email,
+          name: data.name === 'Newsletter signup' ? undefined : data.name,
+        })
+        .catch((err) => console.error('Constant Contact newsletter sync failed:', err));
+    }
+
     return contactMessage;
+  }
+
+  private isNewsletterSignup(data: CreateContactMessageInput) {
+    return data.subject?.trim().toLowerCase() === 'newsletter signup';
   }
 
   /**

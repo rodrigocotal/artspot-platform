@@ -43,6 +43,19 @@ export const config = {
     awsRegion: process.env.AWS_SES_REGION || process.env.AWS_REGION || 'ap-southeast-2',
   },
 
+  // Constant Contact
+  constantContact: {
+    enabled: process.env.CONSTANT_CONTACT_ENABLED === 'true',
+    clientId: process.env.CONSTANT_CONTACT_CLIENT_ID || '',
+    clientSecret: process.env.CONSTANT_CONTACT_CLIENT_SECRET || '',
+    redirectUri:
+      process.env.CONSTANT_CONTACT_REDIRECT_URI ||
+      process.env.CONSTANT_CONTACT_REDIRECT_URI_Dev ||
+      '',
+    refreshToken: process.env.CONSTANT_CONTACT_REFRESH_TOKEN || '',
+    newsletterListId: process.env.CONSTANT_CONTACT_NEWSLETTER_LIST_ID || '',
+  },
+
   // Stripe
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY || '',
